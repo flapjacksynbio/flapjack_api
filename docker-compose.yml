@@ -1,0 +1,14 @@
+version: "3.3"
+
+services:
+
+  flapjack_api:
+    restart: always
+    build: .
+    volumes:
+      - .:/var/app/flap
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
