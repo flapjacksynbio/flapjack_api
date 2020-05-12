@@ -13,7 +13,7 @@ SECRET_KEY = 'xb22!w(2y430$dk33y=jz$s@me!l9x!2i1a7mb)b=pp3b_!^2u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -59,23 +59,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'flapjack_api.wsgi.application'
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'registry',
-#         'USER': 'guillermo',
-#         'HOST': 'postgres',
-#         'PASSWORD': '123456',
-#         'PORT': '5432',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'registry',
+        'USER': 'guillermo',
+        'HOST': 'db',
+        'PASSWORD': '123456',
+        'PORT': '5432',
     }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
