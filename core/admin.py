@@ -1,4 +1,5 @@
 from django.contrib import admin
+from core.models import *
 
 # Models modifiable in the admin
 admin.site.register(Study)
