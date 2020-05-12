@@ -24,7 +24,6 @@ class Assay(models.Model):
         return self.name
 
 class Media(models.Model):
-    assays = models.ManyToManyField(Assay)
     name = models.CharField(max_length=100)
     description = models.TextField()
     url = models.URLField()
@@ -33,7 +32,6 @@ class Media(models.Model):
         return self.name
 
 class Strain(models.Model):
-    assays = models.ManyToManyField(Assay)
     name = models.CharField(max_length=100)
     description = models.TextField()
     url = models.URLField()
@@ -42,7 +40,6 @@ class Strain(models.Model):
         return self.name
 
 class Dna(models.Model):
-    assays = models.ManyToManyField(Assay)
     names = ArrayField(models.CharField(max_length=100))
     sboluris = ArrayField(models.CharField(max_length=1000))
 
