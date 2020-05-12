@@ -3,6 +3,7 @@ version: "3.3"
 services:
 
   flapjack_api:
+    container_name: api
     restart: always
     build: .
     volumes:
@@ -11,4 +12,15 @@ services:
       - "8000"
     ports:
       - "8000:8000"
+    depends_on:
+      - db
     command: python manage.py runserver 0.0.0.0:8000
+
+  db:
+    container_name: db
+    restart: always
+    image: postgres:12.1
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../pgdata:/var/pg/data
