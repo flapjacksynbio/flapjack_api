@@ -43,3 +43,5 @@ You can skip the last step by quitting psql.
 * `cd /flapjack_api`
 * Start app’s container:
  `docker-compose up`
+* run on:
+localhost:8000
