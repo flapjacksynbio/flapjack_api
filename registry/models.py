@@ -67,20 +67,18 @@ class Sample(models.Model):
     def __str__(self):
         return ("Row: {}, Col: {}".format(self.row, self.col))
 
+class Signal(models.Model):
+    name = models.TextField()
+    description = models.TextField()
+    def __str__(self):
+        return self.name
 
 class Measurement(models.Model):
     sample = models.ForeignKey(Sample, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
+    signal = models.ForeignKey(Signal, on_delete=models.CASCADE)
     value = models.FloatField()
     time = models.FloatField()
 
     def __str__(self):
         return self.name
 
-class Signal(models.Model):
-    study = models.ForeignKey(Study, on_delete=models.CASCADE)
-    signal = models.TextField()
-    name = models.TextField()
-
-    def __str__(self):
-        return self.name
