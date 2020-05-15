@@ -25,6 +25,5 @@ services:
     environment:
       POSTGRES_USER: guillermo
       POSTGRES_PASSWORD: 123456
-      PGDATA: /var/pg/data
     volumes:
       - ../pgdata:/var/pg/data
