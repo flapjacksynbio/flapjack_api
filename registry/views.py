@@ -122,7 +122,7 @@ class MediaViewSet(viewsets.ModelViewSet):
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'description', 'url', 'assays']
+    filterset_fields = ['name', 'description', 'url']
     search_fields = ['name', 'description']
 
     '''
@@ -140,7 +140,7 @@ class StrainViewSet(viewsets.ModelViewSet):
     queryset = Strain.objects.all()
     serializer_class = StrainSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'description', 'url', 'assays']
+    filterset_fields = ['name', 'description', 'url']
     search_fields = ['name', 'description']
 
     '''
