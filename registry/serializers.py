@@ -87,6 +87,7 @@ class SignalSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
         #fields = ('name', 'signal', 'study')
 
+'''
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
@@ -101,3 +102,4 @@ class UserProfileInfoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = UserProfileInfo
         fields = '__all__'
+'''
