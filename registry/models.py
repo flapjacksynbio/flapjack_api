@@ -7,7 +7,7 @@ class Study(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     doi = models.URLField()
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    #created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
