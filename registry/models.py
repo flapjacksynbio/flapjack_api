@@ -7,7 +7,7 @@ class Study(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     doi = models.URLField()
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    #created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -61,7 +61,7 @@ class Sample(models.Model):
     strain = models.ForeignKey(Strain, on_delete=models.CASCADE)
     dna = models.ForeignKey(Dna, on_delete=models.CASCADE)
     inducer = models.ForeignKey(Inducer, on_delete=models.CASCADE)
-    row = models.TextField()
+    row = models.IntegerField()
     col = models.IntegerField()
 
     def __str__(self):

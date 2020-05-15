@@ -27,7 +27,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'registry',
-    "jwtauth",
+    'django_filters',
+    "jwtauth"
 ]
 
 REST_FRAMEWORK = {

@@ -1,0 +1,97 @@
+from rest_framework.permissions import BasePermission, IsAuthenticated, DjangoObjectPermissions, SAFE_METHODS
+
+class StudyPermission(BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+
+    def has_permission(self, request, view):
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            return request.user.has_perm('view_study', obj)
+        return True
+
+class AssayPermission(BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            return request.user.has_perm('view_study', obj.study)
+
+        return False
+
+class SamplePermission(BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            return request.user.has_perm('view_study', obj.assay.study)
+
+        return False
+
+class DnaPermission(BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            for assay in obj.assays.all():
+                if request.user.has_perm('view_study', assay.study):
+                    return True
+        return False
+
+class MediaPermission(BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            for assay in obj.assays.all():
+                if request.user.has_perm('view_study', assay.study):
+                    return True
+        return False
+
+class StrainPermission(BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            for assay in obj.assays.all():
+                if request.user.has_perm('view_study', assay.study):
+                    return True
+        return False
+
+class MeasurementPermission(BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            if request.user.has_perm('view_study', obj.sample.assay.study):
+                return True
+        return False
