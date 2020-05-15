@@ -5,46 +5,46 @@ from django.contrib.auth.models import User, Group
 class StudySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Study
-        fields = '__all__'
-        #fields = ('name', 'description', 'doi')
+        #fields = '__all__'
+        fields = ('id', 'name', 'description', 'doi')
 
 class AssaySerializer(serializers.HyperlinkedModelSerializer):
-    study = serializers.StringRelatedField()
+    #study = serializers.StringRelatedField()
     class Meta:
         model = Assay
         #fields = '__all__'
-        fields = ('name', 'description', 'study', 'temperature', 'machine')
+        fields = ('id', 'name', 'description', 'study', 'temperature', 'machine')
 
 class SampleSerializer(serializers.HyperlinkedModelSerializer):
-    assay = serializers.StringRelatedField()
+    #assay = serializers.StringRelatedField()
     class Meta:
         model = Sample
         #fields = '__all__'
-        fields = ('row', 'col', 'assay', 'dna', 'media', 'strain')
+        fields = ('id', 'row', 'col', 'assay', 'dna', 'media', 'strain')
 
 class DnaSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Dna
-        fields = '__all__'
-        #fields = ('names', 'sboluris', 'assays')
+        #fields = '__all__'
+        fields = ('id', 'names', 'sboluris')
 
 class MediaSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Media
-        fields = '__all__'
-        #fields = ('name', 'description', 'url', 'assays')
+        #fields = '__all__'
+        fields = ('id', 'name', 'description', 'url')
 
 class StrainSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Strain
-        fields = '__all__'
-        #fields = ('name', 'description', 'url', 'assays')
+        #fields = '__all__'
+        fields = ('id', 'name', 'description', 'url')
 
 class InducerSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Inducer
-        fields = '__all__'
-        #fields = ('names', 'concentrations')
+        #fields = '__all__'
+        fields = ('id', 'names', 'concentrations')
 
 class MeasurementSerializer(serializers.HyperlinkedModelSerializer):
     #study = serializers.SerializerMethodField()
@@ -58,7 +58,7 @@ class MeasurementSerializer(serializers.HyperlinkedModelSerializer):
         model = Measurement
         #fields = '__all__'
         fields = (
-            'name', 'value', 'time', 'sample', 
+            'id', 'name', 'value', 'time', 'sample', 
             #'study', 
             #'assay',
             #'dna',
@@ -84,8 +84,8 @@ class MeasurementSerializer(serializers.HyperlinkedModelSerializer):
 class SignalSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Signal
-        fields = '__all__'
-        #fields = ('name', 'signal', 'study')
+        #fields = '__all__'
+        fields = ('id', 'name', 'signal', 'study')
 
 '''
 class UserSerializer(serializers.HyperlinkedModelSerializer):
