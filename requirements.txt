@@ -1,3 +1,5 @@
 django==3.0.5
 psycopg2>=2.8.4
 djangorestframework>=3.11.0
+pylint>=2.5.2
+pylint-django>=2.0.15
