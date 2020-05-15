@@ -8,6 +8,7 @@ from .permissions import *
 import time
 from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
 from rest_framework.filters import SearchFilter
+from rest_framework.response import Response
 
 class StudyViewSet(viewsets.ModelViewSet):
     """
@@ -210,7 +211,7 @@ class MeasurementViewSet(viewsets.ModelViewSet):
                                 .prefetch_related('sample__row') \
                                 .prefetch_related('sample__col') \
                                 .filter(sample__in=samples)
-        
+        '''
         df = read_frame(m, fieldnames=['name', \
                                         'value', \
                                         'time', \
@@ -225,10 +226,10 @@ class MeasurementViewSet(viewsets.ModelViewSet):
                                         'sample__row', 'sample__col'])
         
         json_df = json.loads(df.to_json())
-        
+        '''
         end = time.time()
         print('list took %f seconds'%(end-start), flush=True)
-        return Response(json_df)
+        return Response('')
     
     '''
     def get_queryset(self):
@@ -244,8 +245,8 @@ class SignalViewSet(viewsets.ModelViewSet):
     queryset = Signal.objects.all()
     serializer_class = SignalSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'signal', 'study']
-    search_fields = ['name', 'signal', 'study']
+    filterset_fields = ['name', 'description']
+    search_fields = ['name', 'description']
 
     '''
     def get_queryset(self):

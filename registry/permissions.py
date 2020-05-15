@@ -50,8 +50,8 @@ class DnaPermission(BasePermission):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            for assay in obj.assays.all():
-                if request.user.has_perm('view_study', assay.study):
+            for sample in obj.sample_set.all():
+                if request.user.has_perm('view_study', sample.assay.study):
                     return True
         return False
 
@@ -64,8 +64,8 @@ class MediaPermission(BasePermission):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            for assay in obj.assays.all():
-                if request.user.has_perm('view_study', assay.study):
+            for sample in obj.sample_set.all():
+                if request.user.has_perm('view_study', sample.assay.study):
                     return True
         return False
 
@@ -78,8 +78,8 @@ class StrainPermission(BasePermission):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            for assay in obj.assays.all():
-                if request.user.has_perm('view_study', assay.study):
+            for sample in obj.sample_set.all():
+                if request.user.has_perm('view_study', sample.assay.study):
                     return True
         return False
 

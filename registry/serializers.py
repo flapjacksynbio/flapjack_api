@@ -20,7 +20,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Sample
         #fields = '__all__'
-        fields = ('id', 'row', 'col', 'assay', 'dna', 'media', 'strain')
+        fields = ('id', 'row', 'col', 'assay', 'dna', 'media', 'strain', 'inducer')
 
 class DnaSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -58,7 +58,7 @@ class MeasurementSerializer(serializers.HyperlinkedModelSerializer):
         model = Measurement
         #fields = '__all__'
         fields = (
-            'id', 'name', 'value', 'time', 'sample', 
+            'id', 'signal', 'value', 'time', 'sample', 
             #'study', 
             #'assay',
             #'dna',
@@ -85,7 +85,7 @@ class SignalSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Signal
         #fields = '__all__'
-        fields = ('id', 'name', 'signal', 'study')
+        fields = ('id', 'name', 'description')
 
 '''
 class UserSerializer(serializers.HyperlinkedModelSerializer):

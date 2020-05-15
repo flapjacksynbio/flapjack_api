@@ -60,7 +60,7 @@ class Sample(models.Model):
     media = models.ForeignKey(Media, on_delete=models.CASCADE)
     strain = models.ForeignKey(Strain, on_delete=models.CASCADE)
     dna = models.ForeignKey(Dna, on_delete=models.CASCADE)
-    inducer = models.ForeignKey(Inducer, on_delete=models.CASCADE)
+    inducer = models.ForeignKey(Inducer, blank=True, null=True, on_delete=models.CASCADE)
     row = models.IntegerField()
     col = models.IntegerField()
 
