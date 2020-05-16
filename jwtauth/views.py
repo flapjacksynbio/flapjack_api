@@ -6,12 +6,13 @@ from .serializers import UserCreateSerializer
 
 User = get_user_model()
 
+
 @decorators.api_view(["POST"])
 @decorators.permission_classes([permissions.AllowAny])
 def registration(request):
     serializer = UserCreateSerializer(data=request.data)
     if not serializer.is_valid():
-        return response.Response(serializer.errors, status.HTTP_400_BAD_REQUEST)        
+        return response.Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
     user = serializer.save()
     refresh = RefreshToken.for_user(user)
     res = {

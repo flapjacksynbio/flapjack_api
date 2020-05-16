@@ -1,5 +1,6 @@
 from rest_framework.permissions import BasePermission, IsAuthenticated, DjangoObjectPermissions, SAFE_METHODS
 
+
 class StudyPermission(BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.
@@ -15,6 +16,7 @@ class StudyPermission(BasePermission):
             return request.user.has_perm('view_study', obj)
         return True
 
+
 class AssayPermission(BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.
@@ -28,6 +30,7 @@ class AssayPermission(BasePermission):
 
         return False
 
+
 class SamplePermission(BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.
@@ -40,6 +43,7 @@ class SamplePermission(BasePermission):
             return request.user.has_perm('view_study', obj.assay.study)
 
         return False
+
 
 class DnaPermission(BasePermission):
     """
@@ -55,6 +59,7 @@ class DnaPermission(BasePermission):
                     return True
         return False
 
+
 class MediaPermission(BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.
@@ -69,6 +74,7 @@ class MediaPermission(BasePermission):
                     return True
         return False
 
+
 class StrainPermission(BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.
@@ -82,6 +88,7 @@ class StrainPermission(BasePermission):
                 if request.user.has_perm('view_study', sample.assay.study):
                     return True
         return False
+
 
 class MeasurementPermission(BasePermission):
     """

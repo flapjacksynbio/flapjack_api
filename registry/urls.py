@@ -21,5 +21,5 @@ router.register(r'inducer', views.InducerViewSet)
 #router.register(r'user_profile_info', views.UserProfileInfoViewSet)
 
 urlpatterns = [
-  url(r'^api/', include(router.urls))
+    url(r'^api/', include(router.urls))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
