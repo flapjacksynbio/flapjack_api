@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, IsAuthenticated, DjangoObjectPermissions, SAFE_METHODS
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class StudyPermission(BasePermission):

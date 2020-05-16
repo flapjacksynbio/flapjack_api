@@ -1,14 +1,9 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from rest_framework import viewsets
-from .serializers import *
-from rest_framework.permissions import BasePermission, IsAuthenticated, DjangoObjectPermissions
-from .permissions import *
-
-import time
-from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
 from rest_framework.filters import SearchFilter
-from rest_framework.response import Response
+from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
+from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
+from .serializers import AssaySerializer, DnaSerializer, InducerSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
+from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission
 
 
 class StudyViewSet(viewsets.ModelViewSet):

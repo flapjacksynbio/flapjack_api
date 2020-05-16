@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import *
-from django.contrib.auth.models import User, Group
+from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
 
 
 class StudySerializer(serializers.HyperlinkedModelSerializer):
