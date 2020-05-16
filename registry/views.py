@@ -186,12 +186,13 @@ class MeasurementViewSet(viewsets.ModelViewSet):
     API endpoint that allows measurements to be viewed or edited.
     """
     permission_classes = [MeasurementPermission]
-    queryset = Measurement.objects.none()
+    queryset = Measurement.objects.all()
     serializer_class = MeasurementSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'time', 'value', 'sample', 'sample__assay__name']
-    search_fields = ['name', 'sample__assay__name']
+    filterset_fields = ['signal', 'time', 'value', 'sample', 'sample__assay__name']
+    search_fields = ['signal', 'sample__assay__name']
 
+    """
     def list(self, request):
         start = time.time()
         #qs = self.get_queryset()
@@ -230,7 +231,7 @@ class MeasurementViewSet(viewsets.ModelViewSet):
         end = time.time()
         print('list took %f seconds'%(end-start), flush=True)
         return Response('')
-    
+    """
     '''
     def get_queryset(self):
         user = self.request.user
