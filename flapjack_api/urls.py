@@ -3,5 +3,5 @@ from django.urls import include, path
 
 urlpatterns = [
     path('', include('registry.urls')),
-    path('jwtauth/', include('jwtauth.urls'), name='jwtauth'),
+    path('api/auth/', include('jwtauth.urls'), name='jwtauth'),
 ]
