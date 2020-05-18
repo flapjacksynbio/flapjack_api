@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'registry',
     'django_filters',
-    "jwtauth"
+    "accounts"
 ]
 
 REST_FRAMEWORK = {
