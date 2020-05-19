@@ -18,7 +18,6 @@ class Assay(models.Model):
     machine = models.CharField(max_length=100)
     description = models.TextField()
     temperature = models.FloatField()
-    url = models.URLField()
 
     def __str__(self):
         return self.name
@@ -27,7 +26,6 @@ class Assay(models.Model):
 class Media(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    url = models.URLField()
 
     def __str__(self):
         return self.name
@@ -36,7 +34,6 @@ class Media(models.Model):
 class Strain(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    url = models.URLField()
 
     def __str__(self):
         return self.name
