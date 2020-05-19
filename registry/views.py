@@ -1,14 +1,10 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from rest_framework import viewsets
-from .serializers import *
-from rest_framework.permissions import BasePermission, IsAuthenticated, DjangoObjectPermissions
-from .permissions import *
-
-import time
-from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
 from rest_framework.filters import SearchFilter
-from rest_framework.response import Response
+from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
+from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
+from .serializers import AssaySerializer, DnaSerializer, InducerSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
+from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission
+
 
 class StudyViewSet(viewsets.ModelViewSet):
     """
@@ -31,6 +27,7 @@ class StudyViewSet(viewsets.ModelViewSet):
         assign_perm('view_study', self.request.user, obj)
     '''
 
+
 class AssayViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows assays to be viewed or edited.
@@ -41,13 +38,13 @@ class AssayViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, DjangoFilterBackend]
     filterset_fields = ['name', 'temperature', 'machine', 'study']
     search_fields = [
-        'name', 
-        'machine', 
-        'temperature', 
-        'description', 
-        'study__name', 
+        'name',
+        'machine',
+        'temperature',
+        'description',
+        'study__name',
         'study__description'
-        ]
+    ]
 
     '''
     def get_queryset(self):
@@ -55,6 +52,7 @@ class AssayViewSet(viewsets.ModelViewSet):
         studies = get_objects_for_user(user, 'LoadData.view_study')
         return Assay.objects.filter(study__in=studies)
     '''
+
 
 class SampleViewSet(viewsets.ModelViewSet):
     """
@@ -69,10 +67,10 @@ class SampleViewSet(viewsets.ModelViewSet):
         'media__name',
         'assay__name',
         'assay__description',
-        'assay__study__name', 
+        'assay__study__name',
         'assay__study__description',
         'dna__names'
-        ]
+    ]
 
     '''
     def get_queryset(self):
@@ -81,6 +79,7 @@ class SampleViewSet(viewsets.ModelViewSet):
         return Sample.objects.filter(assay__study__in=studies)
     '''
 
+
 class DnaFilter(FilterSet):
     names = CharFilter(lookup_expr='icontains')
     sboluris = CharFilter(lookup_expr='icontains')
@@ -88,6 +87,7 @@ class DnaFilter(FilterSet):
     class Meta:
         model = Dna
         fields = ('sboluris', 'names')
+
 
 class DnaViewSet(viewsets.ModelViewSet):
     """
@@ -99,14 +99,14 @@ class DnaViewSet(viewsets.ModelViewSet):
     filterset_class = DnaFilter
     filter_backends = [SearchFilter, DjangoFilterBackend]
     filterset_fields = {
-        'names': ['icontains'], 
-        'sboluris': ['icontains'], 
+        'names': ['icontains'],
+        'sboluris': ['icontains'],
         'assays': ['exact']
     }
     search_fields = [
         'names',
         'sboluris'
-        ]
+    ]
 
     '''
     def get_queryset(self):
@@ -114,6 +114,7 @@ class DnaViewSet(viewsets.ModelViewSet):
         studies = get_objects_for_user(user, 'LoadData.view_study')
         return Dna.objects.filter(assays__study__in=studies).distinct()
     '''
+
 
 class MediaViewSet(viewsets.ModelViewSet):
     """
@@ -133,6 +134,7 @@ class MediaViewSet(viewsets.ModelViewSet):
         return Media.objects.filter(assays__study__in=studies).distinct()
     '''
 
+
 class StrainViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows strain to be viewed or edited.
@@ -151,6 +153,7 @@ class StrainViewSet(viewsets.ModelViewSet):
         return Strain.objects.filter(assays__study__in=studies).distinct()
     '''
 
+
 class InducerFilter(FilterSet):
     names = CharFilter(lookup_expr='icontains')
     concentrations = NumberFilter(lookup_expr='icontains')
@@ -158,6 +161,7 @@ class InducerFilter(FilterSet):
     class Meta:
         model = Inducer
         fields = ('names', 'concentrations')
+
 
 class InducerViewSet(viewsets.ModelViewSet):
     """
@@ -168,18 +172,19 @@ class InducerViewSet(viewsets.ModelViewSet):
     filterset_class = InducerFilter
     filter_backends = [SearchFilter, DjangoFilterBackend]
     filterset_fields = {
-        'names': ['icontains'], 
+        'names': ['icontains'],
         'concentrations': ['icontains']
     }
     search_fields = [
         'names',
         'concentrations'
-        ]
+    ]
 
-    #def get_queryset(self):
+    # def get_queryset(self):
     #    user = self.request.user
     #    studies = get_objects_for_user(user, 'LoadData.view_study')
     #    return Inducer.objects.filter(samples__assays__study__in=studies)
+
 
 class MeasurementViewSet(viewsets.ModelViewSet):
     """
@@ -189,7 +194,8 @@ class MeasurementViewSet(viewsets.ModelViewSet):
     queryset = Measurement.objects.all()
     serializer_class = MeasurementSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['signal', 'time', 'value', 'sample', 'sample__assay__name']
+    filterset_fields = ['signal', 'time',
+                        'value', 'sample', 'sample__assay__name']
     search_fields = ['signal', 'sample__assay__name']
 
     """
@@ -239,6 +245,7 @@ class MeasurementViewSet(viewsets.ModelViewSet):
         return Measurement.objects.filter(sample__assay__study__in=studies)
     '''
 
+
 class SignalViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows signals to be viewed or edited.
@@ -255,6 +262,7 @@ class SignalViewSet(viewsets.ModelViewSet):
         studies = get_objects_for_user(user, 'LoadData.view_study')
         return Signal.objects.filter(study__in=studies)
     '''
+
 
 '''
 class UserViewSet(viewsets.ModelViewSet):

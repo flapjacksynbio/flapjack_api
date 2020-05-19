@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Assay',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100)),
                 ('machine', models.CharField(max_length=100)),
                 ('description', models.TextField()),
@@ -27,23 +28,30 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Dna',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('names', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=100), size=None)),
-                ('sboluris', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=1000), size=None)),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
+                ('names', django.contrib.postgres.fields.ArrayField(
+                    base_field=models.CharField(max_length=100), size=None)),
+                ('sboluris', django.contrib.postgres.fields.ArrayField(
+                    base_field=models.CharField(max_length=1000), size=None)),
             ],
         ),
         migrations.CreateModel(
             name='Inducer',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('names', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=100), size=None)),
-                ('concentrations', django.contrib.postgres.fields.ArrayField(base_field=models.FloatField(), size=None)),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
+                ('names', django.contrib.postgres.fields.ArrayField(
+                    base_field=models.CharField(max_length=100), size=None)),
+                ('concentrations', django.contrib.postgres.fields.ArrayField(
+                    base_field=models.FloatField(), size=None)),
             ],
         ),
         migrations.CreateModel(
             name='Media',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100)),
                 ('description', models.TextField()),
                 ('url', models.URLField()),
@@ -52,7 +60,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Signal',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.TextField()),
                 ('description', models.TextField()),
             ],
@@ -60,7 +69,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Strain',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100)),
                 ('description', models.TextField()),
                 ('url', models.URLField()),
@@ -69,7 +79,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Study',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100)),
                 ('description', models.TextField()),
                 ('doi', models.URLField()),
@@ -78,29 +89,39 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Sample',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('row', models.IntegerField()),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
+                ('row', models.TextField()),
                 ('col', models.IntegerField()),
-                ('assay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='registry.Assay')),
-                ('dna', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='registry.Dna')),
-                ('inducer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='registry.Inducer')),
-                ('media', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='registry.Media')),
-                ('strain', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='registry.Strain')),
+                ('assay', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='registry.Assay')),
+                ('dna', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='registry.Dna')),
+                ('inducer', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, null=True, to='registry.Inducer')),
+                ('media', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='registry.Media')),
+                ('strain', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='registry.Strain')),
             ],
         ),
         migrations.CreateModel(
             name='Measurement',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('value', models.FloatField()),
                 ('time', models.FloatField()),
-                ('sample', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='registry.Sample')),
-                ('signal', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='registry.Signal')),
+                ('sample', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='registry.Sample')),
+                ('signal', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='registry.Signal')),
             ],
         ),
         migrations.AddField(
             model_name='assay',
             name='study',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='registry.Study'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='registry.Study'),
         ),
     ]
