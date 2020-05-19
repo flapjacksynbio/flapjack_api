@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'registry',
     'django_filters',
-    "jwtauth"
+    "accounts"
 ]
 
 REST_FRAMEWORK = {
@@ -77,8 +77,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'registry',
         'USER': 'guillermo',
-        'HOST': 'db',
         'PASSWORD': '123456',
+        'HOST': 'db',
         'PORT': '5432',
     }
 }

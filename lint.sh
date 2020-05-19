@@ -1,1 +1,1 @@
-pylint analysis flapjack_api jwtauth plot registry --disable=C0111 --load-plugins=pylint_django
+pylint analysis flapjack_api accounts plot registry --disable=C0111 --load-plugins=pylint_django
