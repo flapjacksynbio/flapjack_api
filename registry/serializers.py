@@ -3,78 +3,63 @@ from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Str
 
 
 class StudySerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     class Meta:
         model = Study
-        #fields = '__all__'
-        fields = ('id', 'name', 'description', 'doi')
-
+        fields = '__all__'
 
 class AssaySerializer(serializers.HyperlinkedModelSerializer):
-    #study = serializers.StringRelatedField()
+    id = serializers.ReadOnlyField()
     class Meta:
         model = Assay
-        #fields = '__all__'
-        fields = ('id', 'name', 'description',
-                  'study', 'temperature', 'machine')
-
+        fields = '__all__'
 
 class SampleSerializer(serializers.HyperlinkedModelSerializer):
-    #assay = serializers.StringRelatedField()
+    id = serializers.ReadOnlyField()
     class Meta:
         model = Sample
-        #fields = '__all__'
-        fields = ('id', 'row', 'col', 'assay', 'dna',
-                  'media', 'strain', 'inducer')
-
+        fields = '__all__'
 
 class DnaSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     class Meta:
         model = Dna
-        #fields = '__all__'
-        fields = ('id', 'names', 'sboluris')
-
+        fields = '__all__'
 
 class MediaSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     class Meta:
         model = Media
-        #fields = '__all__'
-        fields = ('id', 'name', 'description', 'url')
-
+        fields = '__all__'
 
 class StrainSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     class Meta:
         model = Strain
-        #fields = '__all__'
-        fields = ('id', 'name', 'description', 'url')
-
+        fields = '__all__'
 
 class InducerSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     class Meta:
         model = Inducer
-        #fields = '__all__'
-        fields = ('id', 'names', 'concentrations')
-
+        fields = '__all__'
 
 class MeasurementSerializer(serializers.HyperlinkedModelSerializer):
-    #study = serializers.SerializerMethodField()
-    #assay = serializers.SerializerMethodField()
-    #dna = serializers.SerializerMethodField()
-    #media = serializers.SerializerMethodField()
-    #strain = serializers.SerializerMethodField()
-    #inducer = serializers.SerializerMethodField()
-
+    id = serializers.ReadOnlyField()
     class Meta:
         model = Measurement
-        #fields = '__all__'
+        fields = '__all__'
+        '''
         fields = (
             'id', 'signal', 'value', 'time', 'sample',
-            # 'study',
-            # 'assay',
-            # 'dna',
-            # 'media',
-            # 'strain',
-            # 'inducer'
+            'study',
+            'assay',
+            'dna',
+            'media',
+            'strain',
+            'inducer'
         )
+        '''
     '''
     def get_study(self, obj):
         return obj.sample.assay.study.name
@@ -92,24 +77,26 @@ class MeasurementSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SignalSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     class Meta:
         model = Signal
-        #fields = '__all__'
-        fields = ('id', 'name', 'description')
-
-
+        fields = '__all__'
+        
 '''
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     class Meta:
         model = User
-        fields = ('username', 'url')
+        fields = '__all__'
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     class Meta:
         model = Group
-        fields = ('name', 'url')
+        fields = '__all__'
 
 class UserProfileInfoSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     class Meta:
         model = UserProfileInfo
         fields = '__all__'
