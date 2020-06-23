@@ -34,6 +34,7 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         parameters = event['params']
         x = list(range(100))
         y = [v*v for v in x]
+        y2 = [(100-v)*(100-v) for v in x]
         for i in range(1, 101, 5):
             await self.send(text_data=json.dumps({
                 'type': 'progress_update',
@@ -54,6 +55,13 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                         'type': 'scatter',
                         'mode': 'lines+markers',
                         },
+                        {
+                        'x': x,
+                        'y': y2,
+                        'marker': { 'color': 'red' },
+                        'type': 'scatter',
+                        'mode': 'lines+markers',
+                        }
                     ]
                 }
         }))
