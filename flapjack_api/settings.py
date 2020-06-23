@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'registry',
+    'plot',
     'django_filters',
     'accounts',
     'channels'

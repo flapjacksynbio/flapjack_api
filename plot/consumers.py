@@ -5,7 +5,7 @@ import asyncio
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-class RegistryConsumer(AsyncWebsocketConsumer):
+class PlotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         await self.channel_layer.group_add(
@@ -95,6 +95,5 @@ class RegistryConsumer(AsyncWebsocketConsumer):
 
     async def websocket_disconnect(self, message):
         await self.channel_layer.group_discard(
-            self.room_group_name,
             self.channel_name
         )
