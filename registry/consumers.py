@@ -5,7 +5,6 @@ import asyncio
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-
 class RegistryConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
@@ -33,21 +32,30 @@ class RegistryConsumer(AsyncWebsocketConsumer):
 
     async def generate_data(self, event):
         parameters = event['params']
-        values = []
+        x = list(range(100))
+        y = [v*v for v in x]
         for i in range(1, 101, 5):
-            values.append((i, i ** 2))
             await self.send(text_data=json.dumps({
                 'type': 'progress_update',
                 'data': {
                     'progress': i
                 }
             }))
-            await asyncio.sleep(0.1)
+            # Here call 
+            await asyncio.sleep(0.01)
         await self.send(text_data=json.dumps({
             'type': 'plot_data',
             'data': {
-                'values': values
-            }
+                'traces': [
+                        {
+                        'x': x,
+                        'y': y,
+                        'marker': { 'color': 'blue' },
+                        'type': 'scatter',
+                        'mode': 'lines+markers',
+                        },
+                    ]
+                }
         }))
 
     async def receive(self, text_data):
