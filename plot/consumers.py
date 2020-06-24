@@ -4,7 +4,29 @@ import asyncio
 # Third Party imports.
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .plotting import *
+from . import plotting
+import pandas as pd
+
+def fake_data():
+    t = list(range(100))
+    y1 = [v*v for v in t]
+    y2 = [(100-v)*(100-v) for v in t]
+    y3 = [(50-v)**3 for v in t]
+    y4 = [(50-v)**4 for v in t]
+    ys = [y1, y2, y3, y4]
+    labels1 = ['apples', 'pears', 'oranges', 'bananas']
+    labels2 = ['green', 'green', 'orange', 'yellow']
+    df = pd.DataFrame()
+    for label1,label2,y in zip(labels1, labels2, ys):
+        for tt,val in zip(t,y):
+            data = {
+                'time': tt,
+                'value': val,
+                'label1': label1,
+                'label2': label2
+            }   
+            df = df.append(data, ignore_index=True)
+    return df
 
 class PlotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -29,65 +51,20 @@ class PlotConsumer(AsyncWebsocketConsumer):
             }))
             await asyncio.sleep(0.1)
 
-    # TO DO: setup message receiving and disconnection
-
     async def generate_data(self, event):
-        parameters = event['params']
-        x = list(range(100))
-        y = [v*v for v in x]
-        y2 = [(100-v)*(100-v) for v in x]
-        y3 = [(50-v)**3 for v in x]
-        y4 = [(50-v)**4 for v in x]
-        for i in range(1, 101, 5):
+        df = fake_data()
+        traces, n_subplots = plotting.plot(df, groupby1='label2', groupby2='label1')
+        if traces:
             await self.send(text_data=json.dumps({
-                'type': 'progress_update',
+                'type': 'plot_data',
                 'data': {
-                    'progress': i
+                    'n_sub_plots': n_subplots,
+                    'traces': traces
                 }
             }))
-            # Here call 
-            await asyncio.sleep(0.01)
-        await self.send(text_data=json.dumps({
-            'type': 'plot_data',
-            'data': {
-                'traces': [
-                        {
-                        'x': x,
-                        'y': y,
-                        'marker': { 'color': 'blue' },
-                        'type': 'scatter',
-                        'mode': 'lines+markers',
-                        },
-                        {
-                        'x': x,
-                        'y': y2,
-                        'xaxis': 'x2',
-                        'yaxis': 'y2',
-                        'marker': { 'color': 'red' },
-                        'type': 'scatter',
-                        'mode': 'lines+markers',
-                        },
-                        {
-                        'x': x,
-                        'y': y3,
-                        'xaxis': 'x3',
-                        'yaxis': 'y3',
-                        'marker': { 'color': 'green' },
-                        'type': 'scatter',
-                        'mode': 'lines+markers',
-                        },
-                        {
-                        'x': x,
-                        'y': y4,
-                        'xaxis': 'x4',
-                        'yaxis': 'y4',
-                        'marker': { 'color': 'magenta' },
-                        'type': 'scatter',
-                        'mode': 'lines+markers',
-                        }
-                    ]
-                }
-        }))
+        else:
+            print('No traces to plot', flush=True)
+            print(df.head())
 
     async def receive(self, text_data):
         data = json.loads(text_data)
