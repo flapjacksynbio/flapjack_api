@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'registry',
     'plot',
+    'analysis',
     'django_filters',
     'accounts',
     'channels'

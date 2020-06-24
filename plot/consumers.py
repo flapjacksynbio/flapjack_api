@@ -4,6 +4,7 @@ import asyncio
 # Third Party imports.
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
+from .plotting import *
 
 class PlotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
