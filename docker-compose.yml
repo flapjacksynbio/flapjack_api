@@ -1,7 +1,6 @@
 version: "3.3"
 
 services:
-
   flapjack_api:
     container_name: api
     restart: always
@@ -28,3 +27,18 @@ services:
       POSTGRES_PASSWORD: 123456
     volumes:
       - ../pgdata:/var/pg/data
+
+  redis:
+    image: redis
+    volumes:
+      - redis:/data
+    ports:
+      - 6379
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  redis:

@@ -28,8 +28,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'registry',
+    'plot',
+    'analysis',
     'django_filters',
-    "accounts"
+    'accounts',
+    'channels'
 ]
 
 REST_FRAMEWORK = {
@@ -120,6 +123,16 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100,
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     ]
+}
+
+ASGI_APPLICATION = "flapjack_api.routing.application"
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
 }
