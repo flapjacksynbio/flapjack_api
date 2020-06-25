@@ -1,10 +1,91 @@
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
-from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
+#from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
+from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter
+from rest_framework_filters.backends import RestFrameworkFilterBackend
 from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
 from .serializers import AssaySerializer, DnaSerializer, InducerSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
 from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission
 
+# Define filters with related fields where necessary
+#
+class DnaFilter(FilterSet):
+    names = CharFilter(lookup_expr='icontains')
+    sboluris = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Dna
+        fields = ('sboluris', 'names')
+
+class MediaFilter(FilterSet):
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Media
+        fields = ('name', 'description')
+
+class StrainFilter(FilterSet):
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Strain
+        fields = ('name', 'description')
+
+class InducerFilter(FilterSet):
+    names = CharFilter(lookup_expr='icontains')
+    
+    class Meta:
+        model = Inducer
+        fields = ('names',)
+
+class StudyFilter(FilterSet):
+    name = CharFilter(lookup_expr='icontains')
+    doi = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Study
+        fields = ('name', 'doi')
+
+class AssayFilter(FilterSet):
+    name = CharFilter(lookup_expr='icontains')
+    temperature = NumberFilter(lookup_expr='exact')
+    machine = CharFilter(lookup_expr='icontains')
+    study = RelatedFilter(StudyFilter, field_name='study', queryset=Study.objects.all())
+
+    class Meta:
+        model = Assay
+        fields = ('name', 'temperature', 'machine')
+
+class SampleFilter(FilterSet):
+    media = RelatedFilter(MediaFilter, field_name='media', queryset=Media.objects.all())
+    assay = RelatedFilter(AssayFilter, field_name='assay', queryset=Assay.objects.all())
+    inducer = RelatedFilter(InducerFilter, field_name='inducer', queryset=Inducer.objects.all())
+    dna = RelatedFilter(DnaFilter, field_name='dna', queryset=Dna.objects.all())
+    temperature = NumberFilter(lookup_expr='exact')
+    machine = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Sample
+        fields = ('temperature', 'machine')
+
+class SignalFilter(FilterSet):
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Signal
+        fields = ('name', 'description')
+
+class MeasurementFilter(FilterSet):
+    sample = RelatedFilter(SampleFilter, field_name='sample', queryset=Sample.objects.all())
+    signal = RelatedFilter(SignalFilter, field_name='signal', queryset=Signal.objects.all())
+    value = NumberFilter(lookup_expr='exact')
+
+    class Meta:
+        model = Measurement
+        fields = ('value',)
 
 class StudyViewSet(viewsets.ModelViewSet):
     """
@@ -13,8 +94,8 @@ class StudyViewSet(viewsets.ModelViewSet):
     permission_classes = [StudyPermission]
     queryset = Study.objects.all()
     serializer_class = StudySerializer
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'doi']
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    filterset_class = StudyFilter
     search_fields = ['name', 'doi', 'description']
 
     '''
@@ -27,7 +108,6 @@ class StudyViewSet(viewsets.ModelViewSet):
         assign_perm('view_study', self.request.user, obj)
     '''
 
-
 class AssayViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows assays to be viewed or edited.
@@ -35,12 +115,12 @@ class AssayViewSet(viewsets.ModelViewSet):
     permission_classes = [AssayPermission]
     queryset = Assay.objects.all()
     serializer_class = AssaySerializer
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'temperature', 'machine', 'study']
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    filterset_class = AssayFilter
     search_fields = [
         'name',
-        'machine',
         'temperature',
+        'machine',
         'description',
         'study__name',
         'study__description'
@@ -53,7 +133,8 @@ class AssayViewSet(viewsets.ModelViewSet):
         return Assay.objects.filter(study__in=studies)
     '''
 
-
+# Define viewsets using the filters
+#
 class SampleViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows samples to be viewed or edited.
@@ -61,8 +142,8 @@ class SampleViewSet(viewsets.ModelViewSet):
     permission_classes = [SamplePermission]
     queryset = Sample.objects.all()
     serializer_class = SampleSerializer
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['media', 'strain', 'dna', 'assay', 'assay__study']
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    filter_class = SampleFilter
     search_fields = [
         'media__name',
         'assay__name',
@@ -80,14 +161,6 @@ class SampleViewSet(viewsets.ModelViewSet):
     '''
 
 
-class DnaFilter(FilterSet):
-    names = CharFilter(lookup_expr='icontains')
-    sboluris = CharFilter(lookup_expr='icontains')
-
-    class Meta:
-        model = Dna
-        fields = ('sboluris', 'names')
-
 
 class DnaViewSet(viewsets.ModelViewSet):
     """
@@ -97,12 +170,7 @@ class DnaViewSet(viewsets.ModelViewSet):
     queryset = Dna.objects.all()
     serializer_class = DnaSerializer
     filterset_class = DnaFilter
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = {
-        'names': ['icontains'],
-        'sboluris': ['icontains'],
-        'assays': ['exact']
-    }
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     search_fields = [
         'names',
         'sboluris'
@@ -123,8 +191,8 @@ class MediaViewSet(viewsets.ModelViewSet):
     permission_classes = [MediaPermission]
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'description']
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    filter_class = MediaFilter
     search_fields = ['name', 'description']
 
     '''
@@ -142,8 +210,8 @@ class StrainViewSet(viewsets.ModelViewSet):
     permission_classes = [StrainPermission]
     queryset = Strain.objects.all()
     serializer_class = StrainSerializer
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'description']
+    filter_class = StrainFilter
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     search_fields = ['name', 'description']
 
     '''
@@ -154,15 +222,6 @@ class StrainViewSet(viewsets.ModelViewSet):
     '''
 
 
-class InducerFilter(FilterSet):
-    names = CharFilter(lookup_expr='icontains')
-    concentrations = NumberFilter(lookup_expr='icontains')
-
-    class Meta:
-        model = Inducer
-        fields = ('names', 'concentrations')
-
-
 class InducerViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows inducers to be viewed or edited.
@@ -170,11 +229,7 @@ class InducerViewSet(viewsets.ModelViewSet):
     queryset = Inducer.objects.all()
     serializer_class = InducerSerializer
     filterset_class = InducerFilter
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = {
-        'names': ['icontains'],
-        'concentrations': ['icontains']
-    }
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     search_fields = [
         'names',
         'concentrations'
@@ -193,9 +248,10 @@ class MeasurementViewSet(viewsets.ModelViewSet):
     permission_classes = [MeasurementPermission]
     queryset = Measurement.objects.all()
     serializer_class = MeasurementSerializer
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['signal', 'time',
-                        'value', 'sample', 'sample__assay__name']
+    filter_class = MeasurementFilter
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    #filterset_fields = ['signal', 'time',
+    #                    'value', 'sample', 'sample__assay__name']
     search_fields = ['signal', 'sample__assay__name']
 
     """
@@ -252,8 +308,9 @@ class SignalViewSet(viewsets.ModelViewSet):
     """
     queryset = Signal.objects.all()
     serializer_class = SignalSerializer
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'description']
+    filter_class = SignalFilter
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    #filterset_fields = ['name', 'description']
     search_fields = ['name', 'description']
 
     '''
