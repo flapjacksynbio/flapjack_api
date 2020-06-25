@@ -15,7 +15,7 @@ def fake_data():
     y4 = [(50-v)**4 for v in t]
     ys = [y1, y2, y3, y4]
     labels1 = ['apples', 'pears', 'oranges', 'bananas']
-    labels2 = ['green', 'green', 'orange', 'yellow']
+    labels2 = ['green', 'green', 'green', 'yellow']
     df = pd.DataFrame()
     for label1,label2,y in zip(labels1, labels2, ys):
         for tt,val in zip(t,y):
@@ -58,7 +58,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 'type': 'plot_data',
                 'data': {
-                    'n_sub_plots': n_subplots,
+                    'n_subplots': n_subplots,
                     'traces': traces
                 }
             }))
