@@ -73,5 +73,6 @@ class PlotConsumer(AsyncWebsocketConsumer):
 
     async def websocket_disconnect(self, message):
         await self.channel_layer.group_discard(
+            "asd",
             self.channel_name
         )

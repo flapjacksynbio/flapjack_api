@@ -4,7 +4,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from .consumers import PlotConsumer
 websockets = URLRouter([
     path(
-        "ws/plot", PlotConsumer,
+        "plot", PlotConsumer,
         name="plot-ws",
     ),
 ])
