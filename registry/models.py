@@ -7,6 +7,8 @@ class Study(models.Model):
     description = models.TextField()
     doi = models.URLField()
     #created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        'auth.User', related_name='studies', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -18,6 +20,8 @@ class Assay(models.Model):
     machine = models.CharField(max_length=100)
     description = models.TextField()
     temperature = models.FloatField()
+    owner = models.ForeignKey(
+        'auth.User', related_name='assays', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
