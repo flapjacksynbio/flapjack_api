@@ -115,11 +115,11 @@ class StudyViewSet(viewsets.ModelViewSet):
     filterset_class = StudyFilter
     search_fields = ['name', 'doi', 'description']
 
-    '''
     def get_queryset(self):
         user = self.request.user
-        return get_objects_for_user(user, 'LoadData.view_study')
+        return Study.objects.filter(owner=user)
 
+    '''
     def perform_create(self, serializer):
         obj = serializer.save()
         assign_perm('view_study', self.request.user, obj)
@@ -144,12 +144,9 @@ class AssayViewSet(viewsets.ModelViewSet):
         'study__description'
     ]
 
-    '''
     def get_queryset(self):
         user = self.request.user
-        studies = get_objects_for_user(user, 'LoadData.view_study')
-        return Assay.objects.filter(study__in=studies)
-    '''
+        return Assay.objects.filter(owner=user)
 
 # Define viewsets using the filters
 #
