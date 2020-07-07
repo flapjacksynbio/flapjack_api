@@ -4,48 +4,69 @@ from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Str
 
 class StudySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+
     class Meta:
         model = Study
         fields = '__all__'
 
+
 class AssaySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+
     class Meta:
         model = Assay
         fields = '__all__'
 
+
 class SampleSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+
     class Meta:
         model = Sample
         fields = '__all__'
 
+
 class DnaSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+
     class Meta:
         model = Dna
         fields = '__all__'
 
+
 class MediaSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+
     class Meta:
         model = Media
         fields = '__all__'
 
+
 class StrainSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+
     class Meta:
         model = Strain
         fields = '__all__'
 
+
 class InducerSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+
     class Meta:
         model = Inducer
         fields = '__all__'
 
+
 class MeasurementSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+
     class Meta:
         model = Measurement
         fields = '__all__'
@@ -78,10 +99,12 @@ class MeasurementSerializer(serializers.ModelSerializer):
 
 class SignalSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+
     class Meta:
         model = Signal
         fields = '__all__'
-        
+
+
 '''
 class UserSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()

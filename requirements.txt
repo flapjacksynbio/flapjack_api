@@ -33,5 +33,4 @@ six==1.11.0
 plotly==4.3.0
 statsmodels==0.10.2
 celery==4.3.0
-django-guardian==2.1.0
 ipython==7.11.1

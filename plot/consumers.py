@@ -7,6 +7,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from . import plotting
 import pandas as pd
 
+
 class PlotConsumer(AsyncWebsocketConsumer):
     async def fake_data(self, event):
         t = list(range(100))
@@ -20,14 +21,14 @@ class PlotConsumer(AsyncWebsocketConsumer):
         df = pd.DataFrame()
         n_steps = len(labels1) * len(t)
         step = 1
-        for label1,label2,y in zip(labels1, labels2, ys):
-            for tt,val in zip(t,y):
+        for label1, label2, y in zip(labels1, labels2, ys):
+            for tt, val in zip(t, y):
                 data = {
                     'time': tt,
                     'value': val,
                     'label1': label1,
                     'label2': label2
-                }   
+                }
                 df = df.append(data, ignore_index=True)
                 await self.send(text_data=json.dumps({
                     'type': 'progress_update',
@@ -38,6 +39,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
         return df
 
     async def connect(self):
+        self.user = self.scope["user"]
+        print(self.user)
         await self.accept()
         await self.channel_layer.group_add(
             "asd",
@@ -46,7 +49,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
 
     async def generate_data(self, event):
         df = await self.fake_data(event)
-        traces, n_subplots = plotting.plot(df, groupby1='label2', groupby2='label1')
+        traces, n_subplots = plotting.plot(
+            df, groupby1='label2', groupby2='label1')
         if traces:
             await self.send(text_data=json.dumps({
                 'type': 'plot_data',
@@ -64,7 +68,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
         if data['type'] == 'plot':
             await self.generate_data({'params': data['parameters']})
 
-    async def websocket_disconnect(self, message):
+    async def disconnect(self, message):
         await self.channel_layer.group_discard(
+            "asd",
             self.channel_name
         )
