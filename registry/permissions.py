@@ -1,13 +1,10 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 
 
-class StudyPermission(BasePermission):
+class StudyPermission(IsAuthenticated):
     """
     Object-level permission to only allow owners of an object to edit it.
     """
-
-    def has_permission(self, request, view):
-        return True
 
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
@@ -17,7 +14,7 @@ class StudyPermission(BasePermission):
         return True
 
 
-class AssayPermission(BasePermission):
+class AssayPermission(IsAuthenticated):
     """
     Object-level permission to only allow owners of an object to edit it.
     """
@@ -31,7 +28,7 @@ class AssayPermission(BasePermission):
         return False
 
 
-class SamplePermission(BasePermission):
+class SamplePermission(IsAuthenticated):
     """
     Object-level permission to only allow owners of an object to edit it.
     """
@@ -45,7 +42,7 @@ class SamplePermission(BasePermission):
         return False
 
 
-class DnaPermission(BasePermission):
+class DnaPermission(IsAuthenticated):
     """
     Object-level permission to only allow owners of an object to edit it.
     """
@@ -60,7 +57,7 @@ class DnaPermission(BasePermission):
         return False
 
 
-class MediaPermission(BasePermission):
+class MediaPermission(IsAuthenticated):
     """
     Object-level permission to only allow owners of an object to edit it.
     """
@@ -75,7 +72,7 @@ class MediaPermission(BasePermission):
         return False
 
 
-class StrainPermission(BasePermission):
+class StrainPermission(IsAuthenticated):
     """
     Object-level permission to only allow owners of an object to edit it.
     """
@@ -90,7 +87,7 @@ class StrainPermission(BasePermission):
         return False
 
 
-class MeasurementPermission(BasePermission):
+class MeasurementPermission(IsAuthenticated):
     """
     Object-level permission to only allow owners of an object to edit it.
     """
