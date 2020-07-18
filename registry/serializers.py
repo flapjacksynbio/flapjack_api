@@ -15,9 +15,6 @@ class StudySerializer(serializers.ModelSerializer):
 
 class AssaySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
-    owner = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
 
     class Meta:
         model = Assay

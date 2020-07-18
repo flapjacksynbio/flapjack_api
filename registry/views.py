@@ -146,7 +146,7 @@ class AssayViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Assay.objects.filter(owner=user)
+        return Assay.objects.filter(study__owner=user)
 
 # Define viewsets using the filters
 #
