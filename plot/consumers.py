@@ -64,6 +64,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             print(df.head())
 
     async def receive(self, text_data):
+        print(f"Receive. text_data: {text_data}", flush=True)
         data = json.loads(text_data)
         if data['type'] == 'plot':
             await self.generate_data({'params': data['parameters']})
