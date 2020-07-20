@@ -18,6 +18,7 @@ from django.contrib.auth.models import User
 columns = [x+str(y) for x in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] for y in range(1,13)]
 file_binary = []
 meta_dict_mem = []
+assay_id = []
 
 class RegistryConsumer(AsyncWebsocketConsumer): 
     async def connect(self):
@@ -41,6 +42,9 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                     temperature=float(data['temperature']),
                     owner=User.objects.get(username='guillermo'))
         assay.save()
+        print(f"assay.id: {assay.id}")
+        assay_id.append(assay.id)
+
         # Send message for receiving file
         await self.send(text_data=json.dumps({
                 'type': 'ready_for_file'
@@ -65,21 +69,19 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         # get dnas and inducers
         meta_dict = synergy_load_meta(wb, columns)
         meta_dict_mem.append(meta_dict)
-        dnas = []
-        inds = []
-        for val in meta_dict.index:
-            if "DNA" in val:
-                dnas.append(val)
-            elif "conc" in val:
-                inds.append(val)
 
-        #dfs = synergy_load_data(ws, signal_names, signal_map)
+        dna_keys = [val for val in meta_dict.index if "DNA" in val]
+        inds = [val for val in meta_dict.index if "conc" in val]
+        dnas = [np.unique(meta_dict.loc[k]) for k in dna_keys]
+        all_dnas = []
+        for dna in dnas:
+            all_dnas += list(dna)
         
         # Ask for dna, inducers and signals
         await self.send(text_data=json.dumps({
                 'type': 'input_requests',
                 'data': {
-                    'dna': dnas,
+                    'dna': all_dnas,
                     'inducer': inds,
                     'signal': signal_names[:-1]
                 }
@@ -98,7 +100,22 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         # get dnas and inducers
         # meta_dict = synergy_load_meta(wb, columns)
         meta_dict = meta_dict_mem[0]
-        print(f"meta_dict.keys(): {meta_dict.keys()}")
+        signal_map = {}
+
+        print(f"metadata.keys(): {metadata.keys()}", flush=True)
+
+        # Improve this when front end send dict {'dna', 'inducer', 'signal'}
+        for k in metadata.keys():
+            if ':' in k:
+                signal_map[k] = Signal.objects.get(id=metadata[k]).name
+
+        print(f"signal_map: {signal_map}", flush=True)
+
+        dfs = synergy_load_data(ws, signal_names, signal_map)
+        
+        upload_data(assay_id[0], meta_dict, dfs, {})
+
+        print("FINISHED UPLOADING")
         await self.send(text_data=json.dumps({
                 'type': 'creation_done'
             }))

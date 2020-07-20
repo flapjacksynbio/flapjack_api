@@ -68,7 +68,7 @@ class Sample(models.Model):
     dna = models.ForeignKey(Dna, on_delete=models.CASCADE)
     inducer = models.ForeignKey(
         Inducer, blank=True, null=True, on_delete=models.CASCADE)
-    row = models.IntegerField()
+    row = models.CharField(max_length=10)
     col = models.IntegerField()
 
     def __str__(self):
