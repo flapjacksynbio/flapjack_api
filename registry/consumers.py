@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 # hardcoded, get from frontend
 columns = [x+str(y) for x in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] for y in range(1,13)]
 file_binary = []
+meta_dict_mem = []
 
 class RegistryConsumer(AsyncWebsocketConsumer): 
     async def connect(self):
@@ -63,6 +64,7 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         
         # get dnas and inducers
         meta_dict = synergy_load_meta(wb, columns)
+        meta_dict_mem.append(meta_dict)
         dnas = []
         inds = []
         for val in meta_dict.index:
@@ -94,8 +96,9 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         print(f"signal_names in metadata: {signal_names}", flush=True)
         
         # get dnas and inducers
-        #meta_dict = synergy_load_meta(wb, columns)
-        
+        # meta_dict = synergy_load_meta(wb, columns)
+        meta_dict = meta_dict_mem[0]
+        print(f"meta_dict.keys(): {meta_dict.keys()}")
         await self.send(text_data=json.dumps({
                 'type': 'creation_done'
             }))
