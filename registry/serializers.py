@@ -7,10 +7,14 @@ class StudySerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
+    is_owner = serializers.SerializerMethodField()
 
     class Meta:
         model = Study
         fields = '__all__'
+
+    def get_is_owner(self, obj):
+        return self.context['request'].user.id == obj.owner.id
 
 
 class AssaySerializer(serializers.ModelSerializer):
