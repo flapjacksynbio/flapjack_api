@@ -14,7 +14,11 @@ from .models import *
 #temp while obtaining the user
 from django.contrib.auth.models import User
 
-class RegistryConsumer(AsyncWebsocketConsumer):
+# hardcoded, get from frontend
+columns = [x+str(y) for x in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] for y in range(1,13)]
+file_binary = []
+
+class RegistryConsumer(AsyncWebsocketConsumer): 
     async def connect(self):
         await self.accept()
         await self.channel_layer.group_add(
@@ -41,10 +45,13 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                 'type': 'ready_for_file'
             }))
 
+
     async def read_binary(self, bin_data):
-        # hardcoded, get from frontend
-        columns = [x+str(y) for x in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] for y in range(1,13)]
-        
+        print(f"type(columns): {type(columns)}", flush=True)
+        print(f"type(file_binary): {type(file_binary)}", flush=True)
+
+        file_binary.append(bin_data)
+
         # Do stuff with the excel
         wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
         ws = wb['Data']
@@ -76,9 +83,19 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                 }
             }))
 
+
     async def parse_metadata(self, metadata):
         print(f"metadata: {metadata}", flush=True)
-
+        # Do stuff with the excel
+        wb = opxl.load_workbook(filename=io.BytesIO(file_binary[0]), data_only=True)
+        ws = wb['Data']
+        signal_names = synergy_get_signal_names(ws)
+        
+        print(f"signal_names in metadata: {signal_names}", flush=True)
+        
+        # get dnas and inducers
+        #meta_dict = synergy_load_meta(wb, columns)
+        
         await self.send(text_data=json.dumps({
                 'type': 'creation_done'
             }))
