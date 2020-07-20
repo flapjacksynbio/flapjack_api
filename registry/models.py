@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, ManyToManyField
+from django.contrib.auth.models import User
 
 
 class Study(models.Model):
@@ -9,6 +10,7 @@ class Study(models.Model):
     #created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     owner = models.ForeignKey(
         'auth.User', related_name='studies', on_delete=models.CASCADE)
+    shared_with = ManyToManyField(User, related_name='shared_studies')
 
     def __str__(self):
         return self.name
