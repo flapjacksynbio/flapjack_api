@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField, ManyToManyField
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
 
 
@@ -7,10 +7,9 @@ class Study(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     doi = models.URLField()
-    #created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     owner = models.ForeignKey(
         'auth.User', related_name='studies', on_delete=models.CASCADE)
-    shared_with = ManyToManyField(User, related_name='shared_studies')
+    shared_with = models.ManyToManyField(User, related_name='shared_studies')
 
     def __str__(self):
         return self.name
@@ -46,6 +45,8 @@ class Strain(models.Model):
 class Dna(models.Model):
     names = ArrayField(models.CharField(max_length=100))
     sboluris = ArrayField(models.CharField(max_length=1000))
+    assays = models.ManyToManyField(
+        Assay, related_name='dnas', through='Sample')
 
     def __str__(self):
         names = self.names
