@@ -10,6 +10,7 @@ class Study(models.Model):
     owner = models.ForeignKey(
         'auth.User', related_name='studies', on_delete=models.CASCADE)
     shared_with = models.ManyToManyField(User, related_name='shared_studies')
+    public = models.BooleanField()
 
     def __str__(self):
         return self.name
