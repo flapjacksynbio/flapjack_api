@@ -9,7 +9,8 @@ class Study(models.Model):
     doi = models.URLField()
     owner = models.ForeignKey(
         'auth.User', related_name='studies', on_delete=models.CASCADE)
-    shared_with = models.ManyToManyField(User, related_name='shared_studies')
+    shared_with = models.ManyToManyField(
+        User, related_name='shared_studies', blank=True, default=[])
     public = models.BooleanField()
 
     def __str__(self):
