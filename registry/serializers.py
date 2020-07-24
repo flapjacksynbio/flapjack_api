@@ -12,6 +12,7 @@ class StudySerializer(serializers.ModelSerializer):
     class Meta:
         model = Study
         fields = '__all__'
+        read_only_fields = ('name', 'description', 'doi')
 
     def get_is_owner(self, obj):
         return self.context['request'].user.id == obj.owner.id
