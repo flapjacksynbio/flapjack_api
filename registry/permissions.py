@@ -11,7 +11,7 @@ class StudyPermission(IsAuthenticated):
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
             return request.user.has_perm('view_study', obj)
-        return True
+        return request.user == obj.owner
 
 
 class AssayPermission(IsAuthenticated):
@@ -24,7 +24,6 @@ class AssayPermission(IsAuthenticated):
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
             return request.user.has_perm('view_study', obj.study)
-
         return False
 
 
@@ -38,7 +37,6 @@ class SamplePermission(IsAuthenticated):
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
             return request.user.has_perm('view_study', obj.assay.study)
-
         return False
 
 

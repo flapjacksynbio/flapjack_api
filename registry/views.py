@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 #from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
@@ -117,7 +118,7 @@ class StudyViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Study.objects.filter(owner=user)
+        return Study.objects.filter(Q(owner=user) | Q(public=True))
 
     '''
     def perform_create(self, serializer):
@@ -326,7 +327,7 @@ class SignalViewSet(viewsets.ModelViewSet):
     serializer_class = SignalSerializer
     filter_class = SignalFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    #filterset_fields = ['name', 'description']
+    # filterset_fields = ['name', 'description']
     search_fields = ['name', 'description']
 
     '''
