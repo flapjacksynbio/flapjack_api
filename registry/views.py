@@ -118,7 +118,7 @@ class StudyViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Study.objects.filter(Q(owner=user) | Q(public=True))
+        return Study.objects.filter(Q(owner=user) | Q(public=True) | Q(shared_with=user))
 
     '''
     def perform_create(self, serializer):
