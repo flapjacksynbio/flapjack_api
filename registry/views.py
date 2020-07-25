@@ -193,12 +193,9 @@ class DnaViewSet(viewsets.ModelViewSet):
         'sboluris'
     ]
 
-    '''
     def get_queryset(self):
         user = self.request.user
-        studies = get_objects_for_user(user, 'LoadData.view_study')
-        return Dna.objects.filter(assays__study__in=studies).distinct()
-    '''
+        return Dna.objects.filter(assays__study__owner=user).distinct()
 
 
 class MediaViewSet(viewsets.ModelViewSet):

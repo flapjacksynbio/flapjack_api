@@ -5,7 +5,6 @@ from .consumers import PlotConsumer
 
 
 websockets = ProtocolTypeRouter({
-
     "websocket": TokenAuthMiddleware(
         URLRouter([
             path(
