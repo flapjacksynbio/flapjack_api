@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 #from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
-from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter
+from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, Filter
 from rest_framework_filters.backends import RestFrameworkFilterBackend
 from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
 from .serializers import AssaySerializer, DnaSerializer, InducerSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
@@ -14,11 +14,10 @@ from .permissions import AssayPermission, DnaPermission, MeasurementPermission, 
 class DnaFilter(FilterSet):
     names = CharFilter(lookup_expr='icontains')
     sboluris = CharFilter(lookup_expr='icontains')
-    assays = NumberFilter(field_name="assays", lookup_expr='in')
 
     class Meta:
         model = Dna
-        fields = ('sboluris', 'names')
+        fields = ('sboluris', 'names', 'assays')
 
 
 class MediaFilter(FilterSet):
