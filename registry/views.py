@@ -14,6 +14,7 @@ from .permissions import AssayPermission, DnaPermission, MeasurementPermission, 
 class DnaFilter(FilterSet):
     names = CharFilter(lookup_expr='icontains')
     sboluris = CharFilter(lookup_expr='icontains')
+    assays = NumberFilter(field_name="assays", lookup_expr='in')
 
     class Meta:
         model = Dna
