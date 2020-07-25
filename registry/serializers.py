@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
 
 
@@ -7,17 +8,23 @@ class StudySerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
+    is_owner = serializers.SerializerMethodField()
+    shared_with = serializers.SlugRelatedField(
+        many=True,
+        slug_field='email',
+        queryset=User.objects.all()
+    )
 
     class Meta:
         model = Study
         fields = '__all__'
 
+    def get_is_owner(self, obj):
+        return self.context['request'].user.id == obj.owner.id
+
 
 class AssaySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
-    owner = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
 
     class Meta:
         model = Assay
