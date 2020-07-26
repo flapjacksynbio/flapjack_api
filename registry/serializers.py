@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
+from django.db.models import Q
 
 
 class StudySerializer(serializers.ModelSerializer):
@@ -44,12 +45,6 @@ class DnaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dna
         fields = '__all__'
-
-    def post(self, request, *args, **kwargs):
-        request.data['assays'] = [request.data['assay']]
-        serializer = DnaSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
 
 
 class MediaSerializer(serializers.ModelSerializer):

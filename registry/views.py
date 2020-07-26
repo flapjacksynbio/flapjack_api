@@ -144,7 +144,11 @@ class AssayViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Assay.objects.filter(study__owner=user)
+        return Assay.objects.filter(
+            Q(study__owner=user) |
+            Q(study__public=True) |
+            Q(study__shared_with=user)
+        )
 
 # Define viewsets using the filters
 #
@@ -192,7 +196,11 @@ class DnaViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Dna.objects.filter(assays__study__owner=user).distinct()
+        return Dna.objects.filter(
+            Q(assays_study__owner=user) |
+            Q(assays_study__public=True) |
+            Q(assays_study__shared_with=user)
+        )
 
 
 class MediaViewSet(viewsets.ModelViewSet):
