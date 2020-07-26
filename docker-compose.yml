@@ -26,7 +26,7 @@ services:
       POSTGRES_USER: guillermo
       POSTGRES_PASSWORD: 123456
     volumes:
-      - ../pgdata:/var/pg/data
+      - db:/var/pg/data
 
   redis:
     image: redis
@@ -42,3 +42,4 @@ services:
 
 volumes:
   redis:
+  db:

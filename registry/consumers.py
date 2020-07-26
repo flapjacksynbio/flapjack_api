@@ -19,6 +19,7 @@ columns = [x+str(y) for x in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] for y in r
 file_binary = []
 meta_dict_mem = []
 assay_id = []
+machine = []
 
 class RegistryConsumer(AsyncWebsocketConsumer): 
     async def connect(self):
@@ -31,13 +32,13 @@ class RegistryConsumer(AsyncWebsocketConsumer):
     # TO DO: setup message receiving and disconnection
     async def initialize_upload(self, data):
         print(data)
-
+        machine.append(data['machine'])
         # Do stuff with the data (study id, assay data, etc...)
 
         # create assay, how to send id ???
         assay = Assay(study=Study.objects.get(id=data['study']), 
                     name=data['name'], 
-                    machine="HTX Synergy", 
+                    machine=data['machine'], 
                     description=data['description'], 
                     temperature=float(data['temperature']),
                     owner=User.objects.get(username='guillermo'))
@@ -104,10 +105,8 @@ class RegistryConsumer(AsyncWebsocketConsumer):
 
         print(f"metadata.keys(): {metadata.keys()}", flush=True)
 
-        # Improve this when front end send dict {'dna', 'inducer', 'signal'}
-        for k in metadata.keys():
-            if ':' in k:
-                signal_map[k] = Signal.objects.get(id=metadata[k]).name
+        for i, s_id in enumerate(metadata['signal']):
+            signal_map[signal_names[i]] = Signal.objects.get(id=s_id).name
 
         print(f"signal_map: {signal_map}", flush=True)
 
