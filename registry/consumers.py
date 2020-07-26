@@ -33,6 +33,7 @@ class RegistryConsumer(AsyncWebsocketConsumer):
     async def initialize_upload(self, data):
         print(data)
         machine.append(data['machine'])
+        print(f"machine: {data['machine']}", flush=True)
         # Do stuff with the data (study id, assay data, etc...)
 
         # create assay, how to send id ???
@@ -40,15 +41,15 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                     name=data['name'], 
                     machine=data['machine'], 
                     description=data['description'], 
-                    temperature=float(data['temperature']),
-                    owner=User.objects.get(username='guillermo'))
+                    temperature=float(data['temperature']))
         assay.save()
         print(f"assay.id: {assay.id}")
         assay_id.append(assay.id)
 
         # Send message for receiving file
         await self.send(text_data=json.dumps({
-                'type': 'ready_for_file'
+                'type': 'ready_for_file',
+                'data': {'assay_id': assay.id}
             }))
 
 
