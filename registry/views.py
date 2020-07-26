@@ -1,14 +1,11 @@
 from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
-#from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
-from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, Filter
+from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter
 from rest_framework_filters.backends import RestFrameworkFilterBackend
 from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
 from .serializers import AssaySerializer, DnaSerializer, InducerSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
 from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission
-# Define filters with related fields where necessary
-#
 
 
 class DnaFilter(FilterSet):
