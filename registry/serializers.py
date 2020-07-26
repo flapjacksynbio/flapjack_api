@@ -12,7 +12,8 @@ class StudySerializer(serializers.ModelSerializer):
     shared_with = serializers.SlugRelatedField(
         many=True,
         slug_field='email',
-        queryset=User.objects.all()
+        queryset=User.objects.all(),
+        required=False
     )
 
     class Meta:
