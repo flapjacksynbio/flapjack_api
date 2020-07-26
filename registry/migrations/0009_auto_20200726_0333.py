@@ -10,9 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.RemoveField(
             model_name='dna',
             name='assays',
-            field=models.ManyToManyField(related_name='dnas', to='registry.Assay'),
+        ),
+        migrations.AddField(
+            model_name='dna',
+            name='assays',
+            field=models.ManyToManyField(
+                related_name='dnas', to='registry.Assay'),
         ),
     ]

@@ -5,9 +5,7 @@ from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Str
 
 class StudySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
-    owner = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
     is_owner = serializers.SerializerMethodField()
     shared_with = serializers.SlugRelatedField(
         many=True,
@@ -46,6 +44,12 @@ class DnaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dna
         fields = '__all__'
+
+    def post(self, request, *args, **kwargs):
+        request.data['assays'] = [request.data['assay']]
+        serializer = DnaSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
 
 
 class MediaSerializer(serializers.ModelSerializer):
