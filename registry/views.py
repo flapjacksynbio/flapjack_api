@@ -1,14 +1,11 @@
 from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
-#from django_filters.rest_framework import FilterSet, DjangoFilterBackend, CharFilter, NumberFilter
-from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, Filter
+from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter
 from rest_framework_filters.backends import RestFrameworkFilterBackend
 from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
 from .serializers import AssaySerializer, DnaSerializer, InducerSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
 from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission
-# Define filters with related fields where necessary
-#
 
 
 class DnaFilter(FilterSet):
@@ -147,7 +144,11 @@ class AssayViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Assay.objects.filter(study__owner=user)
+        return Assay.objects.filter(
+            Q(study__owner=user) |
+            Q(study__public=True) |
+            Q(study__shared_with=user)
+        )
 
 # Define viewsets using the filters
 #
@@ -195,7 +196,11 @@ class DnaViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Dna.objects.filter(assays__study__owner=user).distinct()
+        return Dna.objects.filter(
+            Q(assays__study__owner=user) |
+            Q(assays__study__public=True) |
+            Q(assays__study__shared_with=user)
+        )
 
 
 class MediaViewSet(viewsets.ModelViewSet):

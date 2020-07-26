@@ -1,13 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
+from django.db.models import Q
 
 
 class StudySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
-    owner = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
     is_owner = serializers.SerializerMethodField()
     shared_with = serializers.SlugRelatedField(
         many=True,
