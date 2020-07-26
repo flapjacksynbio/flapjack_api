@@ -197,9 +197,9 @@ class DnaViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return Dna.objects.filter(
-            Q(assays_study__owner=user) |
-            Q(assays_study__public=True) |
-            Q(assays_study__shared_with=user)
+            Q(assays__study__owner=user) |
+            Q(assays__study__public=True) |
+            Q(assays__study__shared_with=user)
         )
 
 
