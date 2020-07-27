@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
-from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter
+from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, BooleanFilter
 from rest_framework_filters.backends import RestFrameworkFilterBackend
 from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
 from .serializers import AssaySerializer, DnaSerializer, InducerSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
@@ -46,10 +46,15 @@ class InducerFilter(FilterSet):
 class StudyFilter(FilterSet):
     name = CharFilter(lookup_expr='icontains')
     doi = CharFilter(lookup_expr='icontains')
+    is_owner = BooleanFilter(field_name='owner', method='filter_is_owner')
 
     class Meta:
         model = Study
         fields = ('name', 'doi')
+
+    def filter_is_owner(self, qs, name, value):
+        user = self.request.user
+        return Study.objects.filter(owner=user)
 
 
 class AssayFilter(FilterSet):
@@ -276,9 +281,9 @@ class MeasurementViewSet(viewsets.ModelViewSet):
     """
     def list(self, request):
         start = time.time()
-        #qs = self.get_queryset()
-        #qs = self.filter_queryset(qs)
-        #df = read_frame(qs)
+        # qs = self.get_queryset()
+        # qs = self.filter_queryset(qs)
+        # df = read_frame(qs)
         
         samples = Sample.objects.all() #filter(assay__name='RV7 - python')
         
