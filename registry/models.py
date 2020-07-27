@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class Study(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    doi = models.URLField()
+    doi = models.URLField(blank=True)
     owner = models.ForeignKey(
         'auth.User', related_name='studies', on_delete=models.CASCADE)
     shared_with = models.ManyToManyField(
