@@ -6,11 +6,11 @@ from django.contrib.auth.models import User
 class Study(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    doi = models.URLField()
+    doi = models.URLField(blank=True)
     owner = models.ForeignKey(
         'auth.User', related_name='studies', on_delete=models.CASCADE)
     shared_with = models.ManyToManyField(
-        User, related_name='shared_studies', blank=True, default=[])
+        User, related_name='shared_studies', blank=True, default=list)
     public = models.BooleanField()
 
     def __str__(self):
@@ -46,7 +46,8 @@ class Strain(models.Model):
 
 class Dna(models.Model):
     names = ArrayField(models.CharField(max_length=100))
-    sboluris = ArrayField(models.CharField(max_length=1000))
+    sboluris = ArrayField(models.CharField(
+        max_length=1000), blank=True, default=list)
     assays = models.ManyToManyField(Assay, related_name='dnas')
 
     def __str__(self):
