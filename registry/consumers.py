@@ -37,6 +37,8 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         # Do stuff with the data (study id, assay data, etc...)
 
         # create assay, how to send id ???
+        print(f"data['study']: {data['study']}", flush=True)
+
         assay = Assay(study=Study.objects.get(id=data['study']), 
                     name=data['name'], 
                     machine=data['machine'], 
@@ -113,6 +115,8 @@ class RegistryConsumer(AsyncWebsocketConsumer):
 
         dfs = synergy_load_data(ws, signal_names, signal_map)
         
+        print(f"assay_id[0]: {assay_id[0]}", flush=True)
+
         upload_data(assay_id[0], meta_dict, dfs, {})
 
         print("FINISHED UPLOADING")

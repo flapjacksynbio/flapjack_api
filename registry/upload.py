@@ -130,7 +130,7 @@ def synergy_load_meta(wb, columns):
 
 
 def upload_data(assay_id, meta_dict, dfs, dna_map):
-    print(f"assay_id: {assay_id}")
+    print(f"assay_id in upload_data: {assay_id}")
     columns = list(meta_dict.columns)
     meta_dnas = [k for k in list(meta_dict.index) if 'DNA' in k]
     meta_inds = [k for k in list(meta_dict.index) if 'conc' in k]
