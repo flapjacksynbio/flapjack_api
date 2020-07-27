@@ -46,7 +46,8 @@ class Strain(models.Model):
 
 class Dna(models.Model):
     names = ArrayField(models.CharField(max_length=100))
-    sboluris = ArrayField(models.CharField(max_length=1000))
+    sboluris = ArrayField(models.CharField(
+        max_length=1000), blank=True, default=[])
     assays = models.ManyToManyField(Assay, related_name='dnas')
 
     def __str__(self):
