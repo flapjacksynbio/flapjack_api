@@ -216,8 +216,8 @@ def upload_data(assay_id, meta_dict, dfs, dna_map):
             # Data value for each well
             measurements = []
             for key, dfm in dfs.items():
+                signal = Signal.objects.get(name=key)
                 for i, value in enumerate(dfm[well]):
-                    signal = Signal.objects.get(name=key)
                     #m_name = key
                     m_value = value
                     m_time = dfm['Time'].iloc[i]
