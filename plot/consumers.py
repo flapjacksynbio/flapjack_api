@@ -48,21 +48,34 @@ class PlotConsumer(AsyncWebsocketConsumer):
         )
 
     async def generate_data(self, event):
-        df = await self.fake_data(event)
-        traces, n_subplots = plotting.plot(
-            df, groupby1='label2', groupby2='label1')
-        if traces:
-            await self.send(text_data=json.dumps({
-                'type': 'plot_data',
-                'data': {
-                    'n_subplots': n_subplots,
-                    'traces': traces
-                }
-            }))
+        params = event['params']
+        plot_options = params['plotOptions']
+        s = plotting.get_samples(params)
+        n_samples = s.count()
+        if n_samples > 0:
+            df = plotting.get_measurements(s)
+            #df = await self.fake_data(event)
+            subplots = plot_options['subplots']
+            markers = plot_options['markers']
+            mean = 'Mean' in plot_options['plot']
+            std = 'std' in plot_options['plot']
+            traces, n_subplots = plotting.plot(df, 
+                                                groupby2='sample__assay__study__name', 
+                                                groupby1='signal__name',
+                                                mean=mean, std=std
+                                                )
         else:
-            print('No traces to plot', flush=True)
-            print(df.head())
-
+            print('No samples found for query params', flush=True)
+            traces, n_subplots = [], 0
+        # Send back traces to plot
+        await self.send(text_data=json.dumps({
+            'type': 'plot_data',
+            'data': {
+                'n_subplots': n_subplots,
+                'traces': traces
+            }
+        }))
+        
     async def receive(self, text_data):
         print(f"Receive. text_data: {text_data}", flush=True)
         data = json.loads(text_data)

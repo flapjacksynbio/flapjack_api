@@ -10,6 +10,7 @@ import plotly
 from plotly.colors import DEFAULT_PLOTLY_COLORS
 import wellfare as wf
 import time
+from django_pandas.io import read_frame
 
 # Set of colors to use for plot markers/lines
 #palette = DEFAULT_PLOTLY_COLORS
@@ -29,6 +30,67 @@ palette = [
 ]
 ncolors = len(palette)
 
+def get_samples(filter):
+    print('get_samples', flush=True)
+    start = time.time()
+    print(f"filter: {filter}", flush=True)
+    studies = filter.get('studyIds')
+    assays = filter.get('assayIds')
+    dnas = filter.get('dnaIds')
+    meds = filter.get('mediaIds')
+    strains = filter.get('strainIds')
+    inducers = filter.get('inducerIds')
+    print(f"in get_samples inducers: {inducers}", flush=True)
+
+    s = Sample.objects.all()
+    filter_exist = False
+
+    if studies:
+        s = s.filter(assay__study__id__in=studies)
+        filter_exist = True    
+    if assays:
+        s = s.filter(assay__id__in=assays)
+        filter_exist = True    
+    if dnas:
+        s = s.filter(dna__id__in=dnas)
+        filter_exist = True    
+    if meds:
+        s = s.filter(media__id__in=meds)  
+        filter_exist = True    
+    if strains:
+        s = s.filter(strain__id__in=strains)
+        filter_exist = True    
+
+    if not filter_exist:
+        s = Sample.objects.none()
+
+    end = time.time()
+    print('get_samples took %f seconds'%(end-start), flush=True)
+    return s
+
+# Get dataframe of measurement values for a set of samples in a query
+# -----------------------------------------------------------------------------------
+def get_measurements(samples):
+    # Get measurements for a given samples
+    print('get_measurements', flush=True)
+    start = time.time()
+    samp_ids = [samp.id for samp in samples]
+    m = Measurement.objects.filter(sample__id__in=samp_ids)
+    df = read_frame(m, fieldnames=['signal__name', \
+                                    'value', \
+                                    'time', \
+                                    'sample__id', \
+                                    'sample__assay__name', \
+                                    'sample__assay__study__name', \
+                                    'sample__media__name', \
+                                    'sample__strain__name', \
+                                    'sample__dna__names', \
+                                    'sample__inducer__names', \
+                                    'sample__inducer__concentrations', \
+                                    'sample__row', 'sample__col'])
+    end = time.time()
+    print('get_measurements took ', end-start, flush=True)
+    return df
     
 def make_traces(
         df, 
@@ -53,8 +115,8 @@ def make_traces(
         vals = []
         for id,samp_data in grouped_samp:
             samp_data = samp_data.sort_values('time')
-            t = samp_data[xname].values
-            val = samp_data[yname].values
+            t = samp_data['time'].values
+            val = samp_data['value'].values
             sval = wf.curves.Curve(x=t, y=val)
             vals.append(sval(st))
         vals = np.array(vals)
@@ -66,14 +128,14 @@ def make_traces(
             'marker': {'color': color},
             'type': 'scatter',
             'mode': 'lines',
-            #'xaxis': xaxis,
-            #'yaxis': yaxis
+            'xaxis': xaxis,
+            'yaxis': yaxis
         })
 
         if std:
             x = np.append(st, st[::-1])
-            ylower = (mean-std)[::-1]
-            yupper = (mean+std)
+            ylower = (meanval-stdval)[::-1]
+            yupper = (meanval+stdval)
             y = np.append(yupper, ylower)
             traces.append({
                 'x': list(x),
@@ -125,10 +187,10 @@ def plot(df, mean=False, std=False, normalize=False, groupby1=None, groupby2=Non
             traces += make_traces(
                     g2,
                     color=colors[name2], 
-                    mean=False, 
-                    std=False, 
+                    mean=mean, 
+                    std=std, 
                     normalize=False,
-                    show_legend_group=False,
+                    show_legend_group=show_legend_group,
                     xaxis='x%d'%axis, yaxis='y%d'%axis 
                 )  
         axis += 1
