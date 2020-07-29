@@ -36,6 +36,22 @@ class Media(models.Model):
         return self.name
 
 
+class Supplement(models.Model):
+    chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE)
+    concentration = models.FloatField()
+
+    def __str__(self):
+        return (f"Supplement {self.chemical.name}, {self.concentration} concentration")
+
+
+class Chemical(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
 class Strain(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -45,37 +61,29 @@ class Strain(models.Model):
 
 
 class Dna(models.Model):
-    names = ArrayField(models.CharField(max_length=100))
-    sboluris = ArrayField(models.CharField(
-        max_length=1000), blank=True, default=list)
+    name = models.CharField(max_length=100)
+    sboluri = models.URLField(blank=true)
     assays = models.ManyToManyField(Assay, related_name='dnas')
 
     def __str__(self):
-        names = self.names
-        names.sort()
-        return ' + '.join(names)
+        return self.name
 
 
-class Inducer(models.Model):
-    names = ArrayField(models.CharField(max_length=100))
-    concentrations = ArrayField(models.FloatField())
-
-    def __str__(self):
-        return ' + '.join(self.names)
+class Vector(models.Model):
+    dnas = models.ManyToManyField(Dna, related_name='vectors')
 
 
 class Sample(models.Model):
     assay = models.ForeignKey(Assay, on_delete=models.CASCADE)
     media = models.ForeignKey(Media, on_delete=models.CASCADE)
     strain = models.ForeignKey(Strain, on_delete=models.CASCADE)
-    dna = models.ForeignKey(Dna, on_delete=models.CASCADE)
-    inducer = models.ForeignKey(
-        Inducer, blank=True, null=True, on_delete=models.CASCADE)
+    vector = models.ForeignKey(Vector, on_delete=models.CASCADE)
+    supplements = models.ManyToManyField(Supplement, related_name='samples')
     row = models.CharField(max_length=10)
     col = models.IntegerField()
 
     def __str__(self):
-        return ("Row: {}, Col: {}".format(self.row, self.col))
+        return (f"Row: {self.row}, Col: {self.col}")
 
 
 class Signal(models.Model):
