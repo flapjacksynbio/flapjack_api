@@ -36,20 +36,20 @@ class Media(models.Model):
         return self.name
 
 
-class Supplement(models.Model):
-    chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE)
-    concentration = models.FloatField()
-
-    def __str__(self):
-        return (f"Supplement {self.chemical.name}, {self.concentration} concentration")
-
-
 class Chemical(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
 
     def __str__(self):
         return self.name
+
+
+class Supplement(models.Model):
+    chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE)
+    concentration = models.FloatField()
+
+    def __str__(self):
+        return (f"Supplement {self.chemical.name}, {self.concentration} concentration")
 
 
 class Strain(models.Model):
@@ -62,7 +62,7 @@ class Strain(models.Model):
 
 class Dna(models.Model):
     name = models.CharField(max_length=100)
-    sboluri = models.URLField(blank=true)
+    sboluri = models.URLField(blank=True)
     assays = models.ManyToManyField(Assay, related_name='dnas')
 
     def __str__(self):

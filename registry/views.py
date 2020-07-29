@@ -3,14 +3,14 @@ from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, BooleanFilter
 from rest_framework_filters.backends import RestFrameworkFilterBackend
-from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
-from .serializers import AssaySerializer, DnaSerializer, InducerSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
+from .models import *
+from .serializers import AssaySerializer, DnaSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
 from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission
 
 
 class DnaFilter(FilterSet):
-    names = CharFilter(lookup_expr='icontains')
-    sboluris = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='icontains')
+    sboluri = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Dna
@@ -35,12 +35,14 @@ class StrainFilter(FilterSet):
         fields = ('name', 'description')
 
 
+"""
 class InducerFilter(FilterSet):
     names = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Inducer
         fields = ('names',)
+"""
 
 
 class StudyFilter(FilterSet):
@@ -69,15 +71,34 @@ class AssayFilter(FilterSet):
         fields = ('name', 'temperature', 'machine')
 
 
+class ChemicalFilter(FilterSet):
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Chemical
+        fields = ('name','description')
+
+
+class SupplementFilter(FilterSet):
+    chemical = RelatedFilter(ChemicalFilter, field_name='chemical',
+                            queryset=Chemical.objects.all())
+    concentration = NumberFilter(lookup_expr='exact')
+
+    class Meta:
+        model = Chemical
+        fields = ('concentration',)
+
+
 class SampleFilter(FilterSet):
-    media = RelatedFilter(MediaFilter, field_name='media',
-                          queryset=Media.objects.all())
     assay = RelatedFilter(AssayFilter, field_name='assay',
                           queryset=Assay.objects.all())
-    inducer = RelatedFilter(
-        InducerFilter, field_name='inducer', queryset=Inducer.objects.all())
+    media = RelatedFilter(MediaFilter, field_name='media',
+                          queryset=Media.objects.all())
     dna = RelatedFilter(DnaFilter, field_name='dna',
                         queryset=Dna.objects.all())
+    supplements = RelatedFilter(SupplementFilter, field_name='supplements',
+                        queryset=Supplement.object.all())
     temperature = NumberFilter(lookup_expr='exact')
     machine = CharFilter(lookup_expr='icontains')
 

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
+from .models import *
 
 
 class StudySerializer(serializers.ModelSerializer):
@@ -62,12 +62,14 @@ class StrainSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+"""
 class InducerSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
 
     class Meta:
         model = Inducer
         fields = '__all__'
+"""
 
 
 class MeasurementSerializer(serializers.ModelSerializer):
