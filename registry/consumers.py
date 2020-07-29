@@ -237,8 +237,6 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                 print("progress being called", flush=True)
                 await self.progress_update(10)
 
-
-
                 # Data value for each well
                 measurements = []
                 for key, dfm in dfs.items():
