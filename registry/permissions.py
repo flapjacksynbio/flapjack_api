@@ -85,6 +85,53 @@ class StrainPermission(IsAuthenticated):
         return False
 
 
+# TO DO: relate it correctly
+class ChemicalPermission(IsAuthenticated):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            for sample in obj.sample_set.all():
+                if request.user.has_perm('view_study', sample.assay.study):
+                    return True
+        return False
+
+
+# TO DO: check if correct
+class SupplementPermission(IsAuthenticated):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            for sample in obj.sample_set.all():
+                if request.user.has_perm('view_study', sample.assay.study):
+                    return True
+        return False
+
+
+class VectorPermission(IsAuthenticated):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in SAFE_METHODS:
+            for sample in obj.sample_set.all():
+                if request.user.has_perm('view_study', sample.assay.study):
+                    return True
+        return False
+
+
 class MeasurementPermission(IsAuthenticated):
     """
     Object-level permission to only allow owners of an object to edit it.

@@ -4,8 +4,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, BooleanFilter
 from rest_framework_filters.backends import RestFrameworkFilterBackend
 from .models import *
-from .serializers import AssaySerializer, DnaSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
-from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission
+from .serializers import AssaySerializer, DnaSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer, VectorSerializer, SupplementSerializer, ChemicalSerializer
+from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission, VectorPermission, SupplementPermission, ChemicalPermission
 
 
 class DnaFilter(FilterSet):
@@ -14,7 +14,7 @@ class DnaFilter(FilterSet):
 
     class Meta:
         model = Dna
-        fields = ('sboluris', 'names', 'assays')
+        fields = ('sboluri', 'name', 'assays')
 
 
 class MediaFilter(FilterSet):
@@ -80,13 +80,22 @@ class ChemicalFilter(FilterSet):
         fields = ('name','description')
 
 
+class VectorFilter(FilterSet):
+    dnas = RelatedFilter(DnaFilter, field_name='dnas',
+                        queryset=Dna.objects.all())
+
+    class Meta:
+        model = Vector
+        fields = ('dnas',)
+
+
 class SupplementFilter(FilterSet):
     chemical = RelatedFilter(ChemicalFilter, field_name='chemical',
                             queryset=Chemical.objects.all())
     concentration = NumberFilter(lookup_expr='exact')
 
     class Meta:
-        model = Chemical
+        model = Supplement
         fields = ('concentration',)
 
 
@@ -95,10 +104,10 @@ class SampleFilter(FilterSet):
                           queryset=Assay.objects.all())
     media = RelatedFilter(MediaFilter, field_name='media',
                           queryset=Media.objects.all())
-    dna = RelatedFilter(DnaFilter, field_name='dna',
+    vector = RelatedFilter(VectorFilter, field_name='vector',
                         queryset=Dna.objects.all())
     supplements = RelatedFilter(SupplementFilter, field_name='supplements',
-                        queryset=Supplement.object.all())
+                        queryset=Supplement.objects.all())
     temperature = NumberFilter(lookup_expr='exact')
     machine = CharFilter(lookup_expr='icontains')
 
