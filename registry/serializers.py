@@ -46,6 +46,30 @@ class DnaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class VectorSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Vector
+        fields = '__all__'
+
+
+class ChemicalSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Chemical
+        fields = '__all__'
+
+
+class SupplementSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Supplement
+        fields = '__all__'
+
+
 class MediaSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
 
@@ -60,16 +84,6 @@ class StrainSerializer(serializers.ModelSerializer):
     class Meta:
         model = Strain
         fields = '__all__'
-
-
-"""
-class InducerSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Inducer
-        fields = '__all__'
-"""
 
 
 class MeasurementSerializer(serializers.ModelSerializer):

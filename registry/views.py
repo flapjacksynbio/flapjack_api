@@ -195,7 +195,7 @@ class SampleViewSet(viewsets.ModelViewSet):
         'assay__description',
         'assay__study__name',
         'assay__study__description',
-        'dna__names'
+        'vector__dnas'
     ]
 
     '''
@@ -216,8 +216,8 @@ class DnaViewSet(viewsets.ModelViewSet):
     filterset_class = DnaFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     search_fields = [
-        'names',
-        'sboluris'
+        'name',
+        'sboluri'
     ]
 
     def get_queryset(self):
@@ -267,23 +267,40 @@ class StrainViewSet(viewsets.ModelViewSet):
     '''
 
 
-class InducerViewSet(viewsets.ModelViewSet):
+class VectorViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows inducers to be viewed or edited.
+    API endpoint that allows vector to be viewed or edited.
     """
-    queryset = Inducer.objects.all()
-    serializer_class = InducerSerializer
-    filterset_class = InducerFilter
+    permission_classes = [VectorPermission]
+    queryset = Vector.objects.all()
+    serializer_class = VectorSerializer
+    filter_class = VectorFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = [
-        'names',
-        'concentrations'
-    ]
+    search_fields = ['dnas']
 
-    # def get_queryset(self):
-    #    user = self.request.user
-    #    studies = get_objects_for_user(user, 'LoadData.view_study')
-    #    return Inducer.objects.filter(samples__assays__study__in=studies)
+
+class SupplementViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows supplement to be viewed or edited.
+    """
+    permission_classes = [SupplementPermission]
+    queryset = Supplement.objects.all()
+    serializer_class = SupplementSerializer
+    filter_class = SupplementFilter
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    search_fields = ['chemical', 'concentration']
+
+
+class ChemicalViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows chemical to be viewed or edited.
+    """
+    permission_classes = [ChemicalPermission]
+    queryset = Chemical.objects.all()
+    serializer_class = ChemicalSerializer
+    filter_class = ChemicalFilter
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    search_fields = ['name', 'description']
 
 
 class MeasurementViewSet(viewsets.ModelViewSet):
