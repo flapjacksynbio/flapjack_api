@@ -3,18 +3,18 @@ from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, BooleanFilter
 from rest_framework_filters.backends import RestFrameworkFilterBackend
-from .models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
-from .serializers import AssaySerializer, DnaSerializer, InducerSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer
-from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission
+from .models import *
+from .serializers import AssaySerializer, DnaSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer, VectorSerializer, SupplementSerializer, ChemicalSerializer
+from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission, VectorPermission, SupplementPermission, ChemicalPermission
 
 
 class DnaFilter(FilterSet):
-    names = CharFilter(lookup_expr='icontains')
-    sboluris = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='icontains')
+    sboluri = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Dna
-        fields = ('sboluris', 'names', 'assays')
+        fields = ('sboluri', 'name', 'assays')
 
 
 class MediaFilter(FilterSet):
@@ -35,12 +35,14 @@ class StrainFilter(FilterSet):
         fields = ('name', 'description')
 
 
+"""
 class InducerFilter(FilterSet):
     names = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Inducer
         fields = ('names',)
+"""
 
 
 class StudyFilter(FilterSet):
@@ -69,15 +71,43 @@ class AssayFilter(FilterSet):
         fields = ('name', 'temperature', 'machine')
 
 
+class ChemicalFilter(FilterSet):
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Chemical
+        fields = ('name','description')
+
+
+class VectorFilter(FilterSet):
+    dnas = RelatedFilter(DnaFilter, field_name='dnas',
+                        queryset=Dna.objects.all())
+
+    class Meta:
+        model = Vector
+        fields = ('dnas',)
+
+
+class SupplementFilter(FilterSet):
+    chemical = RelatedFilter(ChemicalFilter, field_name='chemical',
+                            queryset=Chemical.objects.all())
+    concentration = NumberFilter(lookup_expr='exact')
+
+    class Meta:
+        model = Supplement
+        fields = ('concentration',)
+
+
 class SampleFilter(FilterSet):
-    media = RelatedFilter(MediaFilter, field_name='media',
-                          queryset=Media.objects.all())
     assay = RelatedFilter(AssayFilter, field_name='assay',
                           queryset=Assay.objects.all())
-    inducer = RelatedFilter(
-        InducerFilter, field_name='inducer', queryset=Inducer.objects.all())
-    dna = RelatedFilter(DnaFilter, field_name='dna',
+    media = RelatedFilter(MediaFilter, field_name='media',
+                          queryset=Media.objects.all())
+    vector = RelatedFilter(VectorFilter, field_name='vector',
                         queryset=Dna.objects.all())
+    supplements = RelatedFilter(SupplementFilter, field_name='supplements',
+                        queryset=Supplement.objects.all())
     temperature = NumberFilter(lookup_expr='exact')
     machine = CharFilter(lookup_expr='icontains')
 
@@ -174,7 +204,7 @@ class SampleViewSet(viewsets.ModelViewSet):
         'assay__description',
         'assay__study__name',
         'assay__study__description',
-        'dna__names'
+        'vector__dnas'
     ]
 
     '''
@@ -195,8 +225,8 @@ class DnaViewSet(viewsets.ModelViewSet):
     filterset_class = DnaFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     search_fields = [
-        'names',
-        'sboluris'
+        'name',
+        'sboluri'
     ]
 
     def get_queryset(self):
@@ -246,23 +276,40 @@ class StrainViewSet(viewsets.ModelViewSet):
     '''
 
 
-class InducerViewSet(viewsets.ModelViewSet):
+class VectorViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows inducers to be viewed or edited.
+    API endpoint that allows vector to be viewed or edited.
     """
-    queryset = Inducer.objects.all()
-    serializer_class = InducerSerializer
-    filterset_class = InducerFilter
+    permission_classes = [VectorPermission]
+    queryset = Vector.objects.all()
+    serializer_class = VectorSerializer
+    filter_class = VectorFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = [
-        'names',
-        'concentrations'
-    ]
+    search_fields = ['dnas']
 
-    # def get_queryset(self):
-    #    user = self.request.user
-    #    studies = get_objects_for_user(user, 'LoadData.view_study')
-    #    return Inducer.objects.filter(samples__assays__study__in=studies)
+
+class SupplementViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows supplement to be viewed or edited.
+    """
+    permission_classes = [SupplementPermission]
+    queryset = Supplement.objects.all()
+    serializer_class = SupplementSerializer
+    filter_class = SupplementFilter
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    search_fields = ['chemical', 'concentration']
+
+
+class ChemicalViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows chemical to be viewed or edited.
+    """
+    permission_classes = [ChemicalPermission]
+    queryset = Chemical.objects.all()
+    serializer_class = ChemicalSerializer
+    filter_class = ChemicalFilter
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    search_fields = ['name', 'description']
 
 
 class MeasurementViewSet(viewsets.ModelViewSet):
