@@ -177,6 +177,11 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                         vec_aux.delete()
                         break
                 if not vec_exists:
+                    # add names
+                    names = [dna.name for dna in vec_aux.dnas.all()]
+                    names.sort()
+                    vec_aux.name = '+'.join(names)
+                    vec_aux.save()
                     vector = vec_aux
 
                 # create chemicals and supplements

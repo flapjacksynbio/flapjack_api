@@ -85,7 +85,6 @@ class StrainPermission(IsAuthenticated):
         return False
 
 
-# TO DO: relate it correctly
 class ChemicalPermission(IsAuthenticated):
     """
     Object-level permission to only allow owners of an object to edit it.
@@ -95,13 +94,13 @@ class ChemicalPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            for sample in obj.sample_set.all():
-                if request.user.has_perm('view_study', sample.assay.study):
-                    return True
+            for supp in obj.sample_set.all():
+                for sample in supp.sample_set.all():             
+                    if request.user.has_perm('view_study', sample.assay.study):
+                        return True
         return False
 
 
-# TO DO: check if correct
 class SupplementPermission(IsAuthenticated):
     """
     Object-level permission to only allow owners of an object to edit it.
@@ -126,9 +125,10 @@ class VectorPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            for sample in obj.sample_set.all():
-                if request.user.has_perm('view_study', sample.assay.study):
-                    return True
+            for dna in obj.dnas.all():
+                for assay in dna.assays.all():
+                    if request.user.has_perm('view_study', assay.study):
+                        return True
         return False
 
 
