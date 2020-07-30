@@ -24,12 +24,12 @@ jdcal==1.4
 Jinja2==2.10
 kiwisolver==1.0.1
 MarkupSafe==1.1.0
-openpyxl==2.5.9
+openpyxl==3.0.4 #2.5.9
 Pillow==6.2.0
 pyparsing==2.3.0
 python-dateutil==2.7.5
 pytz==2018.5
-six==1.11.0
+six==1.12.0
 plotly==4.3.0
 statsmodels==0.10.2
 celery==4.3.0
