@@ -8,12 +8,12 @@ from . import plotting
 import pandas as pd
 
 group_fields = {
-    'Vector': 'sample__vector__id',
-    'Study': 'sample__assay__study__id',
-    'Name': 'signal__id',
-    'Assay': 'sample__assay__id',
-    'Media': 'sample__media__id', 
-    'Strain': 'sample__strain__id', 
+    'Vector': 'sample__vector__name',
+    'Study': 'sample__assay__study__name',
+    'Name': 'signal__name',
+    'Assay': 'sample__assay__name',
+    'Media': 'sample__media__name', 
+    'Strain': 'sample__strain__name', 
     'Supplement': 'sample__supplements'
 }
 
@@ -88,8 +88,9 @@ class PlotConsumer(AsyncWebsocketConsumer):
                         color=colors[name2], 
                         mean=mean, 
                         std=std, 
-                        normalize=False,
+                        normalize=normalize,
                         show_legend_group=show_legend_group,
+                        group_name=name2,
                         xaxis='x%d'%axis, yaxis='y%d'%axis 
                     )  
                 progress += len(g2)
