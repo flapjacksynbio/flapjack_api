@@ -88,16 +88,7 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         # load data from "Data" sheet as a DataFrame
         dfs = synergy_load_data(self.ws, self.signal_names, signal_map)
         
-        # until now we have - if new - created the following objects:
-        # Study, Assay, Dna, Chemical, Signal
-
-        # from now on the following objects need to be created:
-        # Vector, Supplement,  Media, Strain, Sample, Measurement
-
-        
-        # needs to send as parameter:
-        # assay_id, meta_dict (media, strain, chemical, supplement, sample), 
-        # dfs (measurement), dna_ids (vector), chemical_ids (supplement), signal_ids (measurement)
+        # upload data
         start = time.time()
         await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata)
         end = time.time()
