@@ -8,11 +8,9 @@ def get_samples(filter):
     print(f"filter: {filter}", flush=True)
     studies = filter.get('studyIds')
     assays = filter.get('assayIds')
-    dnas = filter.get('dnaIds')
+    vectors = filter.get('vectorIds')
     meds = filter.get('mediaIds')
     strains = filter.get('strainIds')
-    inducers = filter.get('inducerIds')
-    print(f"in get_samples inducers: {inducers}", flush=True)
 
     s = Sample.objects.all()
     filter_exist = False
@@ -23,8 +21,8 @@ def get_samples(filter):
     if assays:
         s = s.filter(assay__id__in=assays)
         filter_exist = True    
-    if dnas:
-        s = s.filter(dna__id__in=dnas)
+    if vectors:
+        s = s.filter(vector__id__in=vectors)
         filter_exist = True    
     if meds:
         s = s.filter(media__id__in=meds)  
@@ -56,9 +54,9 @@ def get_measurements(samples):
                                     'sample__assay__study__id', \
                                     'sample__media__id', \
                                     'sample__strain__id', \
-                                    'sample__dna__id', \
-                                    'sample__inducer__id', \
-                                    'sample__inducer__concentrations', \
+                                    'sample__vector__id', \
+                                    'sample__supplements', \
+                                    #'sample__supplement__concentrations', \
                                     'sample__row', 'sample__col'])
     end = time.time()
     print('get_measurements took ', end-start, flush=True)

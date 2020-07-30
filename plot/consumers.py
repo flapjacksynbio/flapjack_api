@@ -7,6 +7,15 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from . import plotting
 import pandas as pd
 
+group_fields = {
+    'Vector': 'sample__vector__id',
+    'Study': 'sample__assay__study__id',
+    'Name': 'signal__id',
+    'Assay': 'sample__assay__id',
+    'Media': 'sample__media__id', 
+    'Strain': 'sample__strain__id', 
+    'Supplement': 'sample__supplements'
+}
 
 class PlotConsumer(AsyncWebsocketConsumer):
     async def fake_data(self, event):
@@ -47,6 +56,52 @@ class PlotConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+    async def plot(self, df, mean=False, std=False, normalize=False, groupby1=None, groupby2=None):
+        '''
+            Generate plot data for frontend plotly plot generation
+        '''
+        n_measurements = len(df)
+        if n_measurements == 0:
+            return None
+
+        traces = []
+        axis = 1
+        colors = {}
+        colidx = 0
+        groupby1 = group_fields[groupby1]
+        groupby2 = group_fields[groupby2]
+        grouped = df.groupby(groupby1)     
+        n_subplots = len(grouped)   
+        ncolors = len(plotting.palette)
+        progress = 0
+        for name1,g1 in grouped:
+            for name2,g2 in g1.groupby(groupby2):
+                if name2 not in colors:
+                    colors[name2] = plotting.palette[colidx%ncolors]
+                    colidx += 1
+                    show_legend_group = True
+                else:
+                    show_legend_group = False
+
+                traces += plotting.make_traces(
+                        g2,
+                        color=colors[name2], 
+                        mean=mean, 
+                        std=std, 
+                        normalize=False,
+                        show_legend_group=show_legend_group,
+                        xaxis='x%d'%axis, yaxis='y%d'%axis 
+                    )  
+                progress += len(g2)
+                print(progress/n_measurements)
+                await self.send(text_data=json.dumps({
+                    'type': 'progress_update',
+                    'data': {'progress': 100*progress/n_measurements}
+                }))
+                await asyncio.sleep(0)
+            axis += 1
+        return traces, n_subplots
+
     async def generate_data(self, event):
         params = event['params']
         plot_options = params['plotOptions']
@@ -59,7 +114,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             markers = plot_options['markers']
             mean = 'Mean' in plot_options['plot']
             std = 'std' in plot_options['plot']
-            traces, n_subplots = plotting.plot(df, 
+            traces, n_subplots = await self.plot(df, 
                                                 groupby1=subplots, 
                                                 groupby2=markers,
                                                 mean=mean, std=std

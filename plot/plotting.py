@@ -23,18 +23,7 @@ palette = [
     '#000000',
     '#ff0000'
 ]
-ncolors = len(palette)
 
-group_fields = {
-    'DNA': 'sample__dna__id',
-    'Study': 'sample__assay__study__id',
-    'Name': 'signal__id',
-    'Assay': 'sample__assay__id',
-    'Media': 'sample__media__id', 
-    'Strain': 'sample__strain__id', 
-    'Inducer': 'sample__inducer__id'
-}
-    
 def make_traces(
         df, 
         color='blue', 
@@ -101,43 +90,4 @@ def make_traces(
             'yaxis': yaxis,
         })
     return(traces)
-
-
-
-
-def plot(df, mean=False, std=False, normalize=False, groupby1=None, groupby2=None):
-    '''
-        Generate plot data for frontend plotly plot generation
-    '''
-    if len(df)==0:
-        return None
-
-    traces = []
-    axis = 1
-    colors = {}
-    colidx = 0
-    groupby1 = group_fields[groupby1]
-    groupby2 = group_fields[groupby2]
-    grouped = df.groupby(groupby1)     
-    n_subplots = len(grouped)   
-    for name1,g1 in grouped:
-        for name2,g2 in g1.groupby(groupby2):
-            if name2 not in colors:
-                colors[name2] = palette[colidx%ncolors]
-                colidx += 1
-                show_legend_group = True
-            else:
-                show_legend_group = False
-
-            traces += make_traces(
-                    g2,
-                    color=colors[name2], 
-                    mean=mean, 
-                    std=std, 
-                    normalize=False,
-                    show_legend_group=show_legend_group,
-                    xaxis='x%d'%axis, yaxis='y%d'%axis 
-                )  
-        axis += 1
-    return traces, n_subplots
 
