@@ -86,7 +86,7 @@ class VectorFilter(FilterSet):
 
     class Meta:
         model = Vector
-        fields = ('dnas',)
+        fields = ('name','dnas')
 
 
 class SupplementFilter(FilterSet):
@@ -285,7 +285,7 @@ class VectorViewSet(viewsets.ModelViewSet):
     serializer_class = VectorSerializer
     filter_class = VectorFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = ['dnas']
+    search_fields = ['names', 'dnas']
 
 
 class SupplementViewSet(viewsets.ModelViewSet):
