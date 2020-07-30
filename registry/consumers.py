@@ -12,19 +12,20 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .upload import *
 from .models import *
 
-#temp while obtaining the user
-from django.contrib.auth.models import User
-
 
 class RegistryConsumer(AsyncWebsocketConsumer): 
     def __init__(self, scope, **kwargs):
         super(RegistryConsumer, self).__init__(scope, **kwargs)
+        
+        # for most attrs is not necessary to declared them, it is  
+        # for having an idea of which parameters the instance has
         self.columns = [x+str(y) for x in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] for y in range(1,13)]
-        self.file_binary = b''
         self.meta_dict = {}
         self.assay_id = 0
         self.machine = ''
         self.signal_names = []
+        self.ws = ''
+        self.dna_names = []
 
     async def connect(self):
         await self.accept()
@@ -36,13 +37,13 @@ class RegistryConsumer(AsyncWebsocketConsumer):
     # TO DO: setup message receiving and disconnection
     async def initialize_upload(self, data):
         print(f"initialize_upload DATA: {data}", flush=True)
+        # data = {'name': 'Assay5', 'machine': 'htx', 'description': 'assay desc', 'temperature': '34', 'study': 1}
         self.machine = data['machine']
         
         print(f"self.machine: {self.machine}", flush=True)
-        # Do stuff with the data (study id, assay data, etc...)
-
         print(f"data['study']: {data['study']}", flush=True)
-
+        
+        # create assay object and store id as attribute
         assay = Assay(study=Study.objects.get(id=data['study']), 
                     name=data['name'], 
                     machine=self.machine, 
@@ -60,35 +61,26 @@ class RegistryConsumer(AsyncWebsocketConsumer):
 
 
     async def read_binary(self, bin_data):
-        self.file_binary = bin_data
-
-        # Do stuff with the excel
+        # load workbook, sheet containing data and extract metadata information
         wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
-        ws = wb['Data']
-        self.signal_names = synergy_get_signal_names(ws)
+        self.ws = wb['Data']
+        self.signal_names = synergy_get_signal_names(self.ws)
+        self.meta_dict = synergy_load_meta(wb, self.columns)
         
         print(f"self.signal_names READ BINARY: {self.signal_names}", flush=True)
         
-        ###########################
-        ## REVIEW this method ##
-        # get dnas and inducers
-        self.meta_dict = synergy_load_meta(wb, self.columns)
-
+        # get dnas and chemicals names to ask for metadata to the user
         dna_keys = [val for val in self.meta_dict.index if "DNA" in val]
-        inds = [val for val in self.meta_dict.index if "conc" in val]
-        dnas = [np.unique(self.meta_dict.loc[k]) for k in dna_keys]
-        all_dnas = []
-        for dna in dnas:
-            all_dnas += list(dna)
+        dna_lists = [list(np.unique(self.meta_dict.loc[k])) for k in dna_keys]
+        self.dna_names = list(np.unique([dna for dna_list in dna_lists for dna in dna_list]))
+        chem_names_excel = [val for val in self.meta_dict.index if "chem" in val]
 
-        ###########################
-        
-        # Ask for dna, inducers and signals
+        # Ask for dna, chemicals and signals
         await self.send(text_data=json.dumps({
                 'type': 'input_requests',
                 'data': {
-                    'dna': all_dnas,
-                    'inducer': inds,
+                    'dna': self.dna_names,
+                    'chemical': chem_names_excel,
                     'signal': self.signal_names[:-1]
                 }
             }))
@@ -96,27 +88,35 @@ class RegistryConsumer(AsyncWebsocketConsumer):
 
     async def parse_metadata(self, metadata):
         print(f"metadata: {metadata}", flush=True)
-        # Do stuff with the excel
-        wb = opxl.load_workbook(filename=io.BytesIO(self.file_binary), data_only=True)
-        ws = wb['Data']
+        # metadata = {'dna': [1, 2, 3, 4], 'chemical': [1], 'signal': [1, 2, 3]}        
         
         # get dnas and inducers
-        signal_map = {}
-
-        print(f"metadata.keys(): {metadata.keys()}", flush=True)
-
-        for i, s_id in enumerate(metadata['signal']):
-            signal_map[self.signal_names[i]] = Signal.objects.get(id=s_id).name
+        # construct signal_map ({signal_name: signal from machine})
+        signal_map = {self.signal_names[i]:Signal.objects.get(id=s_id).name 
+                        for i, s_id in enumerate(metadata['signal'])} 
 
         print(f"signal_map: {signal_map}", flush=True)
 
-        dfs = synergy_load_data(ws, self.signal_names, signal_map)
+        # load data from "Data" sheet as a DataFrame
+        dfs = synergy_load_data(self.ws, self.signal_names, signal_map)
         
         print(f"self.assay_id: {self.assay_id}", flush=True)
+        
+        # until now we have (- if new - created the following objects:
+        # Study, Assay, Dna, Chemical, Signal
+
+        # we from now on the following objects need to be created:
+        # Vector, Supplement,  Media, Strain, Sample, Measurement
+
+        
+        # needs to send as parameter:
+        # assay_id, meta_dict (media, strain, chemical, supplement, sample), 
+        # dfs (measurement), dna_ids (vector), chemical_ids (supplement), signal_ids (measurement)
         start = time.time()
-        await self.upload_data(self.assay_id, self.meta_dict, dfs, {})
+        await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata)
         end = time.time()
         print(f"FINISHED UPLOADING. Took {end-start} secs")
+        
         await self.send(text_data=json.dumps({
                 'type': 'creation_done'
             }))
@@ -151,93 +151,88 @@ class RegistryConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    async def upload_data(self, assay_id, meta_dict, dfs, dna_map):
+    async def upload_data(self, assay_id, meta_dict, dfs, metadata):
         print(f"assay_id in upload_data: {assay_id}")
         columns = list(meta_dict.columns)
         meta_dnas = [k for k in list(meta_dict.index) if 'DNA' in k]
-        meta_inds = [k for k in list(meta_dict.index) if 'conc' in k]
+        meta_inds = [k for k in list(meta_dict.index) if 'chem' in k]
         for well_idx, well in enumerate(columns):
-            existing_dna = [i.names for i in Dna.objects.all()]
             existing_med = [i.name for i in Media.objects.all()]
             existing_str = [i.name for i in Strain.objects.all()]
-            existing_ind = [(i.names, i.concentrations) for i in Inducer.objects.all()]
+            existing_vec = [vec for vec in Vector.objects.all()]
+            existing_sup = [(s.chemical.id, s.concentration) for s in Supplement.objects.all()]
 
             # Metadata value for each well (sample): strain and media
             s_media = meta_dict.loc['Media'][well]
             s_strain = meta_dict.loc['Strains'][well]
 
+            # skip well if media==None
             if s_media.upper() != 'NONE':
+                # create Media object
                 if s_media not in existing_med:
                     media = Media(name=s_media, description='')
                     media.save()
                 else:
                     media = Media.objects.filter(name__exact=s_media)[0]
-
+                
+                # create Strain object
                 if s_strain not in existing_str:
                     strain = Strain(name=s_strain, description='')
                     strain.save()
                 else:
                     strain = Strain.objects.filter(name__exact=s_strain)[0]
 
-                dnas = []
-                for meta_dna in meta_dnas:
-                    s_dna = meta_dict.loc[meta_dna][well]
-                    dnas.append(s_dna)
-                # Get unique DNA names
-                dnas = list(set(dnas))
-                # If we have a real DNA, remove the 'None's
-                if len(dnas)>1 and 'None' in dnas:
-                    dnas.remove('None')
+                # create Vector object
+                vec_aux = Vector.objects.create()
+                #for dna_id in metadata['dna']:
+                for dna in meta_dict.loc[meta_dnas][well]:
+                    if dna in self.dna_names:
+                        idx = np.where(np.array(self.dna_names)==dna)[0][0]
+                        vec_aux.dnas.add(Dna.objects.get(id=metadata['dna'][idx]))
+                
+                # TO DO: find a better way of doing this
+                # checks if vector already exists in database
+                vec_exists = 0
+                for v in existing_vec:
+                    if set(vec_aux.dnas.all())==set(v.dnas.all()):
+                        vec_exists = 1
+                        vector = v
+                        vec_aux.delete()
+                        break
+                if not vec_exists:
+                    vector = vec_aux
 
-                dnas.sort()
-
-                # When dna_map = {} (all dnas already in DB), no dna_map[dna] to get
-                # BUg: When dnas = ['None] error
-                try:
-                    sboluris = [dna_map[dna] for dna in dnas]
-                except:
-                    sboluris = []
-
-                if dnas not in existing_dna:
-                    d = Dna(names=dnas, sboluris=sboluris)
-                    d.save()
-                else:
-                    d = Dna.objects.filter(names__exact=dnas)[0]
-
-
+                # create chemicals and supplements
+                # checking either len(metadata['chemical']) or len(meta_inds) > 0
+                sample_supps = []
                 if len(meta_inds) > 0:
-                    inds = [ind.split(' ')[0] for ind in meta_inds]
-                    concs = [meta_dict.loc[meta_ind][well] for meta_ind in meta_inds]
-                    concs = list(map(float, concs))
-                    # Removes not present inducers
-                    ind_non_zero = np.where(np.array(concs) != 0.)
-                    inds = list(np.array(inds)[ind_non_zero])
-                    concs = [float(c) for c in list(np.array(concs)[ind_non_zero])]
+                    concs = [float(meta_dict.loc[meta_ind][well]) for meta_ind in meta_inds]
+                    for i, chem_id in enumerate(metadata['chemical']):
+                        chemical = Chemical.objects.get(id=chem_id)
+                        if concs[i] > 0.:
+                            if (chemical.id, concs[i]) not in existing_sup:
+                                sup = Supplement(chemical=chemical, concentration=concs[i])
+                                sup.save()
+                            else:
+                                sup = Supplement.objects.get(chemical=chemical, concentration=concs[i])
+                            sample_supps.append(sup)
 
-                    if (inds, concs) not in existing_ind:
-                        i = Inducer(names=inds, concentrations=concs)
-                        i.save()
-                    else:
-                        i = Inducer.objects.filter(names__exact=inds).filter(concentrations__exact=concs)[0]
-                else:
-                    if ([], []) not in existing_ind:
-                        i = Inducer(names=[], concentrations=[])
-                        i.save()
-                    else:
-                        i = Inducer.objects.filter(names__exact=[]).filter(concentrations__exact=[])[0]
-
-                s = Sample(assay=Assay.objects.get(id=assay_id), media=media, strain=strain, dna=d, inducer=i, row=well[0], col=well[1:])
-                s.save()
-
+                # create Sample object
+                samp = Sample(assay=Assay.objects.get(id=assay_id), 
+                                media=media, 
+                                strain=strain, 
+                                vector=vector, 
+                                row=well[0], 
+                                col=well[1:])
+                samp.save()
+                # assign supplements to sample
+                for sup in sample_supps:
+                    samp.supplements.add(sup)
 
                 # status update
-                #process_percent = (96*file_idx+(well_idx+1))/(96*files_number)
-                
-                #progress_update(process_percent)
-                print("progress being called", flush=True)
-                await self.progress_update(10)
-
-
+                process_percent = (well_idx+1)/(len(columns))
+                #print("progress being called", flush=True)
+                await self.progress_update(process_percent)
 
                 # Data value for each well
                 measurements = []
@@ -247,9 +242,9 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                         #m_name = key
                         m_value = value
                         m_time = dfm['Time'].iloc[i]
-                        m = Measurement(sample=s, signal=signal, value=m_value, time=m_time)
+                        m = Measurement(sample=samp, signal=signal, value=m_value, time=m_time)
                         measurements.append(m)
                 Measurement.objects.bulk_create(measurements)
 
             else:
-                print("I'm None")
+                print("I'm Media None")

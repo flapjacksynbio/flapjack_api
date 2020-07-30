@@ -36,6 +36,14 @@ class Media(models.Model):
         return self.name
 
 
+class Strain(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
 class Chemical(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -49,15 +57,7 @@ class Supplement(models.Model):
     concentration = models.FloatField()
 
     def __str__(self):
-        return (f"Supplement {self.chemical.name}, {self.concentration} concentration")
-
-
-class Strain(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-
-    def __str__(self):
-        return self.name
+        return (f"Supplement {self.chemical.name}, concentration {self.concentration}")
 
 
 class Dna(models.Model):
@@ -71,6 +71,11 @@ class Dna(models.Model):
 
 class Vector(models.Model):
     dnas = models.ManyToManyField(Dna, related_name='vectors')
+
+    def __str__(self):
+        dnas = self.dnas.all()
+        dna_names = [dna.name for dna in dnas]
+        return ' + '.join(dna_names)
 
 
 class Sample(models.Model):

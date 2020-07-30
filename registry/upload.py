@@ -125,5 +125,5 @@ def synergy_load_meta(wb, columns):
             if 'Inducers' in wb.sheetnames:
                 names, dicts_ws = get_all_tables(wb[ws_name], columns)
                 for i in range(len(names)):
-                    meta_dict[names[i]+' conc'] = dicts_ws[i]
+                    meta_dict[names[i]+' chemical'] = dicts_ws[i]
     return pd.DataFrame(meta_dict).transpose()
