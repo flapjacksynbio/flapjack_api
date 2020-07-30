@@ -217,16 +217,8 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                     samp.supplements.add(sup)
 
                 # status update
-<<<<<<< HEAD
-                #process_percent = (96*file_idx+(well_idx+1))/(96*files_number)
-                
-                #progress_update(process_percent)
-                print("progress being called", flush=True)
-                await self.progress_update(10)
-=======
                 process_percent = (well_idx+1)/(len(columns))
                 await self.progress_update(process_percent)
->>>>>>> new-data-model
 
                 # Data value for each well
                 measurements = []
