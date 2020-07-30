@@ -1,5 +1,5 @@
 from django.contrib import admin
-from registry.models import Assay, Dna, Inducer, Measurement, Media, Sample, Signal, Strain, Study
+from registry.models import *
 
 # Models modifiable in the admin
 admin.site.register(Study)
@@ -9,5 +9,7 @@ admin.site.register(Media)
 admin.site.register(Dna)
 admin.site.register(Sample)
 admin.site.register(Measurement)
-admin.site.register(Inducer)
+admin.site.register(Vector)
+admin.site.register(Chemical)
+admin.site.register(Supplement)
 admin.site.register(Signal)
