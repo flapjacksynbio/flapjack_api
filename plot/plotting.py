@@ -31,6 +31,7 @@ def make_traces(
         std=False, 
         normalize=False,
         show_legend_group=False,
+        group_name='',
         xaxis='x1', yaxis='y1'
     ):
     '''
@@ -61,7 +62,10 @@ def make_traces(
             'type': 'scatter',
             'mode': 'lines',
             'xaxis': xaxis,
-            'yaxis': yaxis
+            'yaxis': yaxis,
+            'showlegend': show_legend_group,
+            'legendgroup': group_name,
+            'name': group_name
         })
 
         if std:
@@ -77,7 +81,10 @@ def make_traces(
                 'mode': 'lines',
                 'xaxis': xaxis,
                 'yaxis': yaxis,
-                'fill': 'toself'
+                'fill': 'toself',
+                'showlegend': False,
+                'legendgroup': group_name,
+                'name': group_name
             })
     else:
         traces.append({
@@ -88,6 +95,9 @@ def make_traces(
             'mode': 'markers',
             'xaxis': xaxis,
             'yaxis': yaxis,
+            'showlegend': show_legend_group,
+            'legendgroup': group_name,
+            'name': group_name
         })
     return(traces)
 
