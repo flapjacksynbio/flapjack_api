@@ -46,15 +46,15 @@ def get_measurements(samples):
     start = time.time()
     samp_ids = [samp.id for samp in samples]
     m = Measurement.objects.filter(sample__id__in=samp_ids)
-    df = read_frame(m, fieldnames=['signal__id', \
+    df = read_frame(m, fieldnames=['signal__name', \
                                     'value', \
                                     'time', \
                                     'sample__id', \
-                                    'sample__assay__id', \
-                                    'sample__assay__study__id', \
-                                    'sample__media__id', \
-                                    'sample__strain__id', \
-                                    'sample__vector__id', \
+                                    'sample__assay__name', \
+                                    'sample__assay__study__name', \
+                                    'sample__media__name', \
+                                    'sample__strain__name', \
+                                    'sample__vector__name', \
                                     'sample__supplements', \
                                     #'sample__supplement__concentrations', \
                                     'sample__row', 'sample__col'])
