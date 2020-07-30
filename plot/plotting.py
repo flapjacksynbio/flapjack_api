@@ -30,6 +30,16 @@ palette = [
 ]
 ncolors = len(palette)
 
+group_fields = {
+    'DNA': 'sample__dna__id',
+    'Study': 'sample__assay__study__id',
+    'Name': 'signal__id',
+    'Assay': 'sample__assay__id',
+    'Media': 'sample__media__id', 
+    'Strain': 'sample__strain__id', 
+    'Inducer': 'sample__inducer__id'
+}
+
 def get_samples(filter):
     print('get_samples', flush=True)
     start = time.time()
@@ -76,16 +86,16 @@ def get_measurements(samples):
     start = time.time()
     samp_ids = [samp.id for samp in samples]
     m = Measurement.objects.filter(sample__id__in=samp_ids)
-    df = read_frame(m, fieldnames=['signal__name', \
+    df = read_frame(m, fieldnames=['signal__id', \
                                     'value', \
                                     'time', \
                                     'sample__id', \
-                                    'sample__assay__name', \
-                                    'sample__assay__study__name', \
-                                    'sample__media__name', \
-                                    'sample__strain__name', \
-                                    'sample__dna__names', \
-                                    'sample__inducer__names', \
+                                    'sample__assay__id', \
+                                    'sample__assay__study__id', \
+                                    'sample__media__id', \
+                                    'sample__strain__id', \
+                                    'sample__dna__id', \
+                                    'sample__inducer__id', \
                                     'sample__inducer__concentrations', \
                                     'sample__row', 'sample__col'])
     end = time.time()
@@ -173,6 +183,8 @@ def plot(df, mean=False, std=False, normalize=False, groupby1=None, groupby2=Non
     axis = 1
     colors = {}
     colidx = 0
+    groupby1 = group_fields[groupby1]
+    groupby2 = group_fields[groupby2]
     grouped = df.groupby(groupby1)     
     n_subplots = len(grouped)   
     for name1,g1 in grouped:

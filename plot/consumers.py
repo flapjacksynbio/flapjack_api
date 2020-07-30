@@ -60,8 +60,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
             mean = 'Mean' in plot_options['plot']
             std = 'std' in plot_options['plot']
             traces, n_subplots = plotting.plot(df, 
-                                                groupby2='sample__assay__study__name', 
-                                                groupby1='signal__name',
+                                                groupby1=subplots, 
+                                                groupby2=markers,
                                                 mean=mean, std=std
                                                 )
         else:
