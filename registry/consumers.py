@@ -16,7 +16,6 @@ from .models import *
 class RegistryConsumer(AsyncWebsocketConsumer): 
     def __init__(self, scope, **kwargs):
         super(RegistryConsumer, self).__init__(scope, **kwargs)
-        
         # for most attrs is not necessary to declared them, it is  
         # for having an idea of which parameters the instance has
         self.columns = [x+str(y) for x in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] for y in range(1,13)]
@@ -40,9 +39,6 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         # data = {'name': 'Assay5', 'machine': 'htx', 'description': 'assay desc', 'temperature': '34', 'study': 1}
         self.machine = data['machine']
         
-        print(f"self.machine: {self.machine}", flush=True)
-        print(f"data['study']: {data['study']}", flush=True)
-        
         # create assay object and store id as attribute
         assay = Assay(study=Study.objects.get(id=data['study']), 
                     name=data['name'], 
@@ -50,7 +46,6 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                     description=data['description'], 
                     temperature=float(data['temperature']))
         assay.save()
-        print(f"assay.id FROM OBJECT: {assay.id}")
         self.assay_id = assay.id
 
         # Send message for receiving file
@@ -66,8 +61,6 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         self.ws = wb['Data']
         self.signal_names = synergy_get_signal_names(self.ws)
         self.meta_dict = synergy_load_meta(wb, self.columns)
-        
-        print(f"self.signal_names READ BINARY: {self.signal_names}", flush=True)
         
         # get dnas and chemicals names to ask for metadata to the user
         dna_keys = [val for val in self.meta_dict.index if "DNA" in val]
@@ -88,24 +81,18 @@ class RegistryConsumer(AsyncWebsocketConsumer):
 
     async def parse_metadata(self, metadata):
         print(f"metadata: {metadata}", flush=True)
-        # metadata = {'dna': [1, 2, 3, 4], 'chemical': [1], 'signal': [1, 2, 3]}        
-        
         # get dnas and inducers
         # construct signal_map ({signal_name: signal from machine})
         signal_map = {self.signal_names[i]:Signal.objects.get(id=s_id).name 
                         for i, s_id in enumerate(metadata['signal'])} 
 
-        print(f"signal_map: {signal_map}", flush=True)
-
         # load data from "Data" sheet as a DataFrame
         dfs = synergy_load_data(self.ws, self.signal_names, signal_map)
         
-        print(f"self.assay_id: {self.assay_id}", flush=True)
-        
-        # until now we have (- if new - created the following objects:
+        # until now we have - if new - created the following objects:
         # Study, Assay, Dna, Chemical, Signal
 
-        # we from now on the following objects need to be created:
+        # from now on the following objects need to be created:
         # Vector, Supplement,  Media, Strain, Sample, Measurement
 
         
@@ -115,7 +102,7 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         start = time.time()
         await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata)
         end = time.time()
-        print(f"FINISHED UPLOADING. Took {end-start} secs")
+        print(f"UPLOAD FINISHED. Took {end-start} secs")
         
         await self.send(text_data=json.dumps({
                 'type': 'creation_done'
@@ -151,8 +138,8 @@ class RegistryConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+    # TO DO: move part of this function to upload.py utils
     async def upload_data(self, assay_id, meta_dict, dfs, metadata):
-        print(f"assay_id in upload_data: {assay_id}")
         columns = list(meta_dict.columns)
         meta_dnas = [k for k in list(meta_dict.index) if 'DNA' in k]
         meta_inds = [k for k in list(meta_dict.index) if 'chem' in k]
@@ -231,7 +218,6 @@ class RegistryConsumer(AsyncWebsocketConsumer):
 
                 # status update
                 process_percent = (well_idx+1)/(len(columns))
-                #print("progress being called", flush=True)
                 await self.progress_update(process_percent)
 
                 # Data value for each well
@@ -239,7 +225,6 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                 for key, dfm in dfs.items():
                     signal = Signal.objects.get(name=key)
                     for i, value in enumerate(dfm[well]):
-                        #m_name = key
                         m_value = value
                         m_time = dfm['Time'].iloc[i]
                         m = Measurement(sample=samp, signal=signal, value=m_value, time=m_time)
