@@ -36,7 +36,6 @@ class RegistryConsumer(AsyncWebsocketConsumer):
     # TO DO: setup message receiving and disconnection
     async def initialize_upload(self, data):
         print(f"initialize_upload DATA: {data}", flush=True)
-        # data = {'name': 'Assay5', 'machine': 'htx', 'description': 'assay desc', 'temperature': '34', 'study': 1}
         self.machine = data['machine']
         
         # create assay object and store id as attribute
