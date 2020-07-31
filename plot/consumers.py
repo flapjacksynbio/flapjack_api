@@ -75,7 +75,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 }))
                 await asyncio.sleep(0)
             axis += 1
-        return traces, n_subplots, annotations
+        return traces, n_subplots
 
     async def generate_data(self, event):
         params = event['params']
@@ -102,8 +102,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             'type': 'plot_data',
             'data': {
                 'n_subplots': n_subplots,
-                'traces': traces,
-                'annotations': annotations  
+                'traces': traces 
             }
         }))
         
