@@ -24,6 +24,73 @@ palette = [
     '#ff0000'
 ]
 
+def layout_screen(fig, font_size=10):
+    '''
+    Layout figure optimized for screen display
+
+    fig = figure to layout
+    font_size = font size in pts
+
+    Returns:
+    fig = figure with correct layout
+    '''
+
+    fig.update_layout(  autosize=True,
+                        margin=go.layout.Margin(
+                            l=50,
+                            r=50,
+                            b=50,
+                            t=50,
+                            pad=0
+                        ),
+                        paper_bgcolor="rgb(255,255,255)",
+                        template='plotly',
+                        font_size=font_size
+                    )
+    for a in fig['layout']['annotations']:
+        a['font'] = dict(size=font_size)
+    fig.update_traces(marker=dict(size=6), line=dict(width=1), selector=dict(type='scatter'))
+    fig.update_traces(marker=dict(size=6), line=dict(width=1), selector=dict(type='line'))
+    fig.update_traces(line=dict(width=0), selector=dict(fill="toself"))
+    fig.update_yaxes(linewidth=1, 
+                    tickwidth=1, 
+                    title_font=dict(size=font_size), 
+                    tickfont=dict(size=font_size),
+                    hoverformat=".2e"
+                    )
+    fig.update_xaxes(linewidth=1, 
+                    tickwidth=1, 
+                    title_font=dict(size=font_size), 
+                    tickfont=dict(size=font_size),
+                    hoverformat=".2e"
+                    )
+    return fig
+
+def format_axes(fig, row, col, rows, xlabel='Time', ylabel='Value', font_size=10):
+    # Format axes
+    if row==rows:
+        fig.update_xaxes(title_text=xlabel, 
+                        title_font=dict(size=font_size), 
+                        tickfont=dict(size=font_size),
+                        tickwidth=3,
+                        linewidth=3,
+                        row=row, col=col)
+    if col==1:
+        fig.update_yaxes(title_text=ylabel, 
+                        title_font=dict(size=font_size), 
+                        tickfont=dict(size=font_size), 
+                        #tickformat='.2g',
+                        tickwidth=3,
+                        linewidth=3,
+                        row=row, col=col)
+    elif col>1:
+        fig.update_yaxes(title_font=dict(size=font_size), 
+                        tickfont=dict(size=font_size), 
+                        tickwidth=3,
+                        #tickformat='.2g',
+                        linewidth=3,
+                        row=row, col=col)
+
 def make_traces(
         fig,
         df, 

@@ -31,13 +31,23 @@ class PlotConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    async def plot(self, df, mean=False, std=False, normalize=False, groupby1=None, groupby2=None):
+    async def plot(self, df, 
+                    mean=False, 
+                    std=False, 
+                    normalize=False, 
+                    groupby1=None, 
+                    groupby2=None,
+                    font_size=10):
         '''
             Generate plot data for frontend plotly plot generation
         '''
         n_measurements = len(df)
         if n_measurements == 0:
             return None
+
+        # Axis labels
+        xlabel = 'Time (hours)'
+        ylabel = 'Measurement'
 
         traces = []
         colors = {}
@@ -69,7 +79,6 @@ class PlotConsumer(AsyncWebsocketConsumer):
                             vertical_spacing=0.1, horizontal_spacing=0.1
                             ) 
         end = time.time()
-
         # Add traces to subplots
         print('make_subplots took %g'%(end-start), flush=True)
         for name1,g1 in grouped:
@@ -87,6 +96,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 col = 1 + subplot_index%cols
                 print('Row, Col ', row, col, flush=True)
 
+                # Add traces to figure
                 fig = plotting.make_traces(
                         fig,
                         g2,
@@ -96,8 +106,17 @@ class PlotConsumer(AsyncWebsocketConsumer):
                         normalize=normalize,
                         show_legend_group=show_legend_group,
                         group_name=name2,
-                        row=row, col=col 
+                        row=row, col=col
                     )  
+                
+                # Format axes
+                plotting.format_axes(fig, 
+                                        row, col, rows, 
+                                        xlabel=xlabel, 
+                                        ylabel=ylabel, 
+                                        font_size=font_size)
+
+                # Update progress bar
                 progress += len(g2)
                 print(progress/n_measurements)
                 await self.send(text_data=json.dumps({
@@ -105,8 +124,10 @@ class PlotConsumer(AsyncWebsocketConsumer):
                     'data': {'progress': int(100*progress/n_measurements)}
                 }))
                 await asyncio.sleep(0)
+            # Next subplot
             subplot_index += 1
-        return fig, n_subplots
+        plotting.layout_screen(fig, font_size=font_size)
+        return fig
 
     async def generate_data(self, event):
         params = event['params']
@@ -120,7 +141,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             markers = plot_options['markers']
             mean = 'Mean' in plot_options['plot']
             std = 'std' in plot_options['plot']
-            fig, n_subplots = await self.plot(df, 
+            fig = await self.plot(df, 
                                                 groupby1=subplots, 
                                                 groupby2=markers,
                                                 mean=mean, std=std
@@ -128,7 +149,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             fig_json = fig.to_json()
         else:
             print('No samples found for query params', flush=True)
-            fig_json, n_subplots = '', 0
+            fig_json = ''
         # Send back traces to plot
         await self.send(text_data=json.dumps({
             'type': 'plot_data',
