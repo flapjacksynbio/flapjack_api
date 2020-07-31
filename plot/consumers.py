@@ -128,7 +128,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             fig_json = fig.to_json()
         else:
             print('No samples found for query params', flush=True)
-            fig_json, n_subplots = '', [], 0
+            fig_json, n_subplots = '', 0
         # Send back traces to plot
         await self.send(text_data=json.dumps({
             'type': 'plot_data',
