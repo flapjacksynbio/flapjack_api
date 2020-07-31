@@ -46,20 +46,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
         groupby2 = group_fields[groupby2]
         grouped = df.groupby(groupby1)     
         n_subplots = len(grouped)
-        start = time.time()
-        fig = make_subplots(
-                            rows=2, cols=2,
-                            subplot_titles=[name for name,g in grouped],
-                            shared_xaxes=True, shared_yaxes=False,
-                            vertical_spacing=0.1, horizontal_spacing=0.1
-                            ) 
-        end = time.time()
-        print('make_subplots took %g'%(end-start), flush=True)
-        fig_json = json.loads(fig.to_json())
-        annotations = fig_json['layout']['annotations']
         ncolors = len(plotting.palette)
         progress = 0
-        fig = make_subplots(rows=2, cols=2)
         for name1,g1 in grouped:
             for name2,g2 in g1.groupby(groupby2):
                 if name2 not in colors:
@@ -101,7 +89,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             markers = plot_options['markers']
             mean = 'Mean' in plot_options['plot']
             std = 'std' in plot_options['plot']
-            traces, n_subplots, annotations = await self.plot(df, 
+            traces, n_subplots = await self.plot(df, 
                                                 groupby1=subplots, 
                                                 groupby2=markers,
                                                 mean=mean, std=std
