@@ -55,8 +55,6 @@ class PlotConsumer(AsyncWebsocketConsumer):
                             ) 
         end = time.time()
         print('make_subplots took %g'%(end-start), flush=True)
-        fig_json = json.loads(fig.to_json())
-        annotations = fig_json['layout']['annotations']
         ncolors = len(plotting.palette)
         progress = 0
         fig = make_subplots(rows=2, cols=2)
@@ -69,7 +67,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 else:
                     show_legend_group = False
 
-                traces += plotting.make_traces(
+                fig = plotting.make_traces(
+                        fig,
                         g2,
                         color=colors[name2], 
                         mean=mean, 
@@ -87,7 +86,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 }))
                 await asyncio.sleep(0)
             axis += 1
-        return traces, n_subplots, annotations
+        return fig, n_subplots
 
     async def generate_data(self, event):
         params = event['params']
@@ -101,21 +100,20 @@ class PlotConsumer(AsyncWebsocketConsumer):
             markers = plot_options['markers']
             mean = 'Mean' in plot_options['plot']
             std = 'std' in plot_options['plot']
-            traces, n_subplots, annotations = await self.plot(df, 
+            fig, n_subplots, annotations = await self.plot(df, 
                                                 groupby1=subplots, 
                                                 groupby2=markers,
                                                 mean=mean, std=std
                                                 )
+            fig_json = fig.to_json()
         else:
             print('No samples found for query params', flush=True)
-            traces, n_subplots = [], 0
+            fig_json, n_subplots = '', [], 0
         # Send back traces to plot
         await self.send(text_data=json.dumps({
             'type': 'plot_data',
             'data': {
-                'n_subplots': n_subplots,
-                'traces': traces,
-                'annotations': annotations  
+                'figure': fig_json
             }
         }))
         
