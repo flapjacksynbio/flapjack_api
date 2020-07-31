@@ -5,12 +5,15 @@ import asyncio
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
 from . import plotting
+from plotly.subplots import make_subplots
+import plotly
 import pandas as pd
+import time
 
 group_fields = {
     'Vector': 'sample__vector__name',
     'Study': 'sample__assay__study__name',
-    'Name': 'signal__name',
+    'Signal': 'signal__name',
     'Assay': 'sample__assay__name',
     'Media': 'sample__media__name', 
     'Strain': 'sample__strain__name', 
@@ -18,35 +21,6 @@ group_fields = {
 }
 
 class PlotConsumer(AsyncWebsocketConsumer):
-    async def fake_data(self, event):
-        t = list(range(100))
-        y1 = [v*v for v in t]
-        y2 = [(100-v)*(100-v) for v in t]
-        y3 = [(50-v)**3 for v in t]
-        y4 = [(50-v)**4 for v in t]
-        ys = [y1, y2, y3, y4]
-        labels1 = ['apples', 'pears', 'oranges', 'bananas']
-        labels2 = ['green', 'green', 'green', 'yellow']
-        df = pd.DataFrame()
-        n_steps = len(labels1) * len(t)
-        step = 1
-        for label1, label2, y in zip(labels1, labels2, ys):
-            for tt, val in zip(t, y):
-                data = {
-                    'time': tt,
-                    'value': val,
-                    'label1': label1,
-                    'label2': label2
-                }
-                df = df.append(data, ignore_index=True)
-                await self.send(text_data=json.dumps({
-                    'type': 'progress_update',
-                    'data': {'progress': 100*step//n_steps}
-                }))
-                await asyncio.sleep(0)
-                step += 1
-        return df
-
     async def connect(self):
         self.user = self.scope["user"]
         print(self.user)
@@ -71,9 +45,21 @@ class PlotConsumer(AsyncWebsocketConsumer):
         groupby1 = group_fields[groupby1]
         groupby2 = group_fields[groupby2]
         grouped = df.groupby(groupby1)     
-        n_subplots = len(grouped)   
+        n_subplots = len(grouped)
+        start = time.time()
+        fig = make_subplots(
+                            rows=2, cols=2,
+                            subplot_titles=[name for name,g in grouped],
+                            shared_xaxes=True, shared_yaxes=False,
+                            vertical_spacing=0.1, horizontal_spacing=0.1
+                            ) 
+        end = time.time()
+        print('make_subplots took %g'%(end-start), flush=True)
+        fig_json = json.loads(fig.to_json())
+        annotations = fig_json['layout']['annotations']
         ncolors = len(plotting.palette)
         progress = 0
+        fig = make_subplots(rows=2, cols=2)
         for name1,g1 in grouped:
             for name2,g2 in g1.groupby(groupby2):
                 if name2 not in colors:
@@ -97,11 +83,11 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 print(progress/n_measurements)
                 await self.send(text_data=json.dumps({
                     'type': 'progress_update',
-                    'data': {'progress': 100*progress/n_measurements}
+                    'data': {'progress': int(100*progress/n_measurements)}
                 }))
                 await asyncio.sleep(0)
             axis += 1
-        return traces, n_subplots
+        return traces, n_subplots, annotations
 
     async def generate_data(self, event):
         params = event['params']
@@ -115,7 +101,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             markers = plot_options['markers']
             mean = 'Mean' in plot_options['plot']
             std = 'std' in plot_options['plot']
-            traces, n_subplots = await self.plot(df, 
+            traces, n_subplots, annotations = await self.plot(df, 
                                                 groupby1=subplots, 
                                                 groupby2=markers,
                                                 mean=mean, std=std
@@ -128,7 +114,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
             'type': 'plot_data',
             'data': {
                 'n_subplots': n_subplots,
-                'traces': traces
+                'traces': traces,
+                'annotations': annotations  
             }
         }))
         
