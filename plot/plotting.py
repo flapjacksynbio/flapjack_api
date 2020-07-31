@@ -80,7 +80,7 @@ def make_traces(
                                     showlegend=show_legend_group)
             fig.add_trace(scatter2, row=row, col=col)
     else:
-         scatter = go.Scattergl(x=df[xname], y=df[yname], 
+        scatter = go.Scattergl(x=df[xname], y=df[yname], 
                                 mode='markers',
                                 marker_color=color,
                                 marker_size=6,

@@ -9,6 +9,7 @@ from plotly.subplots import make_subplots
 import plotly
 import pandas as pd
 import time
+import math
 
 group_fields = {
     'Vector': 'sample__vector__name',
@@ -52,12 +53,13 @@ class PlotConsumer(AsyncWebsocketConsumer):
         # Compute number of rows and columns
         n_sub_plots = len(grouped)
         if n_sub_plots>3:
-            rows = int(np.ceil(np.sqrt(n_sub_plots)))
-            cols = int(np.ceil(n_sub_plots/rows))
+            rows = int(math.ceil(math.sqrt(n_sub_plots)))
+            cols = int(math.ceil(n_sub_plots/rows))
             cols = max(cols,1)
         else:
             rows = 1
             cols = n_sub_plots
+        print('Rows, Columns, subplot ', rows, cols, n_sub_plots, flush=True)
         # Construct subplots
         start = time.time()
         fig = make_subplots(
@@ -83,7 +85,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 # Which position the subplot is in
                 row = 1 + subplot_index//cols
                 col = 1 + subplot_index%cols
-                subplot_index += 1
+                print('Row, Col ', row, col, flush=True)
 
                 fig = plotting.make_traces(
                         fig,
@@ -103,7 +105,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                     'data': {'progress': int(100*progress/n_measurements)}
                 }))
                 await asyncio.sleep(0)
-            axis += 1
+            subplot_index += 1
         return fig, n_subplots
 
     async def generate_data(self, event):
@@ -118,7 +120,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             markers = plot_options['markers']
             mean = 'Mean' in plot_options['plot']
             std = 'std' in plot_options['plot']
-            fig, n_subplots, annotations = await self.plot(df, 
+            fig, n_subplots = await self.plot(df, 
                                                 groupby1=subplots, 
                                                 groupby2=markers,
                                                 mean=mean, std=std
