@@ -5,6 +5,7 @@ import asyncio
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
 from . import plotting
+from registry.util import get_samples, get_measurements
 from plotly.subplots import make_subplots
 import plotly
 import pandas as pd
@@ -132,10 +133,11 @@ class PlotConsumer(AsyncWebsocketConsumer):
     async def generate_data(self, event):
         params = event['params']
         plot_options = params['plotOptions']
-        s = plotting.get_samples(params)
+        s = get_samples(params)
+        signals = params.get('signalIds')
         n_samples = s.count()
         if n_samples > 0:
-            df = plotting.get_measurements(s)
+            df = get_measurements(s, signals)
             #df = await self.fake_data(event)
             subplots = plot_options['subplots']
             markers = plot_options['markers']

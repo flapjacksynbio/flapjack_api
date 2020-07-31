@@ -40,12 +40,16 @@ def get_samples(filter):
 
 # Get dataframe of measurement values for a set of samples in a query
 # -----------------------------------------------------------------------------------
-def get_measurements(samples):
+def get_measurements(samples, signals):
     # Get measurements for a given samples
     print('get_measurements', flush=True)
     start = time.time()
     samp_ids = [samp.id for samp in samples]
     m = Measurement.objects.filter(sample__id__in=samp_ids)
+    # Filter by signal
+    if signals:
+        m = m.filter(signal__id__in=signals)
+    # Get pandas dataframe 
     df = read_frame(m, fieldnames=['signal__name', \
                                     'value', \
                                     'time', \
