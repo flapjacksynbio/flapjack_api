@@ -19,7 +19,7 @@ group_fields = {
     'Assay': 'sample__assay__name',
     'Media': 'sample__media__name', 
     'Strain': 'sample__strain__name', 
-    'Supplement': 'sample__supplements'
+    'Supplement': 'sample__supplements__id'
 }
 
 class PlotConsumer(AsyncWebsocketConsumer):
@@ -106,7 +106,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                         std=std, 
                         normalize=normalize,
                         show_legend_group=show_legend_group,
-                        group_name=name2,
+                        group_name=str(name2),
                         row=row, col=col
                     )  
                 
@@ -148,7 +148,10 @@ class PlotConsumer(AsyncWebsocketConsumer):
                                                 groupby2=markers,
                                                 mean=mean, std=std
                                                 )
-            fig_json = fig.to_json()
+            if fig:
+                fig_json = fig.to_json()
+            else:
+                fig_json = ''
         else:
             print('No samples found for query params', flush=True)
             fig_json = ''

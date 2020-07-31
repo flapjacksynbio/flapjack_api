@@ -59,8 +59,9 @@ def get_measurements(samples, signals):
                                     'sample__media__name', \
                                     'sample__strain__name', \
                                     'sample__vector__name', \
-                                    'sample__supplements', \
-                                    #'sample__supplement__concentrations', \
+                                    'sample__supplements__id', \
+                                    'sample__supplements__chemical__name', \
+                                    'sample__supplements__concentration', \
                                     'sample__row', 'sample__col'])
     end = time.time()
     print('get_measurements took ', end-start, flush=True)
