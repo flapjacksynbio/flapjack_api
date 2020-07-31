@@ -39,33 +39,51 @@ class PlotConsumer(AsyncWebsocketConsumer):
             return None
 
         traces = []
-        axis = 1
         colors = {}
         colidx = 0
+        subplot_index = 0
         groupby1 = group_fields[groupby1]
         groupby2 = group_fields[groupby2]
         grouped = df.groupby(groupby1)     
         n_subplots = len(grouped)
+        ncolors = len(plotting.palette)
+        progress = 0
+
+        # Compute number of rows and columns
+        n_sub_plots = len(grouped)
+        if n_sub_plots>3:
+            rows = int(np.ceil(np.sqrt(n_sub_plots)))
+            cols = int(np.ceil(n_sub_plots/rows))
+            cols = max(cols,1)
+        else:
+            rows = 1
+            cols = n_sub_plots
+        # Construct subplots
         start = time.time()
         fig = make_subplots(
-                            rows=2, cols=2,
+                            rows=rows, cols=cols,
                             subplot_titles=[name for name,g in grouped],
                             shared_xaxes=True, shared_yaxes=False,
                             vertical_spacing=0.1, horizontal_spacing=0.1
                             ) 
         end = time.time()
+
+        # Add traces to subplots
         print('make_subplots took %g'%(end-start), flush=True)
-        ncolors = len(plotting.palette)
-        progress = 0
-        fig = make_subplots(rows=2, cols=2)
         for name1,g1 in grouped:
             for name2,g2 in g1.groupby(groupby2):
+                # Choose color and whether to show in legend
                 if name2 not in colors:
                     colors[name2] = plotting.palette[colidx%ncolors]
                     colidx += 1
                     show_legend_group = True
                 else:
                     show_legend_group = False
+
+                # Which position the subplot is in
+                row = 1 + subplot_index//cols
+                col = 1 + subplot_index%cols
+                subplot_index += 1
 
                 fig = plotting.make_traces(
                         fig,
@@ -76,7 +94,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                         normalize=normalize,
                         show_legend_group=show_legend_group,
                         group_name=name2,
-                        xaxis='x%d'%axis, yaxis='y%d'%axis 
+                        row=row, col=col 
                     )  
                 progress += len(g2)
                 print(progress/n_measurements)
