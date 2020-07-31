@@ -25,6 +25,7 @@ palette = [
 ]
 
 def make_traces(
+        fig,
         df, 
         color='blue', 
         mean=False, 
@@ -32,7 +33,7 @@ def make_traces(
         normalize=False,
         show_legend_group=False,
         group_name='',
-        xaxis='x1', yaxis='y1'
+        row=1, col=1
     ):
     '''
     Generate trace data for each sample, or mean and std, for the data in df
@@ -55,49 +56,37 @@ def make_traces(
         vals = np.array(vals)
         meanval = np.nanmean(vals, axis=0)
         stdval = np.nanstd(vals, axis=0)
-        traces.append({
-            'x': list(st),
-            'y': list(meanval),
-            'marker': {'color': color},
-            'type': 'scatter',
-            'mode': 'lines',
-            'xaxis': xaxis,
-            'yaxis': yaxis,
-            'showlegend': show_legend_group,
-            'legendgroup': group_name,
-            'name': group_name
-        })
+
+        scatter1 = go.Scatter(x=st, y=meanval, 
+                                mode='lines',
+                                line_color=color,
+                                line=dict(width=4),
+                                legendgroup=group_name,
+                                name=group_name,
+                                showlegend=show_legend_group)
+        fig.add_trace(scatter1, row=row, col=col)
 
         if std:
             x = np.append(st, st[::-1])
             ylower = (meanval-stdval)[::-1]
             yupper = (meanval+stdval)
             y = np.append(yupper, ylower)
-            traces.append({
-                'x': list(x),
-                'y': list(y),
-                'marker': {'color': color},
-                'type': 'scatter',
-                'mode': 'lines',
-                'xaxis': xaxis,
-                'yaxis': yaxis,
-                'fill': 'toself',
-                'showlegend': False,
-                'legendgroup': group_name,
-                'name': group_name
-            })
+            scatter2 = go.Scatter(x=x, y=y, 
+                                    mode='lines',
+                                    fill='toself',
+                                    line_color=color,
+                                    legendgroup=group_name + 'std',
+                                    name='+/- std',
+                                    showlegend=show_legend_group)
+            fig.add_trace(scatter2, row=row, col=col)
     else:
-        traces.append({
-            'x': list(df['time'].values),
-            'y': list(df['value'].values),
-            'marker': {'color': color},
-            'type': 'scatter',
-            'mode': 'markers',
-            'xaxis': xaxis,
-            'yaxis': yaxis,
-            'showlegend': show_legend_group,
-            'legendgroup': group_name,
-            'name': group_name
-        })
-    return(traces)
+         scatter = go.Scattergl(x=df[xname], y=df[yname], 
+                                mode='markers',
+                                marker_color=color,
+                                marker_size=6,
+                                legendgroup=name,
+                                name=name,
+                                showlegend=show_legend_group)
+        fig.add_trace(scatter, row=row, col=col)
+    return(fig)
 
