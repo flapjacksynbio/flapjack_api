@@ -92,7 +92,7 @@ def layout_screen(fig, font_size=10):
                     )
     return fig
 
-def format_axes(fig, row, col, rows, xlabel='Time', ylabel='Value', font_size=10):
+def format_axes(fig, row, col, rows, xlabel='Time', ylabel='Measurement', font_size=10):
     # Format axes
     if row==rows:
         fig.update_xaxes(title_text=xlabel, 
@@ -131,19 +131,19 @@ def make_traces(
     '''
     Generate trace data for each sample, or mean and std, for the data in df
     '''
-    df = df.sort_values('time')
+    df = df.sort_values('Time')
     if len(df)==0:
         return(None)
     traces = []
 
     if mean:
-        grouped_samp = df.groupby('sample__id')
-        st = np.arange(df['time'].min(), df['time'].max(), 0.1)
+        grouped_samp = df.groupby('Sample')
+        st = np.arange(df['Time'].min(), df['Time'].max(), 0.1)
         vals = []
         for id,samp_data in grouped_samp:
-            samp_data = samp_data.sort_values('time')
-            t = samp_data['time'].values
-            val = samp_data['value'].values
+            samp_data = samp_data.sort_values('Time')
+            t = samp_data['Time'].values
+            val = samp_data['Measurement'].values
             sval = wf.curves.Curve(x=t, y=val)
             vals.append(sval(st))
         vals = np.array(vals)

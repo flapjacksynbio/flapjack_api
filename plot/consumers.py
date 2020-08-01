@@ -13,13 +13,13 @@ import time
 import math
 
 group_fields = {
-    'Vector': 'sample__vector__name',
-    'Study': 'sample__assay__study__name',
-    'Signal': 'signal__name',
-    'Assay': 'sample__assay__name',
-    'Media': 'sample__media__name', 
-    'Strain': 'sample__strain__name', 
-    'Supplement': 'sample__supplements__name'
+    'Vector': 'Vector',
+    'Study': 'Study',
+    'Signal': 'Signal',
+    'Assay': 'Assay',
+    'Media': 'Media', 
+    'Strain': 'Strain', 
+    'Supplement': 'Supplements'
 }
 
 class PlotConsumer(AsyncWebsocketConsumer):
