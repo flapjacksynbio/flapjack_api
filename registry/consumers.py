@@ -98,14 +98,13 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                 'type': 'creation_done'
             }))
 
-
     async def progress_update(self, progress):
         print(f"progress: {progress}", flush=True)
         await self.send(text_data=json.dumps({
                 'type': 'progress',
                 'data': progress
             }))
-
+        await asyncio.sleep(0)
 
     async def receive(self, text_data=None, bytes_data=None):
         if text_data:
