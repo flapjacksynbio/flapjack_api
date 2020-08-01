@@ -193,7 +193,26 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                         chemical = Chemical.objects.get(id=chem_id)
                         if concs[i] > 0.:
                             if (chemical.id, concs[i]) not in existing_sup:
-                                sup = Supplement(chemical=chemical, concentration=concs[i])
+                                # make func
+                                conc_log = np.log10(concs[i])
+                                if conc_log >= 0:
+                                    units = 'M'
+                                    cons_str= str(concs[i])
+                                elif (conc_log < 0) and (conc_log) > -3:
+                                    units = 'mM'                                    
+                                    cons_str= f"{concs[i]*1e3:.2f}"
+                                elif (conc_log <= -3) and (conc_log) > -6:
+                                    units = '\u03BCM'
+                                    cons_str= f"{concs[i]*1e6:.2f}"
+                                elif (conc_log <= -6) and (conc_log) > -9:
+                                    units = 'nM'
+                                    cons_str= f"{concs[i]*1e9:.2f}"
+                                elif (conc_log <= -9) and (conc_log) > -12:
+                                    units = 'pM'
+                                    cons_str= f"{concs[i]*1e12:.2f}"
+                                sup = Supplement(name=f"{chemical.name} = {cons_str} {units}", 
+                                                chemical=chemical, 
+                                                concentration=concs[i])
                                 sup.save()
                             else:
                                 sup = Supplement.objects.get(chemical=chemical, concentration=concs[i])
