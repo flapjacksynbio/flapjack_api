@@ -145,13 +145,11 @@ def get_bg_corrected(samples, density_name, bg_std_devs=2., min_density=0.05, re
             #meas_data = meas_data.assign(Rate=vals_corrected)
             meas_data['Measurement'] = vals_corrected
             rows.append(meas_data)
-            print('vals_correcfted ', vals_corrected, flush=True)
 
     if len(rows)>0:
         meas_bg_corrected = meas_bg_corrected.append(rows)        
     # Remove data meeting correction criteria
     meas_bg_corrected = meas_bg_corrected.dropna(subset=['Measurement'])
-    print(meas_bg_corrected.head(), flush=True)
     return(meas_bg_corrected)
 
 # Model functions for fitting to data
