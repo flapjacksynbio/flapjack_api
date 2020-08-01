@@ -24,10 +24,19 @@ palette = [
     '#ff0000'
 ]
 
+special_case_grids = {
+    3: (1,3),
+    5: (3,2)    
+}
+
 def optimal_grid(n):
     '''
     Compute optimal grid of subplots for n plots
     '''
+    # Special cases
+    if n in special_case_grids:
+        return special_case_grids[n]
+        
     n_sqrtf = np.sqrt(n)
     n_sqrt = int(np.ceil(n_sqrtf))
 
