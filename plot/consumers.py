@@ -5,6 +5,7 @@ import asyncio
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
 from . import plotting
+from analysis import analysis 
 from registry.util import get_samples, get_measurements
 from plotly.subplots import make_subplots
 import plotly
@@ -20,6 +21,11 @@ group_fields = {
     'Media': 'Media', 
     'Strain': 'Strain', 
     'Supplement': 'Supplements'
+}
+
+analysis_funcs = {
+    'Velocity': analysis.velocity,
+    'Expression Rate (indirect)': analysis.expression_rate_indirect
 }
 
 class PlotConsumer(AsyncWebsocketConsumer):
@@ -122,6 +128,11 @@ class PlotConsumer(AsyncWebsocketConsumer):
         plotting.layout_screen(fig, font_size=font_size)
         return fig
 
+    def analyze_data(self, df, analysis):
+        analysis_type = analysis['type']
+        df = analysis_funcs[analysis_type](df, analysis)
+        return df
+
     async def generate_data(self, event):
         params = event['params']
         plot_options = params['plotOptions']
@@ -129,8 +140,25 @@ class PlotConsumer(AsyncWebsocketConsumer):
         signals = params.get('signalIds')
         n_samples = s.count()
         if n_samples > 0:
-            df = get_measurements(s, signals)
-            #df = await self.fake_data(event)
+            # Run analysis if selected
+            analysis_params = params.get('analysis')
+            if analysis:
+                density_name = analysis_params.get('biomass_signal')
+                bg_std_devs = analysis_params.get('bg_correction')
+                min_density = analysis_params.get('min_density')
+                remove_data = analysis_params.get('remove_data')
+                df = analysis.get_bg_corrected(
+                    s, 
+                    density_name, 
+                    bg_std_devs, 
+                    min_density, 
+                    remove_data,
+                    signals
+                )
+                df = self.analyze_data(df, analysis_params)
+            else:
+                df = get_measurements(s, signals)
+            # Plot figure
             subplots = plot_options['subplots']
             markers = plot_options['markers']
             mean = 'Mean' in plot_options['plot']
