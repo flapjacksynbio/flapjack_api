@@ -63,17 +63,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
 
         # Compute number of rows and columns
         n_sub_plots = len(grouped)
-        '''
-        if n_sub_plots>3:
-            rows = int(math.ceil(math.sqrt(n_sub_plots)))
-            cols = int(math.ceil(n_sub_plots/rows))
-            cols = max(cols,1)
-        else:
-            rows = 1
-            cols = n_sub_plots
-        '''
         rows,cols = plotting.optimal_grid(n_sub_plots)
-        print('Rows, Columns, subplot ', rows, cols, n_sub_plots, flush=True)
+        
         # Construct subplots
         start = time.time()
         fig = make_subplots(
@@ -98,7 +89,6 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 # Which position the subplot is in
                 row = 1 + subplot_index//cols
                 col = 1 + subplot_index%cols
-                print('Row, Col ', row, col, flush=True)
 
                 # Add traces to figure
                 fig = plotting.make_traces(
@@ -122,7 +112,6 @@ class PlotConsumer(AsyncWebsocketConsumer):
 
                 # Update progress bar
                 progress += len(g2)
-                print(progress/n_measurements)
                 await self.send(text_data=json.dumps({
                     'type': 'progress_update',
                     'data': {'progress': int(100*progress/n_measurements)}

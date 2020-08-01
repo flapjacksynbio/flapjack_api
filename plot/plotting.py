@@ -49,7 +49,7 @@ def optimal_grid(n):
         # It's not a perfect square, but a square grid is best
         x, y = n_sqrt, n_sqrt
     return x,y
-    
+
 def layout_screen(fig, font_size=10):
     '''
     Layout figure optimized for screen display
@@ -170,7 +170,7 @@ def make_traces(
                                     line_color=color,
                                     legendgroup=group_name + 'std',
                                     name='+/- std',
-                                    showlegend=show_legend_group)
+                                    showlegend=False)
             fig.add_trace(scatter2, row=row, col=col)
     else:
         scatter = go.Scattergl(x=df[xname], y=df[yname], 
