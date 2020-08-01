@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
+from decimal import Decimal
 
 
 class Study(models.Model):
@@ -53,11 +54,12 @@ class Chemical(models.Model):
 
 
 class Supplement(models.Model):
+    name = models.CharField(max_length=100)
     chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE)
     concentration = models.FloatField()
 
     def __str__(self):
-        return (f"Supplement {self.chemical.name}, concentration {self.concentration}")
+        return self.name
 
 
 class Dna(models.Model):
