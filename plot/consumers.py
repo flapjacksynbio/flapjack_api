@@ -19,7 +19,7 @@ group_fields = {
     'Assay': 'sample__assay__name',
     'Media': 'sample__media__name', 
     'Strain': 'sample__strain__name', 
-    'Supplement': 'sample__supplements__id'
+    'Supplement': 'sample__supplements__name'
 }
 
 class PlotConsumer(AsyncWebsocketConsumer):

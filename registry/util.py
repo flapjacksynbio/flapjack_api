@@ -59,7 +59,7 @@ def get_measurements(samples, signals):
                                     'sample__media__name', \
                                     'sample__strain__name', \
                                     'sample__vector__name', \
-                                    'sample__supplements__id', \
+                                    'sample__supplements__name', \
                                     'sample__supplements__chemical__name', \
                                     'sample__supplements__concentration', \
                                     'sample__row', 'sample__col'])
