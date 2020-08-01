@@ -199,14 +199,26 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                                     units = 'M'
                                     cons_str= str(concs[i])
                                 elif (conc_log < 0) and (conc_log) > -3:
-                                    units = 'mM'                                    
-                                    cons_str= f"{concs[i]*1e3:.2f}"
+                                    if concs[i]*1e3 < 100:
+                                        cons_str= f"{concs[i]*1e3:.2f}"
+                                        units = 'mM'
+                                    else:
+                                        cons_str= f"{concs[i]:.2f}"
+                                        units = '\u03BCM'                      
                                 elif (conc_log <= -3) and (conc_log) > -6:
-                                    units = '\u03BCM'
-                                    cons_str= f"{concs[i]*1e6:.2f}"
+                                    if concs[i]*1e6 < 100:
+                                        units = '\u03BCM'
+                                        cons_str= f"{concs[i]*1e6:.2f}"
+                                    else:
+                                        units = 'nM'
+                                        cons_str= f"{concs[i]*1e3:.2f}"
                                 elif (conc_log <= -6) and (conc_log) > -9:
-                                    units = 'nM'
-                                    cons_str= f"{concs[i]*1e9:.2f}"
+                                    if concs[i]*1e9 < 100:
+                                        units = 'nM'
+                                        cons_str= f"{concs[i]*1e9:.2f}"
+                                    else:
+                                        units = 'pM'
+                                        cons_str= f"{concs[i]*1e6:.2f}"
                                 elif (conc_log <= -9) and (conc_log) > -12:
                                     units = 'pM'
                                     cons_str= f"{concs[i]*1e12:.2f}"
