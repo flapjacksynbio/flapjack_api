@@ -63,6 +63,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
 
         # Compute number of rows and columns
         n_sub_plots = len(grouped)
+        '''
         if n_sub_plots>3:
             rows = int(math.ceil(math.sqrt(n_sub_plots)))
             cols = int(math.ceil(n_sub_plots/rows))
@@ -70,6 +71,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
         else:
             rows = 1
             cols = n_sub_plots
+        '''
+        rows,cols = plotting.optimal_grid(n_sub_plots)
         print('Rows, Columns, subplot ', rows, cols, n_sub_plots, flush=True)
         # Construct subplots
         start = time.time()

@@ -24,6 +24,32 @@ palette = [
     '#ff0000'
 ]
 
+def optimal_grid(n):
+    '''
+    Compute optimal grid of subplots for n plots
+    '''
+    n_sqrtf = np.sqrt(n)
+    n_sqrt = int(np.ceil(n_sqrtf))
+
+    if n_sqrtf == n_sqrt:
+        # Perfect square, we're done
+        x, y = n_sqrt, n_sqrt
+    elif n <= n_sqrt * (n_sqrt - 1):
+        # An n_sqrt x n_sqrt - 1 grid is close enough to look pretty
+        # square, so if n is less than that value, will use that rather
+        # than jumping all the way to a square grid.
+        x, y = n_sqrt, n_sqrt - 1
+    elif not (n_sqrt % 2) and n % 2:
+        # If the square root is even and the number of axes is odd, in
+        # order to keep the arrangement horizontally symmetrical, using a
+        # grid of size (n_sqrt + 1 x n_sqrt - 1) looks best and guarantees
+        # symmetry.
+        x, y = (n_sqrt + 1, n_sqrt - 1)
+    else:
+        # It's not a perfect square, but a square grid is best
+        x, y = n_sqrt, n_sqrt
+    return x,y
+    
 def layout_screen(fig, font_size=10):
     '''
     Layout figure optimized for screen display
