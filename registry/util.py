@@ -57,7 +57,7 @@ def get_samples(filter):
 
 # Get dataframe of measurement values for a set of samples in a query
 # -----------------------------------------------------------------------------------
-def get_measurements(samples, signals):
+def get_measurements(samples, signals=None):
     # Get measurements for a given samples
     print('get_measurements', flush=True)
     start = time.time()
