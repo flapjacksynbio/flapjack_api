@@ -126,7 +126,7 @@ def format_axes(fig, row, col, rows, xlabel='Time', ylabel='Measurement', font_s
                         linewidth=3,
                         row=row, col=col)
 
-def make_traces(
+def make_bar_traces(
         fig,
         df, 
         color='blue', 
@@ -135,7 +135,37 @@ def make_traces(
         normalize=False,
         show_legend_group=False,
         group_name='',
-        row=1, col=1
+        row=1, col=1,
+        xlabel='Vector',
+        ylabel='Measurement'
+    ): 
+    x = df[xlabel]
+    y = [df[ylabel].mean()]
+    error_y = [df[ylabel].std()]
+    bar = go.Bar(x=x, y=y,
+                            error_y=dict(
+                                        type='data', # value of error bar given in data coordinates
+                                        array=error_y,
+                                        visible=True),
+                            marker=dict(color=color),
+                            legendgroup=group_name,
+                            name=group_name,
+                            showlegend=show_legend_group)
+    fig.add_trace(bar, row=row, col=col)
+    return fig
+
+def make_timeseries_traces(
+        fig,
+        df, 
+        color='blue', 
+        mean=False, 
+        std=False, 
+        normalize=False,
+        show_legend_group=False,
+        group_name='',
+        row=1, col=1,
+        xlabel='Time',
+        ylabel='Measurement'
     ):
     '''
     Generate trace data for each sample, or mean and std, for the data in df
@@ -152,7 +182,7 @@ def make_traces(
         for id,samp_data in grouped_samp:
             samp_data = samp_data.sort_values('Time')
             t = samp_data['Time'].values
-            val = samp_data['Measurement'].values
+            val = samp_data[ylabel].values
             sval = wf.curves.Curve(x=t, y=val)
             vals.append(sval(st))
         vals = np.array(vals)

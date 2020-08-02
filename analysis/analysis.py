@@ -12,7 +12,8 @@ import time
 remove_background = {
         'Velocity': False,
         'Expression Rate (indirect)': True,
-        'Expression Rate (direct)': True
+        'Expression Rate (direct)': True,
+        'Mean Expression': True
     }
 
 class Analysis:
@@ -23,15 +24,16 @@ class Analysis:
         self.analysis_funcs = {
             'Velocity': self.velocity,
             'Expression Rate (indirect)': self.expression_rate_indirect,
-            'Expression Rate (direct)': self.expression_rate_direct
+            'Expression Rate (direct)': self.expression_rate_direct,
+            'Mean Expression': self.mean_expression
         }
         self.background = {}
 
     def set_params(self, params):
         self.analysis_type = params['type']
         self.density_name = params.get('biomass_signal')
-        self.bg_std_devs = float(params.get('bg_correction'))
-        self.min_density = float(params.get('min_density'))
+        self.bg_std_devs = params.get('bg_correction')
+        self.min_density = params.get('min_density')
         self.remove_data = params.get('remove_data')
         self.smoothing_type = params.get('smoothing_type', 'savgol')
         self.smoothing_param1 = int(params.get('pre_smoothing', 21))
@@ -211,7 +213,7 @@ class Analysis:
                             z = lowess(velocity, time, frac=self.smoothing_param2)
                             ksynth = z[:,1]
                     # Put result in dataframe
-                    data = data.assign(Measurement=velocity)
+                    data = data.assign(Velocity=velocity)
                     rows.append(data)
         if len(rows)>0:
             result = result.append(rows)
@@ -309,7 +311,7 @@ class Analysis:
                             z = lowess(ksynth, time, frac=self.smoothing_param2)
                             ksynth = z[:,1]
                     # Put result in dataframe
-                    data = data.assign(Measurement=ksynth)
+                    data = data.assign(Rate=ksynth)
                     rows.append(data)
         if len(rows)>0:
             result = result.append(rows)
@@ -368,11 +370,26 @@ class Analysis:
                         ksynth, _, _, _, _ = wf.infer_synthesis_rate_onestep(cfp, cod, ttu, 
                                                                                 degr=self.degr, eps_L=self.eps_L, 
                                                                                 positive=True)
-                    data = data.assign(Measurement=ksynth(fpt))
+                    data = data.assign(Rate=ksynth(fpt))
                     rows.append(data)
         if len(rows)>0:
             result = result.append(rows)
         else:
             print('No rows to add to expression rate dataframe', flush=True)
-        result = result.dropna(subset=['Measurement'])
+        result = result.dropna(subset=['Rate'])
         return(result)
+
+    # Analysis functions that compute value from a dataframe with given keyword args
+    # ----------------------------------------------------------------------------------
+    def mean_expression(self, df):
+        '''
+        Return a dataframe containing the mean value for each sample,name in the input dataframe df
+        '''
+        agg = {}
+        for column_name in df.columns:
+            if column_name!='Sample' and column_name!='Signal':
+                agg[column_name] = 'first'
+        agg['Measurement'] = 'mean'
+        grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
+        mean = grouped_samples.agg(agg)
+        return mean     

@@ -24,6 +24,20 @@ group_fields = {
     'Supplement': 'Supplements'
 }
 
+axis_labels = {
+    'Velocity': ('Time', 'Velocity'),
+    'Expression Rate (direct)': ('Time', 'Rate'),
+    'Expression Rate (indirect)': ('Time', 'Rate'),
+    'Mean Expression': (None, 'Measurement')
+}
+
+plot_types = {
+    'Velocity': 'timeseries',
+    'Expression Rate (direct)': 'timeseries',
+    'Expression Rate (indirect)': 'timeseries',
+    'Mean Expression': 'bar'
+}
+
 class PlotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
@@ -40,17 +54,16 @@ class PlotConsumer(AsyncWebsocketConsumer):
                     normalize=False, 
                     groupby1=None, 
                     groupby2=None,
-                    font_size=10):
+                    font_size=10,
+                    xlabel='Time',
+                    ylabel='Measurement',
+                    plot_type='timeseries'):
         '''
             Generate plot data for frontend plotly plot generation
         '''
         n_measurements = len(df)
         if n_measurements == 0:
             return None
-
-        # Axis labels
-        xlabel = 'Time (hours)'
-        ylabel = 'Measurement'
 
         traces = []
         colors = {}
@@ -76,6 +89,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                             vertical_spacing=0.1, horizontal_spacing=0.1
                             ) 
         end = time.time()
+
         # Add traces to subplots
         print('make_subplots took %g'%(end-start), flush=True)
         for name1,g1 in grouped:
@@ -93,17 +107,35 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 col = 1 + subplot_index%cols
 
                 # Add traces to figure
-                fig = plotting.make_traces(
-                        fig,
-                        g2,
-                        color=colors[name2], 
-                        mean=mean, 
-                        std=std, 
-                        normalize=normalize,
-                        show_legend_group=show_legend_group,
-                        group_name=str(name2),
-                        row=row, col=col
-                    )  
+                if plot_type == 'timeseries':
+                    fig = plotting.make_timeseries_traces(
+                            fig,
+                            g2,
+                            color=colors[name2], 
+                            mean=mean, 
+                            std=std, 
+                            normalize=normalize,
+                            show_legend_group=show_legend_group,
+                            group_name=str(name2),
+                            row=row, col=col,
+                            ylabel=ylabel
+                        )
+                elif plot_type == 'bar':
+                    fig = plotting.make_bar_traces(
+                            fig,
+                            g2,
+                            color=colors[name2], 
+                            mean=mean, 
+                            std=std, 
+                            normalize=normalize,
+                            show_legend_group=show_legend_group,
+                            group_name=str(name2),
+                            row=row, col=col,
+                            xlabel=groupby2,
+                            ylabel=ylabel
+                        )
+                else:
+                    print('Unsupported plot type, ', plot_type, flush=True)
                 
                 # Format axes
                 plotting.format_axes(fig, 
@@ -149,9 +181,18 @@ class PlotConsumer(AsyncWebsocketConsumer):
             # Get measurements to plot/analyze
             df = get_measurements(s, signals)
 
+            # Default axis labels for raw measurements
+            xlabel, ylabel = 'Time', 'Measurement'
+
+            # Default plot type for raw measurements
+            plot_type = 'timeseries'
+
             # Run analysis if selected
             analysis_params = params.get('analysis')
             if analysis_params:
+                analysis_type = analysis_params['type']
+                xlabel, ylabel = axis_labels[analysis_type]
+                plot_type = plot_types[analysis_type]
                 analysis = Analysis(s, analysis_params, signals)
                 df = await self.run_analysis(df, analysis)
 
@@ -161,10 +202,12 @@ class PlotConsumer(AsyncWebsocketConsumer):
             mean = 'Mean' in plot_options['plot']
             std = 'std' in plot_options['plot']
             fig = await self.plot(df, 
-                                                groupby1=subplots, 
-                                                groupby2=markers,
-                                                mean=mean, std=std
-                                                )
+                                groupby1=subplots, 
+                                groupby2=markers,
+                                mean=mean, std=std,
+                                xlabel=xlabel, ylabel=ylabel,
+                                plot_type=plot_type
+                                )
             if fig:
                 fig_json = fig.to_json()
             else:
