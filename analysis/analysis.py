@@ -11,7 +11,8 @@ import time
 
 remove_background = {
         'Velocity': False,
-        'Expression Rate (indirect)': True
+        'Expression Rate (indirect)': True,
+        'Expression Rate (direct)': True
     }
 
 class Analysis:
@@ -21,19 +22,23 @@ class Analysis:
         # Functions to call for particular analysis types
         self.analysis_funcs = {
             'Velocity': self.velocity,
-            'Expression Rate (indirect)': self.expression_rate_indirect
+            'Expression Rate (indirect)': self.expression_rate_indirect,
+            'Expression Rate (direct)': self.expression_rate_direct
         }
         self.background = {}
 
     def set_params(self, params):
         self.analysis_type = params['type']
         self.density_name = params.get('biomass_signal')
-        self.bg_std_devs = params.get('bg_correction')
-        self.min_density = params.get('min_density')
+        self.bg_std_devs = float(params.get('bg_correction'))
+        self.min_density = float(params.get('min_density'))
         self.remove_data = params.get('remove_data')
         self.smoothing_type = params.get('smoothing_type', 'savgol')
         self.smoothing_param1 = int(params.get('pre_smoothing', 21))
         self.smoothing_param2 = int(params.get('post_smoothing', 21))
+        self.degr = float(params.get('degr', 0.))
+        self.eps_L = float(params.get('eps_L', 1e-7))
+
 
     def analyze_data(self, df):     
         # Is it necessary to remove background for this analysis?
@@ -311,4 +316,63 @@ class Analysis:
         else:
             print('No rows to add to expression rate dataframe', flush=True)
 
+        return(result)
+
+    def expression_rate_direct(self, df):
+        '''
+        Parameters:
+            df = data frame to analyse
+            density_df = dataframe containing density (biomass) measurements
+            degr = degradation rate of reporter protein
+            eps_L = insignificant value for model fitting
+        '''
+        density_df = df[df['Signal_id']==self.density_name]
+        print(self.degr, self.eps_L, flush=True)
+        
+        result = pd.DataFrame()
+        rows = []
+
+        grouped_sample = df.groupby('Sample')
+        n_samples = len(grouped_sample)
+        # Loop over samples
+        si = 1
+        for samp_id, samp_data in grouped_sample:
+            print('Computing expression rate of sample %d of %d'%(si, n_samples), flush=True)
+            si += 1
+            for meas_name, data in samp_data.groupby('Signal_id'):
+                data = data.sort_values('Time')
+                time = data['Time']
+                val = data['Measurement']
+                density = density_df[density_df['Sample']==samp_id]
+                density = density.sort_values('Time')
+                density_val = density['Measurement']
+                density_time = density['Time']
+
+                if len(val)>1:
+                    # Construct curves
+                    fpt = time.values
+                    fpy = val.values
+                    cfp = wf.curves.Curve(x=fpt, y=fpy)
+                    odt = density_time.values
+                    ody = density_val.values
+                    cod = wf.curves.Curve(x=odt, y=ody)
+                    # Compute time range
+                    xmin, xmax = cod.xlim()
+                    ttu = np.arange(xmin, xmax, 0.1)
+                    # Fit model
+                    if meas_name==self.density_name:
+                        ksynth, _, _, _, _ = wf.infer_growth_rate(cod, ttu, 
+                                                                    eps_L=self.eps_L, 
+                                                                    positive=True)
+                    else:
+                        ksynth, _, _, _, _ = wf.infer_synthesis_rate_onestep(cfp, cod, ttu, 
+                                                                                degr=self.degr, eps_L=self.eps_L, 
+                                                                                positive=True)
+                    data = data.assign(Measurement=ksynth(fpt))
+                    rows.append(data)
+        if len(rows)>0:
+            result = result.append(rows)
+        else:
+            print('No rows to add to expression rate dataframe', flush=True)
+        result = result.dropna(subset=['Measurement'])
         return(result)
