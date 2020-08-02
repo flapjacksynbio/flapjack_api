@@ -3,6 +3,7 @@ from django_pandas.io import read_frame
 import time
 
 pretty_field_names = {
+    'signal__id': 'Signal_id',
     'signal__name': 'Signal',
     'value': 'Measurement',
     'time': 'Time',
@@ -67,7 +68,7 @@ def get_measurements(samples, signals=None):
     if signals:
         m = m.filter(signal__id__in=signals)
     # Get pandas dataframe 
-    df = read_frame(m, fieldnames=['signal__name', \
+    df = read_frame(m, fieldnames=['signal__id', 'signal__name', \
                                     'value', \
                                     'time', \
                                     'sample__id', \

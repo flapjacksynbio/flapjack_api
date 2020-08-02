@@ -5,8 +5,9 @@ import asyncio
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
 from . import plotting
-from analysis import analysis 
+from analysis.analysis import Analysis 
 from registry.util import get_samples, get_measurements
+from registry.models import Signal
 from plotly.subplots import make_subplots
 import plotly
 import pandas as pd
@@ -21,11 +22,6 @@ group_fields = {
     'Media': 'Media', 
     'Strain': 'Strain', 
     'Supplement': 'Supplements'
-}
-
-analysis_funcs = {
-    'Velocity': analysis.velocity,
-    'Expression Rate (indirect)': analysis.expression_rate_indirect
 }
 
 class PlotConsumer(AsyncWebsocketConsumer):
@@ -120,7 +116,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 progress += len(g2)
                 await self.send(text_data=json.dumps({
                     'type': 'progress_update',
-                    'data': {'progress': int(100*progress/n_measurements)}
+                    'data': {'progress': int(50 + 50*progress/n_measurements)}
                 }))
                 await asyncio.sleep(0)
             # Next subplot
@@ -128,10 +124,20 @@ class PlotConsumer(AsyncWebsocketConsumer):
         plotting.layout_screen(fig, font_size=font_size)
         return fig
 
-    def analyze_data(self, df, analysis):
-        analysis_type = analysis['type']
-        df = analysis_funcs[analysis_type](df, analysis)
-        return df
+    async def run_analysis(self, df, analysis):
+        grouped = df.groupby('Sample')
+        progress = 0
+        n_steps = len(grouped)
+        result_dfs = []
+        for id,g in grouped:
+            result_dfs.append(analysis.analyze_data(g))
+            progress += 1
+            await self.send(text_data=json.dumps({
+                    'type': 'progress_update',
+                    'data': {'progress': int(50*progress/n_steps)}
+                }))
+            await asyncio.sleep(0)
+        return pd.concat(result_dfs)
 
     async def generate_data(self, event):
         params = event['params']
@@ -140,24 +146,15 @@ class PlotConsumer(AsyncWebsocketConsumer):
         signals = params.get('signalIds')
         n_samples = s.count()
         if n_samples > 0:
+            # Get measurements to plot/analyze
+            df = get_measurements(s, signals)
+
             # Run analysis if selected
             analysis_params = params.get('analysis')
-            if analysis:
-                density_name = analysis_params.get('biomass_signal')
-                bg_std_devs = analysis_params.get('bg_correction')
-                min_density = analysis_params.get('min_density')
-                remove_data = analysis_params.get('remove_data')
-                df = analysis.get_bg_corrected(
-                    s, 
-                    density_name, 
-                    bg_std_devs, 
-                    min_density, 
-                    remove_data,
-                    signals
-                )
-                df = self.analyze_data(df, analysis_params)
-            else:
-                df = get_measurements(s, signals)
+            if analysis_params:
+                analysis = Analysis(s, analysis_params, signals)
+                df = await self.run_analysis(df, analysis)
+
             # Plot figure
             subplots = plot_options['subplots']
             markers = plot_options['markers']
