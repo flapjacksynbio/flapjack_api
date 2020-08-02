@@ -21,7 +21,7 @@ class Analysis:
         # Functions to call for particular analysis types
         self.analysis_funcs = {
             'Velocity': self.velocity,
-            #'Expression Rate (indirect)': self.expression_rate_indirect
+            'Expression Rate (indirect)': self.expression_rate_indirect
         }
         self.background = {}
 
@@ -90,7 +90,7 @@ class Analysis:
         meas_bg_corrected = pd.DataFrame()
 
         # Ignore background samples
-        meas = df[not df.vector__name__in==['none','None']]
+        meas = df[~df.Vector.isin(['none','None'])]
         #get_measurements(self.samples.exclude(vector__name__in=['none', 'None']), signals)
         # Loop over samples
         rows = []
@@ -215,3 +215,100 @@ class Analysis:
 
         return(result)
 
+    def expression_rate_indirect(self, df):
+        '''
+        Parameters:
+        df = data frame to analyse
+        density_df = dataframe with density measurements
+        pre_smoothing = Savitsky-Golay filter parameter (window size)
+        post_smoothing = Savitsky-Golay filter parameter (window size)
+        '''
+        print(self.smoothing_param1, self.smoothing_param2, flush=True)
+        density_df = df[df['Signal_id']==self.density_name]
+        
+        result = pd.DataFrame()
+        rows = []
+
+        if self.smoothing_type=='lowess':
+            lowess = sm.nonparametric.lowess
+
+        grouped_sample = df.groupby('Sample')
+        n_samples = len(grouped_sample)
+        # Loop over samples
+        si = 1
+        for samp_id, samp_data in grouped_sample:
+            print('Computing expression rate of sample %d of %d'%(si, n_samples), flush=True)
+            si += 1
+            for meas_name, data in samp_data.groupby('Signal_id'):
+                data = data.sort_values('Time')
+                time = data['Time'].values
+                val = data['Measurement'].values
+                density = density_df[density_df['Sample']==samp_id]
+                density = density.sort_values('Time')
+                density_val = density['Measurement'].values
+                density_time = density['Time'].values
+                
+                if self.smoothing_type=='savgol':
+                    min_data_pts = max(self.smoothing_param1, self.smoothing_param2)
+                else:
+                    min_data_pts = 2
+                print(len(val), flush=True)
+                if len(val)>min_data_pts and len(density_val)>min_data_pts:
+                    # Interpolation
+                    ival = interp1d(time, val)
+                    idensity = interp1d(density_time, density_val)
+
+                    # Savitzky-Golay filter
+                    if self.smoothing_param1>0:
+                        if self.smoothing_type=='savgol':
+                            print('Applying savgol filter', flush=True)
+                            sval = savgol_filter(val, int(self.smoothing_param1), 2, mode='interp')
+                            sdensity = savgol_filter(density_val, int(self.smoothing_param1), 2, mode='interp')
+                            print(len(val), len(density_val), flush=True)
+                        elif smoothing_type=='lowess':
+                            print('Applying lowess filter', flush=True)
+                            z = lowess(val, time, frac=self.smoothing_param1)
+                            sval = z[:,1]
+                            z = lowess(density_val, density_time, frac=self.smoothing_param1)
+                            sdensity = z[:,1]
+                            print(len(val), len(density_val), flush=True)
+
+                    # Interpolation
+                    sval = interp1d(time, sval)
+                    sdensity = interp1d(density_time, sdensity)
+
+                    # Compute time range
+                    tmin = max(time.min(), density_time.min())
+                    tmax = min(time.max(), density_time.max())
+                    time = time[ (time>=tmin) & (time<tmax)]
+
+                    # Reslice data to new time range
+                    data = data[ (data.Time>=tmin) & (data.Time<tmax) ]
+
+                    # Compute expression rate for time series
+                    dvaldt = savgol_filter(ival(time), int(self.smoothing_param1), 2, deriv=1, mode='interp')
+                    ksynth = dvaldt / sdensity(time)
+                    #dvaldt = sval.derivative()(time)
+                    #ksynth = dvaldt / (sdensity(time) + 0.)
+
+                    # Compute promoter activity d/dt(I/A)
+                    #conc = sval(time) / sdensity(time)
+                    #sconc = UnivariateSpline(time, conc, s=0, k=3)
+                    #ksynth = sconc.derivative()(time)
+    
+                    # Final Savitzky-Golay filtering of expression rate profile
+                    if self.smoothing_param2>0:
+                        if self.smoothing_type=='savgol':
+                            ksynth = savgol_filter(ksynth, int(self.smoothing_param2), 2, mode='interp')
+                        elif smoothing_type=='lowess':
+                            z = lowess(ksynth, time, frac=self.smoothing_param2)
+                            ksynth = z[:,1]
+                    # Put result in dataframe
+                    data = data.assign(Measurement=ksynth)
+                    rows.append(data)
+        if len(rows)>0:
+            result = result.append(rows)
+        else:
+            print('No rows to add to expression rate dataframe', flush=True)
+
+        return(result)
