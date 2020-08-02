@@ -13,11 +13,12 @@ remove_background = {
         'Velocity': False,
         'Expression Rate (indirect)': True,
         'Expression Rate (direct)': True,
-        'Mean Expression': True
+        'Mean Expression': True,
+        'Induction Curve': True
     }
 
 class Analysis:
-    def __init__(self, samples, params, signals):
+    def __init__(self, params, signals):
         self.set_params(params)
         self.signals = signals
         # Functions to call for particular analysis types
@@ -25,7 +26,8 @@ class Analysis:
             'Velocity': self.velocity,
             'Expression Rate (indirect)': self.expression_rate_indirect,
             'Expression Rate (direct)': self.expression_rate_direct,
-            'Mean Expression': self.mean_expression
+            'Mean Expression': self.mean_expression,
+            'Induction Curve': self.induction_curve
         }
         self.background = {}
 
@@ -40,7 +42,9 @@ class Analysis:
         self.smoothing_param2 = int(params.get('post_smoothing', 21))
         self.degr = float(params.get('degr', 0.))
         self.eps_L = float(params.get('eps_L', 1e-7))
-
+        chemical = params.get('chemical', None)
+        if chemical:
+            self.chemical_id = chemical['value']
 
     def analyze_data(self, df):     
         # Is it necessary to remove background for this analysis?
@@ -393,3 +397,25 @@ class Analysis:
         grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
         mean = grouped_samples.agg(agg)
         return mean     
+
+    # Other analysis types that make different forms of resulting data
+    def induction_curve(self, df):
+        concs = []
+        expr = []
+        grouped_samps = df.groupby('Sample')
+        for samp_id,samp in grouped_samps:
+            chemical_ids = samp['Chemical_ids']
+            chemical_concs = samp['Concentrations']
+
+            if len(chemical_ids)==0: 
+                concs.append(0.0)
+                expr.append(samp['Measurement'].mean())
+            else:
+                for id,conc in zip(chemical_ids, chemical_concs):
+                    if id == self.chemical_id:
+                        concs.append
+                        concs.append(conc)
+                        expr.append(samp['Measurement'].mean())
+
+        df = pd.DataFrame({'Expression':expr, 'Concentration':concs})
+        return df

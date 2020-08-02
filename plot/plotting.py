@@ -59,7 +59,7 @@ def optimal_grid(n):
         x, y = n_sqrt, n_sqrt
     return x,y
 
-def layout_screen(fig, font_size=10):
+def layout_screen(fig, xaxis_type='linear', yaxis_type='linear', font_size=10):
     '''
     Layout figure optimized for screen display
 
@@ -80,7 +80,7 @@ def layout_screen(fig, font_size=10):
                         ),
                         paper_bgcolor="rgb(255,255,255)",
                         template='plotly',
-                        font_size=font_size
+                        font_size=font_size,
                     )
     for a in fig['layout']['annotations']:
         a['font'] = dict(size=font_size)
@@ -91,17 +91,25 @@ def layout_screen(fig, font_size=10):
                     tickwidth=1, 
                     title_font=dict(size=font_size), 
                     tickfont=dict(size=font_size),
-                    hoverformat=".2e"
+                    hoverformat=".2e",
+                    type=yaxis_type
                     )
     fig.update_xaxes(linewidth=1, 
                     tickwidth=1, 
                     title_font=dict(size=font_size), 
                     tickfont=dict(size=font_size),
-                    hoverformat=".2e"
+                    hoverformat=".2e",
+                    type=xaxis_type
                     )
     return fig
 
-def format_axes(fig, row, col, rows, xlabel='Time', ylabel='Measurement', font_size=10):
+def format_axes(
+    fig, 
+    row, 
+    col, 
+    rows, 
+    xlabel='Time', ylabel='Measurement', 
+    font_size=10):
     # Format axes
     if row==rows:
         fig.update_xaxes(title_text=xlabel, 
@@ -125,6 +133,36 @@ def format_axes(fig, row, col, rows, xlabel='Time', ylabel='Measurement', font_s
                         #tickformat='.2g',
                         linewidth=3,
                         row=row, col=col)
+
+def make_induction_traces(
+        fig,
+        df, 
+        color='blue', 
+        mean=False, 
+        std=False, 
+        normalize=False,
+        show_legend_group=False,
+        group_name='',
+        row=1, col=1,
+        xlabel='Concentration',
+        ylabel='Expression'
+    ):
+    npts = len(df)
+    marker = dict(size=4, color=color)
+    xx = df[xlabel].values
+    x = xx[xx>0.]
+    y = df[ylabel].values
+    y = y[xx>0.]
+    
+    scatter1 = go.Scatter(x=x, y=y, 
+                            mode='markers',
+                            marker=marker,
+                            marker_size=6,
+                            legendgroup=group_name,
+                            name=group_name,
+                            showlegend=show_legend_group,)
+    fig.add_trace(scatter1, row=row, col=col)
+    return fig
 
 def make_bar_traces(
         fig,
@@ -212,12 +250,12 @@ def make_timeseries_traces(
                                     showlegend=False)
             fig.add_trace(scatter2, row=row, col=col)
     else:
-        scatter = go.Scattergl(x=df[xname], y=df[yname], 
+        scatter = go.Scattergl(x=df[xlabel], y=df[ylabel], 
                                 mode='markers',
                                 marker_color=color,
                                 marker_size=6,
-                                legendgroup=name,
-                                name=name,
+                                legendgroup=group_name,
+                                name=group_name,
                                 showlegend=show_legend_group)
         fig.add_trace(scatter, row=row, col=col)
     return(fig)

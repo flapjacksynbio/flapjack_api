@@ -15,6 +15,7 @@ pretty_field_names = {
     'sample__vector__name': 'Vector',
     'sample__supplements__name': 'Supplements',
     'sample__supplements__chemical__name': 'Chemicals',
+    'sample__supplements__chemical__id': 'Chemical_ids',
     'sample__supplements__concentration': 'Concentrations',
     'sample__row': 'Row', 
     'sample__col': 'Column'
@@ -79,6 +80,7 @@ def get_measurements(samples, signals=None):
                                     'sample__vector__name', \
                                     'sample__supplements__name', \
                                     'sample__supplements__chemical__name', \
+                                    'sample__supplements__chemical__id', \
                                     'sample__supplements__concentration', \
                                     'sample__row', 'sample__col'])
     df.columns = [pretty_field_names[col] for col in df.columns]
