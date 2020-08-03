@@ -29,6 +29,9 @@ axis_labels = {
     'Expression Rate (direct)': ('Time', 'Rate'),
     'Expression Rate (indirect)': ('Time', 'Rate'),
     'Mean Expression': (None, 'Measurement'),
+    'Max Expression': (None, 'Measurement'),
+    'Mean Velocity': (None, 'Velocity'),
+    'Max Velocity': (None, 'Velocity'),
     'Induction Curve': ('Concentration', 'Expression'),
     'Kymograph': ('Concentration', 'Time')
 }
@@ -38,6 +41,9 @@ plot_types = {
     'Expression Rate (direct)': 'timeseries',
     'Expression Rate (indirect)': 'timeseries',
     'Mean Expression': 'bar',
+    'Max Expression': 'bar',
+    'Mean Velocity': 'bar',
+    'Max Velocity': 'bar',
     'Induction Curve': 'induction',
     'Kymograph': 'kymograph'
 }

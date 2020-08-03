@@ -11,11 +11,14 @@ import time
 
 remove_background = {
         'Velocity': False,
+        'Mean Velocity': False,
+        'Max Velocity': False,
         'Expression Rate (indirect)': True,
         'Expression Rate (direct)': True,
         'Mean Expression': True,
-        'Induction Curve': False,
-        'Kymograph': False
+        'Max Expression': True,
+        'Induction Curve': True,
+        'Kymograph': True
     }
 
 class Analysis:
@@ -27,7 +30,10 @@ class Analysis:
             'Velocity': self.velocity,
             'Expression Rate (indirect)': self.expression_rate_indirect,
             'Expression Rate (direct)': self.expression_rate_direct,
+            'Mean Velocity': self.mean_velocity,
+            'Max Velocity': self.max_velocity,
             'Mean Expression': self.mean_expression,
+            'Max Expression': self.max_expression,
             'Induction Curve': self.induction_curve,
             'Kymograph': self.kymograph
         }
@@ -407,6 +413,47 @@ class Analysis:
         mean = grouped_samples.agg(agg)
         return mean     
 
+    def max_expression(self, df):
+        '''
+        Return a dataframe containing the mean value for each sample,name in the input dataframe df
+        '''
+        agg = {}
+        for column_name in df.columns:
+            if column_name!='Sample' and column_name!='Signal':
+                agg[column_name] = 'first'
+        agg['Measurement'] = 'max'
+        grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
+        mean = grouped_samples.agg(agg)
+        return mean     
+
+    def mean_velocity(self, df):
+        '''
+        Return a dataframe containing the max value for each sample,name in the input dataframe df
+        '''
+        df = self.velocity(df)
+        agg = {}
+        for column_name in df.columns:
+            if column_name!='Sample' and column_name!='Signal':
+                agg[column_name] = 'first'
+        agg['Velocity'] = 'mean'
+        grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
+        mean_expr = grouped_samples.agg(agg)
+        return mean_expr    
+
+    def max_velocity(self, df):
+        '''
+        Return a dataframe containing the max velocity for each sample,name in the input dataframe df
+        '''
+        df = self.velocity(df)
+        agg = {}
+        for column_name in df.columns:
+            if column_name!='Sample' and column_name!='Signal':
+                agg[column_name] = 'first'
+        agg['Velocity'] = 'max'
+        grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
+        max_expr = grouped_samples.agg(agg)
+        return max_expr    
+
     # Other analysis types that make different forms of resulting data
     def induction_curve(self, df):
         data = df[df.Chemical_id==self.chemical_id]
@@ -419,4 +466,5 @@ class Analysis:
         '''
         data = df[df.Chemical_id==self.chemical_id]
         return data
+
 
