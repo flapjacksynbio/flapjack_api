@@ -411,6 +411,7 @@ class Analysis:
         agg['Measurement'] = 'mean'
         grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
         mean = grouped_samples.agg(agg)
+        mean.columns = ['Expression' if c=='Measurement' else c for c in mean.columns]
         return mean     
 
     def max_expression(self, df):
@@ -423,8 +424,9 @@ class Analysis:
                 agg[column_name] = 'first'
         agg['Measurement'] = 'max'
         grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
-        mean = grouped_samples.agg(agg)
-        return mean     
+        maxx = grouped_samples.agg(agg)
+        maxx.columns = ['Expression' if c=='Measurement' else c for c in mean.columns]
+        return maxx     
 
     def mean_velocity(self, df):
         '''

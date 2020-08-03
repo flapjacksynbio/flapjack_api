@@ -28,8 +28,8 @@ axis_labels = {
     'Velocity': ('Time', 'Velocity'),
     'Expression Rate (direct)': ('Time', 'Rate'),
     'Expression Rate (indirect)': ('Time', 'Rate'),
-    'Mean Expression': (None, 'Measurement'),
-    'Max Expression': (None, 'Measurement'),
+    'Mean Expression': (None, 'Expression'),
+    'Max Expression': (None, 'Expression'),
     'Mean Velocity': (None, 'Velocity'),
     'Max Velocity': (None, 'Velocity'),
     'Induction Curve': ('Concentration', 'Expression'),
@@ -149,7 +149,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                             group_name=str(name2),
                             row=row, col=col,
                             xlabel=groupby2,
-                            ylabel='Measurement'
+                            ylabel=ylabel
                         )
                 elif plot_type == 'induction':
                     fig = plotting.make_induction_traces(
