@@ -14,7 +14,8 @@ remove_background = {
         'Expression Rate (indirect)': True,
         'Expression Rate (direct)': True,
         'Mean Expression': True,
-        'Induction Curve': True
+        'Induction Curve': False,
+        'Kymograph': False
     }
 
 class Analysis:
@@ -27,7 +28,8 @@ class Analysis:
             'Expression Rate (indirect)': self.expression_rate_indirect,
             'Expression Rate (direct)': self.expression_rate_direct,
             'Mean Expression': self.mean_expression,
-            'Induction Curve': self.induction_curve
+            'Induction Curve': self.induction_curve,
+            'Kymograph': self.kymograph
         }
         self.background = {}
 
@@ -332,8 +334,12 @@ class Analysis:
             degr = degradation rate of reporter protein
             eps_L = insignificant value for model fitting
         '''
+        if len(df)==0:
+            return(df)
+
         density_df = df[df['Signal_id']==self.density_name]
         print(self.degr, self.eps_L, flush=True)
+        print(density_df, flush=True)
         
         result = pd.DataFrame()
         rows = []
@@ -353,6 +359,9 @@ class Analysis:
                 density = density.sort_values('Time')
                 density_val = density['Measurement']
                 density_time = density['Time']
+
+                print('density_time ', density_time, flush=True)
+                print('density_val ', density_val, flush=True)
 
                 if len(val)>1:
                     # Construct curves
@@ -400,22 +409,14 @@ class Analysis:
 
     # Other analysis types that make different forms of resulting data
     def induction_curve(self, df):
-        concs = []
-        expr = []
-        grouped_samps = df.groupby('Sample')
-        for samp_id,samp in grouped_samps:
-            chemical_ids = samp['Chemical_ids']
-            chemical_concs = samp['Concentrations']
+        data = df[df.Chemical_id==self.chemical_id]
+        mean_expr = self.mean_expression(data)
+        return mean_expr
 
-            if len(chemical_ids)==0: 
-                concs.append(0.0)
-                expr.append(samp['Measurement'].mean())
-            else:
-                for id,conc in zip(chemical_ids, chemical_concs):
-                    if id == self.chemical_id:
-                        concs.append
-                        concs.append(conc)
-                        expr.append(samp['Measurement'].mean())
+    def kymograph(self, df):
+        '''
+        Compute kymograph for induced expression, x-axis=inducer concentration
+        '''
+        data = df[df.Chemical_id==self.chemical_id]
+        return data
 
-        df = pd.DataFrame({'Expression':expr, 'Concentration':concs})
-        return df

@@ -29,7 +29,8 @@ axis_labels = {
     'Expression Rate (direct)': ('Time', 'Rate'),
     'Expression Rate (indirect)': ('Time', 'Rate'),
     'Mean Expression': (None, 'Measurement'),
-    'Induction Curve': ('Concentration', 'Expression')
+    'Induction Curve': ('Concentration', 'Expression'),
+    'Kymograph': ('Concentration', 'Time')
 }
 
 plot_types = {
@@ -37,7 +38,8 @@ plot_types = {
     'Expression Rate (direct)': 'timeseries',
     'Expression Rate (indirect)': 'timeseries',
     'Mean Expression': 'bar',
-    'Induction Curve': 'induction'
+    'Induction Curve': 'induction',
+    'Kymograph': 'kymograph'
 }
 
 class PlotConsumer(AsyncWebsocketConsumer):
@@ -59,14 +61,15 @@ class PlotConsumer(AsyncWebsocketConsumer):
                     font_size=10,
                     xlabel='Time',
                     ylabel='Measurement',
-                    plot_type='timeseries',
-                    analysis=None):
+                    plot_type='timeseries'):
         '''
             Generate plot data for frontend plotly plot generation
         '''
         n_measurements = len(df)
         if n_measurements == 0:
             return None
+
+        print('plot df ', df, flush=True)
 
         traces = []
         colors = {}
@@ -97,10 +100,6 @@ class PlotConsumer(AsyncWebsocketConsumer):
         print('make_subplots took %g'%(end-start), flush=True)
         for name1,g1 in grouped:
             for name2,g2 in g1.groupby(groupby2):
-                # Run any required analysis on the measurements
-                if analysis:
-                    g2 = analysis.analyze_data(g2)
-
                 # Choose color and whether to show in legend
                 if name2 not in colors:
                     colors[name2] = plotting.palette[colidx%ncolors]
@@ -114,8 +113,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 col = 1 + subplot_index%cols
 
                 # Linear axes by default
-                xaxis_type = 'linear'
-                yaxis_type = 'linear'
+                xaxis_type = None
+                yaxis_type = None
 
                 # Add traces to figure
                 if plot_type == 'timeseries':
@@ -144,10 +143,23 @@ class PlotConsumer(AsyncWebsocketConsumer):
                             group_name=str(name2),
                             row=row, col=col,
                             xlabel=groupby2,
-                            ylabel=ylabel
+                            ylabel='Measurement'
                         )
                 elif plot_type == 'induction':
                     fig = plotting.make_induction_traces(
+                            fig,
+                            g2,
+                            color=colors[name2], 
+                            mean=mean, 
+                            std=std, 
+                            normalize=normalize,
+                            show_legend_group=show_legend_group,
+                            group_name=str(name2),
+                            row=row, col=col
+                        )
+                    xaxis_type = 'log'
+                elif plot_type == 'kymograph':
+                    fig = plotting.make_kymograph_traces(
                             fig,
                             g2,
                             color=colors[name2], 
@@ -175,13 +187,30 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 progress += len(g2)
                 await self.send(text_data=json.dumps({
                     'type': 'progress_update',
-                    'data': {'progress': int(100 * progress / n_measurements)}
+                    'data': {'progress': int(50 + 50 * progress / n_measurements)}
                 }))
                 await asyncio.sleep(0)
             # Next subplot
             subplot_index += 1
         plotting.layout_screen(fig, xaxis_type=xaxis_type, yaxis_type=yaxis_type, font_size=font_size)
         return fig
+
+    async def run_analysis(self, df, analysis):
+        grouped = df.groupby('Sample')
+        result_dfs = []
+        n_samples = len(grouped)
+        progress = 0
+        for id,g in grouped:
+            result_df = analysis.analyze_data(g)
+            result_dfs.append(result_df)
+            progress += 1
+            await self.send(text_data=json.dumps({
+                'type': 'progress_update',
+                'data': {'progress': int(50 * progress / n_samples)}
+            }))
+            await asyncio.sleep(0)
+        df = pd.concat(result_dfs)
+        return df
 
     async def generate_data(self, event):
         params = event['params']
@@ -199,9 +228,6 @@ class PlotConsumer(AsyncWebsocketConsumer):
             # Default plot type for raw measurements
             plot_type = 'timeseries'
 
-            # No analysis by default
-            analysis = None
-
             # Run analysis if selected
             analysis_params = params.get('analysis')
             if analysis_params:
@@ -209,7 +235,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 xlabel, ylabel = axis_labels[analysis_type]
                 plot_type = plot_types[analysis_type]
                 analysis = Analysis(analysis_params, signals)
-                #df = await self.run_analysis(df, analysis)
+                df = await self.run_analysis(df, analysis)
 
             # Plot figure
             subplots = plot_options['subplots']
@@ -221,8 +247,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                                 groupby2=markers,
                                 mean=mean, std=std,
                                 xlabel=xlabel, ylabel=ylabel,
-                                plot_type=plot_type,
-                                analysis=analysis
+                                plot_type=plot_type
                                 )
             if fig:
                 fig_json = fig.to_json()

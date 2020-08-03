@@ -13,10 +13,10 @@ pretty_field_names = {
     'sample__media__name': 'Media',
     'sample__strain__name': 'Strain',
     'sample__vector__name': 'Vector',
-    'sample__supplements__name': 'Supplements',
-    'sample__supplements__chemical__name': 'Chemicals',
-    'sample__supplements__chemical__id': 'Chemical_ids',
-    'sample__supplements__concentration': 'Concentrations',
+    'sample__supplements__name': 'Supplement',
+    'sample__supplements__chemical__name': 'Chemical',
+    'sample__supplements__chemical__id': 'Chemical_id',
+    'sample__supplements__concentration': 'Concentration',
     'sample__row': 'Row', 
     'sample__col': 'Column'
 }

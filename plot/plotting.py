@@ -6,6 +6,7 @@ import plotly
 from plotly.colors import DEFAULT_PLOTLY_COLORS
 import wellfare as wf
 import time
+import pandas as pd
 
 # Set of colors to use for plot markers/lines
 #palette = DEFAULT_PLOTLY_COLORS
@@ -59,7 +60,7 @@ def optimal_grid(n):
         x, y = n_sqrt, n_sqrt
     return x,y
 
-def layout_screen(fig, xaxis_type='linear', yaxis_type='linear', font_size=10):
+def layout_screen(fig, xaxis_type=None, yaxis_type=None, font_size=10):
     '''
     Layout figure optimized for screen display
 
@@ -91,16 +92,18 @@ def layout_screen(fig, xaxis_type='linear', yaxis_type='linear', font_size=10):
                     tickwidth=1, 
                     title_font=dict(size=font_size), 
                     tickfont=dict(size=font_size),
-                    hoverformat=".2e",
-                    type=yaxis_type
+                    hoverformat=".2e"
                     )
+    if yaxis_type:
+        fig.update_xaxes(type=yaxis_type)
     fig.update_xaxes(linewidth=1, 
                     tickwidth=1, 
                     title_font=dict(size=font_size), 
                     tickfont=dict(size=font_size),
-                    hoverformat=".2e",
-                    type=xaxis_type
+                    hoverformat=".2e"
                     )
+    if xaxis_type:
+        fig.update_xaxes(type=xaxis_type)
     return fig
 
 def format_axes(
@@ -134,6 +137,43 @@ def format_axes(
                         linewidth=3,
                         row=row, col=col)
 
+def make_kymograph_traces(
+        fig,
+        df, 
+        color='blue', 
+        mean=False, 
+        std=False, 
+        normalize=False,
+        show_legend_group=False,
+        group_name='',
+        row=1, col=1,
+        xlabel='Concentration',
+        ylabel='Time'
+    ):
+    unique_times = np.sort(df['Time'].unique()) #np.unique(x[idx])
+    n_times = len(unique_times)-2
+    unique_concs = np.sort(df['Concentration'].unique()) #np.unique(y[idx])
+    n_concs = len(unique_concs)-2
+    
+    if len(df)>0:
+        c1,bins1 = pd.cut(df.Time, bins=unique_times, retbins=True)
+        c2,bins2 = pd.cut(df.Concentration, bins=unique_concs, retbins=True)       
+        hm = df.groupby([c1, c2]).Measurement.mean().unstack()
+        #print('c1, c2 ', c1, c2, flush=True)
+        print('bin sizes ', len(bins1), len(bins2), flush=True)
+        #print('bins ', bins1, bins2, flush=True)
+        print('size kymo ', hm.shape, flush=True)
+
+        heatmap = go.Heatmap(x=bins2, y=bins1, z=hm, 
+                            showscale=show_legend_group,
+                            colorscale='Viridis',
+                            zmin=0.)
+        fig.add_trace(heatmap, row=row, col=col)
+        fig.update_yaxes(autorange='reversed')
+    else:
+        print('Cannot make kymograph of empty dataframe, ', df, flush=True)
+    return fig
+
 def make_induction_traces(
         fig,
         df, 
@@ -145,7 +185,7 @@ def make_induction_traces(
         group_name='',
         row=1, col=1,
         xlabel='Concentration',
-        ylabel='Expression'
+        ylabel='Measurement'
     ):
     npts = len(df)
     marker = dict(size=4, color=color)
@@ -177,8 +217,11 @@ def make_bar_traces(
         xlabel='Vector',
         ylabel='Measurement'
     ): 
-    x = df[xlabel]
+    x = [df[xlabel].values[0]]
     y = [df[ylabel].mean()]
+    print('xlabel, ylabel ', xlabel, ylabel, flush=True)
+    print('x, ', x, flush=True)
+    print('y, ', y, flush=True)
     error_y = [df[ylabel].std()]
     bar = go.Bar(x=x, y=y,
                             error_y=dict(
@@ -208,9 +251,12 @@ def make_timeseries_traces(
     '''
     Generate trace data for each sample, or mean and std, for the data in df
     '''
-    df = df.sort_values('Time')
+    print('df columns ', df.columns, flush=True)
     if len(df)==0:
-        return(None)
+        return(fig)
+
+    # Sort all measurements by time
+    df = df.sort_values('Time')
     traces = []
 
     if mean:
