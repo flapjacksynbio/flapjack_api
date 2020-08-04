@@ -285,7 +285,7 @@ class Analysis:
                     min_data_pts = max(self.smoothing_param1, self.smoothing_param2)
                 else:
                     min_data_pts = 2
-                print(len(val), flush=True)
+
                 if len(val)>min_data_pts and len(density_val)>min_data_pts:
                     # Interpolation
                     ival = interp1d(time, val)
@@ -294,17 +294,17 @@ class Analysis:
                     # Savitzky-Golay filter
                     if self.smoothing_param1>0:
                         if self.smoothing_type=='savgol':
-                            print('Applying savgol filter', flush=True)
+                            #print('Applying savgol filter', flush=True)
                             sval = savgol_filter(val, int(self.smoothing_param1), 2, mode='interp')
                             sdensity = savgol_filter(density_val, int(self.smoothing_param1), 2, mode='interp')
-                            print(len(val), len(density_val), flush=True)
+                            #print(len(val), len(density_val), flush=True)
                         elif smoothing_type=='lowess':
-                            print('Applying lowess filter', flush=True)
+                            #print('Applying lowess filter', flush=True)
                             z = lowess(val, time, frac=self.smoothing_param1)
                             sval = z[:,1]
                             z = lowess(density_val, density_time, frac=self.smoothing_param1)
                             sdensity = z[:,1]
-                            print(len(val), len(density_val), flush=True)
+                            #print(len(val), len(density_val), flush=True)
 
                     # Interpolation
                     sval = interp1d(time, sval)
@@ -419,7 +419,6 @@ class Analysis:
         '''
         Return a dataframe containing the mean value for each sample,name in the input dataframe df
         '''
-        print('df, ', df, flush=True)
         agg = {}
         for column_name in df.columns:
             if column_name!='Sample' and column_name!='Signal':

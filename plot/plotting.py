@@ -223,9 +223,6 @@ def make_bar_traces(
     ): 
     x = [df[xlabel].values[0]]
     y = [df[ylabel].mean()]
-    print('xlabel, ylabel ', xlabel, ylabel, flush=True)
-    print('x, ', x, flush=True)
-    print('y, ', y, flush=True)
     error_y = [df[ylabel].std()]
     bar = go.Bar(x=x, y=y,
                             error_y=dict(
@@ -255,7 +252,6 @@ def make_timeseries_traces(
     '''
     Generate trace data for each sample, or mean and std, for the data in df
     '''
-    print('df columns ', df.columns, flush=True)
     if len(df)==0:
         return(fig)
 
