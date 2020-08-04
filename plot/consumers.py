@@ -80,8 +80,6 @@ class PlotConsumer(AsyncWebsocketConsumer):
         if n_measurements == 0:
             return None
 
-        print('plot df ', df, flush=True)
-
         traces = []
         colors = {}
         colidx = 0
