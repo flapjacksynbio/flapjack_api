@@ -13,8 +13,8 @@ remove_background = {
         'Velocity': False,
         'Mean Velocity': False,
         'Max Velocity': False,
-        'Expression Rate (indirect)': True,
-        'Expression Rate (direct)': True,
+        'Expression Rate (indirect)': False,
+        'Expression Rate (direct)': False,
         'Mean Expression': True,
         'Max Expression': True,
         'Induction Curve': True,
@@ -43,7 +43,7 @@ class Analysis:
         self.analysis_type = params['type']
         self.density_name = params.get('biomass_signal')
         self.bg_std_devs = params.get('bg_correction')
-        self.min_density = params.get('min_density')
+        self.min_density = float(params.get('min_density', 0))
         self.remove_data = params.get('remove_data')
         self.smoothing_type = params.get('smoothing_type', 'savgol')
         self.smoothing_param1 = int(params.get('pre_smoothing', 21))
@@ -53,6 +53,7 @@ class Analysis:
         chemical = params.get('chemical', None)
         if chemical:
             self.chemical_id = chemical['value']
+        self.ref_name = params.get('ref_signal')
 
     def analyze_data(self, df):     
         # Is it necessary to remove background for this analysis?
@@ -132,7 +133,7 @@ class Analysis:
                     if self.remove_data:
                         print('Correcting OD bg', flush=True)
                         print('Removing %d data points'%np.sum(vals_corrected < self.bg_std_devs*bg_media_std), flush=True)
-                        vals_corrected[vals_corrected < np.maximum(self.bg_std_devs*bg_media_std, min_density)] = np.nan
+                        vals_corrected[vals_corrected < np.maximum(self.bg_std_devs*bg_media_std, self.min_density)] = np.nan
                     #print('bgmean, bgstd = ', bg_media_mean, bg_media_std)
                 else:
                     # Correct fluorescence
@@ -366,9 +367,6 @@ class Analysis:
                 density_val = density['Measurement']
                 density_time = density['Time']
 
-                print('density_time ', density_time, flush=True)
-                print('density_val ', density_val, flush=True)
-
                 if len(val)>1:
                     # Construct curves
                     fpt = time.values
@@ -378,24 +376,30 @@ class Analysis:
                     ody = density_val.values
                     cod = wf.curves.Curve(x=odt, y=ody)
                     # Compute time range
-                    xmin, xmax = cod.xlim()
-                    ttu = np.arange(xmin, xmax, 0.1)
+                    od_xmin, od_xmax = cod.xlim()
+                    cfp_xmin, cfp_xmax = cfp.xlim()
+                    xmin = max(od_xmin, cfp_xmin)
+                    xmax = min(od_xmax, cfp_xmax)
+                    ttu = np.arange(od_xmin, od_xmax, 0.1)
                     # Fit model
-                    if meas_name==self.density_name:
-                        ksynth, _, _, _, _ = wf.infer_growth_rate(cod, ttu, 
-                                                                    eps_L=self.eps_L, 
-                                                                    positive=True)
-                    else:
-                        ksynth, _, _, _, _ = wf.infer_synthesis_rate_onestep(cfp, cod, ttu, 
-                                                                                degr=self.degr, eps_L=self.eps_L, 
-                                                                                positive=True)
-                    data = data.assign(Rate=ksynth(fpt))
-                    rows.append(data)
+                    try:
+                        if meas_name==self.density_name:
+                            ksynth, _, _, _, _ = wf.infer_growth_rate(cod, ttu, 
+                                                                        eps_L=self.eps_L, 
+                                                                        positive=True)
+                        else:
+                            ksynth, _, _, _, _ = wf.infer_synthesis_rate_onestep(cfp, cod, ttu, 
+                                                                                    degr=self.degr, eps_L=self.eps_L, 
+                                                                                    positive=True)
+                        data = data.assign(Rate=ksynth(fpt))
+                        rows.append(data)
+                    except:
+                        pass
         if len(rows)>0:
             result = result.append(rows)
+            result = result.dropna(subset=['Rate'])
         else:
             print('No rows to add to expression rate dataframe', flush=True)
-        result = result.dropna(subset=['Rate'])
         return(result)
 
     # Analysis functions that compute value from a dataframe with given keyword args
@@ -469,4 +473,119 @@ class Analysis:
         data = df[df.Chemical_id==self.chemical_id]
         return data
 
+    def ratiometric_alpha(self, df):
+        # Parameters:
+        #   bounds = tuple of list of min and max values for  Gompertz model parameters
+        #   df = dataframe of measurements including OD
+        #   density_df = dataframe containing biomass measurements
+        #   ndt = number of doubling times to extend exponential phase
+        density_df = df[df['Signal_id']==density_name]
+
+        result = pd.DataFrame()
+        rows = []
+
+        grouped_samples = df.groupby('Sample')
+        for samp_id,data in grouped_samples:
+            # input values for Gompertz model fit
+            oddf = density_df[density_df['Sample']==samp_id]
+            oddf = oddf.sort_values('Time')
+            odt = oddf['Time'].values
+            odval = oddf['Measurement'].values
+            odt = odt[odval>0.]
+            odval = odval[odval>0.]
+            #y = np.log(odval[odval>0.]) - np.log(np.nanmin(odval[odval>0.]))
+
+            # Fit Gompertz model
+            try:
+                z,_=curve_fit(gompertz, odt, odval, bounds=bounds)
+            except:
+                break
+                
+            y0 = z[0]
+            ymax = z[1]
+            A = np.log(ymax/y0)
+            um = z[2]
+            l = z[3]
+            print('y0, ymax, um, l', y0, ymax, um, l, flush=True)
+
+            # Compute time of peak growth
+            tm = ((A/(np.exp(1)*um))+l)
+            # Compute doubling time at peak growth
+            dt = np.log(2)/um
+            # Time range to consider exponential growth phase
+            t1 = tm
+            t2 = tm + ndt*dt
+            print('t1, t2', t1, t2, flush=True)
+
+            # Compute alpha as slope of fluo vs od for each measurement name
+            grouped_name = data.groupby('Signal')
+            for name,data in grouped_name:
+                # fluorescence measurements
+                mdf = data[(data['Time']>=t1) & (data['Time']<=t2)]
+                mdf = mdf.sort_values('Time')
+                mval = mdf['Measurement'].values
+                mt = mdf['Time'].values
+                
+                # od measurements
+                oddf = oddf[(oddf['Time']>=t1)&(oddf['Time']<=t2)]
+                oddf = oddf.sort_values('Time')
+                odval = oddf['Measurement'].values
+                odt = oddf['Time'].values
+                
+                if len(mt)>1 and len(odt)>1:
+                    smval = interp1d(mt, mval, kind='linear', bounds_error=False)
+                    sodval = interp1d(odt, odval, kind='linear', bounds_error=False)
+
+                    tmin = max(odt.min(), mt.min())
+                    tmax = min(odt.max(), mt.max())
+                    print('tmin, tmax', tmin, tmax, flush=True)
+                    times = np.linspace(tmin,tmax,100)
+
+                    z = np.polyfit(sodval(times), smval(times), 1)
+                    p = np.poly1d(z)
+
+                    # Get slope as alpha
+                    alpha = z[0]
+
+                    # Get dataframe with single row containing alpha for this sample, name
+                    data = data.iloc[0]
+                    data['value'] = alpha
+                else:
+                    data = data.iloc[0]
+                    data['value'] = np.nan
+                # Append to list of rows to append to result
+                rows.append(data)
+        # Append alpha values to result df
+        if len(rows)>0:
+            result=result.append(rows)
+        return result
+
+    def ratiometric_rho(self, df):
+        # Parameters:
+        #   bounds = tuple of list of min and max values for  Gompertz model parameters
+        #   df = dataframe of measurements including OD
+        #   density_df = dataframe containing biomass measurements
+        #   ref_df = dataframe containing reference measurements
+        #   ndt = number of doubling times to extend exponential phase
+        density_df = df[df['Signal_id']==self.density_name]
+        ref_df = df[df['Signal_id']==self.ref_name]
+
+        alpha = self.ratiometric_alpha(df)
+        alpha_ref = self.ratiometric_alpha(ref_df)
+
+        alpha = alpha.sort_values('Sample')
+        alpha_ref = alpha_ref.sort_values('Sample')
+
+        result = pd.DataFrame()
+        rows = [] 
+        grouped = alpha.groupby('Signal')
+        # Normalise each measurement separately by the reference
+        for name_id,data in grouped:
+            data = data.sort_values('Sample')
+            vals = data['Measurement'].values
+            ref = alpha_ref['Measurement'].values
+            data['Measurement'] = vals / ref
+            rows.append(data)
+        result = result.append(rows)
+        return result     
 
