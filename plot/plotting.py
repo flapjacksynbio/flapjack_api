@@ -95,7 +95,9 @@ def layout_screen(fig, xaxis_type=None, yaxis_type=None, font_size=10):
                     hoverformat=".2e"
                     )
     if yaxis_type:
-        fig.update_xaxes(type=yaxis_type)
+        fig.update_yaxes(type=yaxis_type)
+        if yaxis_type == 'log':
+            fig.update_yaxes(dtick=1)
     fig.update_xaxes(linewidth=1, 
                     tickwidth=1, 
                     title_font=dict(size=font_size), 
@@ -104,6 +106,8 @@ def layout_screen(fig, xaxis_type=None, yaxis_type=None, font_size=10):
                     )
     if xaxis_type:
         fig.update_xaxes(type=xaxis_type)
+        if xaxis_type == 'log':
+            fig.update_xaxes(dtick=1)
     return fig
 
 def format_axes(
@@ -185,7 +189,7 @@ def make_induction_traces(
         group_name='',
         row=1, col=1,
         xlabel='Concentration',
-        ylabel='Measurement'
+        ylabel='Expression'
     ):
     npts = len(df)
     marker = dict(size=4, color=color)
