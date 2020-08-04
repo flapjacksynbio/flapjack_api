@@ -6,6 +6,7 @@ from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
 from . import plotting
 from analysis.analysis import Analysis 
+from analysis.util import *
 from registry.util import get_samples, get_measurements
 from registry.models import Signal
 from plotly.subplots import make_subplots
@@ -33,7 +34,9 @@ axis_labels = {
     'Mean Velocity': (None, 'Velocity'),
     'Max Velocity': (None, 'Velocity'),
     'Induction Curve': ('Concentration', 'Expression'),
-    'Kymograph': ('Concentration', 'Time')
+    'Kymograph': ('Concentration', 'Time'),
+    'Rho': (None, 'Rate'),
+    'Alpha': (None, 'Rate')
 }
 
 plot_types = {
@@ -44,6 +47,8 @@ plot_types = {
     'Max Expression': 'bar',
     'Mean Velocity': 'bar',
     'Max Velocity': 'bar',
+    'Rho': 'bar',
+    'Alpha': 'bar',
     'Induction Curve': 'induction',
     'Kymograph': 'kymograph'
 }
@@ -243,9 +248,16 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 analysis = Analysis(analysis_params, signals)
                 df = await self.run_analysis(df, analysis)
 
+            normalize = plot_options['normalize']
+            if normalize and normalize!='None':
+                print('normalizing', flush=True)
+                print('normalize', normalize, flush=True)
+                df = normalize_data(df, normalize, ylabel)
+
             # Plot figure
             subplots = plot_options['subplots']
             markers = plot_options['markers']
+            normalize = plot_options['normalize']
             mean = 'Mean' in plot_options['plot']
             std = 'std' in plot_options['plot']
             fig = await self.plot(df, 
@@ -253,7 +265,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
                                 groupby2=markers,
                                 mean=mean, std=std,
                                 xlabel=xlabel, ylabel=ylabel,
-                                plot_type=plot_type
+                                plot_type=plot_type,
+                                normalize=normalize
                                 )
             if fig:
                 fig_json = fig.to_json()

@@ -4,6 +4,7 @@ from scipy.optimize import curve_fit
 from django_pandas.io import read_frame
 from registry.models import *
 from registry.util import *
+from analysis.util import *
 from scipy.interpolate import interp1d, UnivariateSpline
 from scipy.signal import medfilt, savgol_filter
 import wellfare as wf
@@ -14,11 +15,13 @@ remove_background = {
         'Mean Velocity': False,
         'Max Velocity': False,
         'Expression Rate (indirect)': False,
-        'Expression Rate (direct)': False,
+        'Expression Rate (direct)': True,
         'Mean Expression': True,
         'Max Expression': True,
         'Induction Curve': True,
-        'Kymograph': True
+        'Kymograph': True,
+        'Alpha': True,
+        'Rho': True
     }
 
 class Analysis:
@@ -35,16 +38,20 @@ class Analysis:
             'Mean Expression': self.mean_expression,
             'Max Expression': self.max_expression,
             'Induction Curve': self.induction_curve,
-            'Kymograph': self.kymograph
+            'Kymograph': self.kymograph,
+            'Alpha': self.ratiometric_alpha,
+            'Rho': self.ratiometric_rho
         }
         self.background = {}
 
     def set_params(self, params):
         self.analysis_type = params['type']
         self.density_name = params.get('biomass_signal')
-        self.bg_std_devs = params.get('bg_correction')
-        self.min_density = float(params.get('min_density', 0))
-        self.remove_data = params.get('remove_data')
+        self.ref_name = params.get('ref_signal')
+        self.bg_std_devs = float(params.get('bg_correction', 0))
+        self.min_density = float(params.get('min_biomass', 0))
+        self.n_doubling_times = float(params.get('ndt', 2))
+        self.remove_data = bool(params.get('remove_data', False))
         self.smoothing_type = params.get('smoothing_type', 'savgol')
         self.smoothing_param1 = int(params.get('pre_smoothing', 21))
         self.smoothing_param2 = int(params.get('post_smoothing', 21))
@@ -54,12 +61,12 @@ class Analysis:
         if chemical:
             self.chemical_id = chemical['value']
         self.ref_name = params.get('ref_signal')
+        self.bounds = [[0,0,0,0], [1,1,1,24]]
 
     def analyze_data(self, df):     
         # Is it necessary to remove background for this analysis?
         if remove_background[self.analysis_type]:
             df = self.bg_correct(df)
-            
         # Apply analysis to dataframe
         analysis_func = self.analysis_funcs[self.analysis_type]
         df = analysis_func(df)
@@ -110,8 +117,14 @@ class Analysis:
         meas_bg_corrected = pd.DataFrame()
 
         # Ignore background samples
+        if len(df)==0:
+            print('bg_correct got empty dataframe', flush=True)
+            return df
         meas = df[~df.Vector.isin(['none','None'])]
-        #get_measurements(self.samples.exclude(vector__name__in=['none', 'None']), signals)
+        if len(meas)==0:
+            print('bg_correct got empty meas dataframe', flush=True)
+            return df
+
         # Loop over samples
         rows = []
         grouped_sample = meas.groupby('Sample')
@@ -161,6 +174,8 @@ class Analysis:
         # Remove data meeting correction criteria
         if len(meas_bg_corrected)>0:
             meas_bg_corrected = meas_bg_corrected.dropna(subset=['Measurement'])
+        else:
+            print("bg_correct returning empty dataframe", flush=True)
         return(meas_bg_corrected)
 
     # Analysis functions that compute timeseries from a dataframe with given keyword args
@@ -346,7 +361,6 @@ class Analysis:
 
         density_df = df[df['Signal_id']==self.density_name]
         print(self.degr, self.eps_L, flush=True)
-        print(density_df, flush=True)
         
         result = pd.DataFrame()
         rows = []
@@ -380,21 +394,20 @@ class Analysis:
                     cfp_xmin, cfp_xmax = cfp.xlim()
                     xmin = max(od_xmin, cfp_xmin)
                     xmax = min(od_xmax, cfp_xmax)
-                    ttu = np.arange(od_xmin, od_xmax, 0.1)
+                    ttu = np.linspace(od_xmin, od_xmax, 100, endpoint=False)
                     # Fit model
                     try:
                         if meas_name==self.density_name:
                             ksynth, _, _, _, _ = wf.infer_growth_rate(cod, ttu, 
-                                                                        eps_L=self.eps_L, 
-                                                                        positive=True)
+                                                                        eps_L=self.eps_L)
                         else:
                             ksynth, _, _, _, _ = wf.infer_synthesis_rate_onestep(cfp, cod, ttu, 
-                                                                                    degr=self.degr, eps_L=self.eps_L, 
-                                                                                    positive=True)
+                                                                                    degr=self.degr, eps_L=self.eps_L)
                         data = data.assign(Rate=ksynth(fpt))
                         rows.append(data)
                     except:
-                        pass
+                        print('Fitting direct expression rates failed!', flush=True)
+
         if len(rows)>0:
             result = result.append(rows)
             result = result.dropna(subset=['Rate'])
@@ -408,6 +421,7 @@ class Analysis:
         '''
         Return a dataframe containing the mean value for each sample,name in the input dataframe df
         '''
+        print('df, ', df, flush=True)
         agg = {}
         for column_name in df.columns:
             if column_name!='Sample' and column_name!='Signal':
@@ -499,6 +513,7 @@ class Analysis:
             try:
                 z,_=curve_fit(gompertz, odt, odval, bounds=self.bounds)
             except:
+                print('Gompertz fitting failed', flush=True)
                 break
                 
             y0 = z[0]
@@ -514,7 +529,7 @@ class Analysis:
             dt = np.log(2)/um
             # Time range to consider exponential growth phase
             t1 = tm
-            t2 = tm + ndt*dt
+            t2 = tm + self.n_doubling_times * dt
             print('t1, t2', t1, t2, flush=True)
 
             # Compute alpha as slope of fluo vs od for each measurement name
@@ -549,10 +564,10 @@ class Analysis:
 
                     # Get dataframe with single row containing alpha for this sample, name
                     data = data.iloc[0]
-                    data['value'] = alpha
+                    data['Rate'] = alpha
                 else:
                     data = data.iloc[0]
-                    data['value'] = np.nan
+                    data['Rate'] = np.nan
                 # Append to list of rows to append to result
                 rows.append(data)
         # Append alpha values to result df
@@ -568,24 +583,31 @@ class Analysis:
         #   ref_df = dataframe containing reference measurements
         #   ndt = number of doubling times to extend exponential phase
         density_df = df[df['Signal_id']==self.density_name]
-        ref_df = df[df['Signal_id']==self.ref_name]
+        ref_df = df[(df.Signal_id==self.ref_name) | (df.Signal_id==self.density_name)]
 
         alpha = self.ratiometric_alpha(df)
         alpha_ref = self.ratiometric_alpha(ref_df)
 
+        if len(alpha)==0 or len(alpha_ref)==0:
+            return(df)
+        #print('alpha_ref cols ', alpha_ref.columns, flush=True)
+
         alpha = alpha.sort_values('Sample')
         alpha_ref = alpha_ref.sort_values('Sample')
 
+        alpha['Rate'] = alpha['Rate'] / alpha_ref['Rate']
+        '''
         result = pd.DataFrame()
         rows = [] 
-        grouped = alpha.groupby('Signal')
+        grouped = alpha.groupby('Signal_id')
         # Normalise each measurement separately by the reference
         for name_id,data in grouped:
             data = data.sort_values('Sample')
-            vals = data['Measurement'].values
-            ref = alpha_ref['Measurement'].values
+            vals = data['Rate'].values
+            ref = alpha_ref['Rate'].values
             data['Measurement'] = vals / ref
             rows.append(data)
         result = result.append(rows)
         return result     
-
+        '''
+        return alpha
