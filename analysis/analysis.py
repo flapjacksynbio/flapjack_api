@@ -479,7 +479,7 @@ class Analysis:
         #   df = dataframe of measurements including OD
         #   density_df = dataframe containing biomass measurements
         #   ndt = number of doubling times to extend exponential phase
-        density_df = df[df['Signal_id']==density_name]
+        density_df = df[df['Signal_id']==self.density_name]
 
         result = pd.DataFrame()
         rows = []
@@ -497,7 +497,7 @@ class Analysis:
 
             # Fit Gompertz model
             try:
-                z,_=curve_fit(gompertz, odt, odval, bounds=bounds)
+                z,_=curve_fit(gompertz, odt, odval, bounds=self.bounds)
             except:
                 break
                 
