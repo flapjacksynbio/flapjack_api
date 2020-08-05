@@ -8,6 +8,7 @@ import wellfare as wf
 import time
 import pandas as pd
 
+
 # Set of colors to use for plot markers/lines
 #palette = DEFAULT_PLOTLY_COLORS
 palette = [
@@ -151,8 +152,7 @@ def make_kymograph_traces(
         show_legend_group=False,
         group_name='',
         row=1, col=1,
-        xlabel='Concentration',
-        ylabel='Time'
+        ycolumn='Rate',
     ):
     unique_times = np.sort(df['Time'].unique()) #np.unique(x[idx])
     n_times = len(unique_times)-2
@@ -162,16 +162,20 @@ def make_kymograph_traces(
     if len(df)>0:
         c1,bins1 = pd.cut(df.Time, bins=unique_times, retbins=True)
         c2,bins2 = pd.cut(df.Concentration, bins=unique_concs, retbins=True)       
-        hm = df.groupby([c1, c2]).Measurement.mean().unstack()
+        hm = df.groupby([c1, c2])[ycolumn].mean().unstack()
         #print('c1, c2 ', c1, c2, flush=True)
         print('bin sizes ', len(bins1), len(bins2), flush=True)
         #print('bins ', bins1, bins2, flush=True)
         print('size kymo ', hm.shape, flush=True)
 
+        # Always normalize the heatmap since there is only 1 colorbar
+        hm = np.array(hm)
+        hm /= hm.max()
+
         heatmap = go.Heatmap(x=bins2, y=bins1, z=hm, 
                             showscale=show_legend_group,
                             colorscale='Viridis',
-                            zmin=0.)
+                            zmin=0., zmax=1.)
         fig.add_trace(heatmap, row=row, col=col)
         fig.update_yaxes(autorange='reversed')
     else:
@@ -188,14 +192,13 @@ def make_induction_traces(
         show_legend_group=False,
         group_name='',
         row=1, col=1,
-        xlabel='Concentration',
-        ylabel='Expression'
+        ycolumn='Expression'
     ):
     npts = len(df)
     marker = dict(size=4, color=color)
-    xx = df[xlabel].values
+    xx = df['Concentration'].values
     x = xx[xx>0.]
-    y = df[ylabel].values
+    y = df[ycolumn].values
     y = y[xx>0.]
     
     scatter1 = go.Scatter(x=x, y=y, 
@@ -218,11 +221,11 @@ def make_bar_traces(
         show_legend_group=False,
         group_name='',
         row=1, col=1,
-        xlabel='Vector',
-        ylabel='Measurement'
+        xcolumn='Vector',
+        ycolumn='Measurement'
     ): 
-    x = [df[xlabel].values[0]]
-    y = [df[ylabel].mean()]
+    x = [df[xcolumn].values[0]]
+    y = [df[ycolumn].mean()]
     error_y = [df[ylabel].std()]
     bar = go.Bar(x=x, y=y,
                             error_y=dict(
@@ -246,8 +249,7 @@ def make_timeseries_traces(
         show_legend_group=False,
         group_name='',
         row=1, col=1,
-        xlabel='Time',
-        ylabel='Measurement'
+        ycolumn='Measurement'
     ):
     '''
     Generate trace data for each sample, or mean and std, for the data in df
@@ -266,7 +268,7 @@ def make_timeseries_traces(
         for id,samp_data in grouped_samp:
             samp_data = samp_data.sort_values('Time')
             t = samp_data['Time'].values
-            val = samp_data[ylabel].values
+            val = samp_data[ycolumn].values
             sval = wf.curves.Curve(x=t, y=val)
             vals.append(sval(st))
         vals = np.array(vals)

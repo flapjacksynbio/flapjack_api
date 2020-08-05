@@ -60,6 +60,7 @@ class Analysis:
         self.chemical_id = params.get('chemical', None)
         self.ref_name = params.get('ref_signal')
         self.bounds = [[0,0,0,0], [1,1,1,24]]
+        self.function = params.get('function')
 
     def analyze_data(self, df):     
         # Is it necessary to remove background for this analysis?
@@ -397,10 +398,12 @@ class Analysis:
                     try:
                         if meas_name==self.density_name:
                             ksynth, _, _, _, _ = wf.infer_growth_rate(cod, ttu, 
-                                                                        eps_L=self.eps_L)
+                                                                        eps_L=self.eps_L,
+                                                                        positive=True)
                         else:
                             ksynth, _, _, _, _ = wf.infer_synthesis_rate_onestep(cfp, cod, ttu, 
-                                                                                    degr=self.degr, eps_L=self.eps_L)
+                                                                                    degr=self.degr, eps_L=self.eps_L,
+                                                                                    positive=True)
                         data = data.assign(Rate=ksynth(fpt))
                         rows.append(data)
                     except:
@@ -440,7 +443,7 @@ class Analysis:
         agg['Measurement'] = 'max'
         grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
         maxx = grouped_samples.agg(agg)
-        maxx.columns = ['Expression' if c=='Measurement' else c for c in mean.columns]
+        maxx.columns = ['Expression' if c=='Measurement' else c for c in maxx.columns]
         return maxx     
 
     def mean_velocity(self, df):
@@ -474,16 +477,17 @@ class Analysis:
     # Other analysis types that make different forms of resulting data
     def induction_curve(self, df):
         data = df[df.Chemical_id==self.chemical_id]
-        mean_expr = self.mean_expression(data)
-        return mean_expr
+        analyzed_data = self.analysis_funcs[self.function](data)
+        return analyzed_data
 
     def kymograph(self, df):
         '''
         Compute kymograph for induced expression, x-axis=inducer concentration
         '''
         data = df[df.Chemical_id==self.chemical_id]
-        return data
-
+        analyzed_data = self.analysis_funcs[self.function](data)
+        return analyzed_data
+        
     def ratiometric_alpha(self, df):
         # Parameters:
         #   bounds = tuple of list of min and max values for  Gompertz model parameters

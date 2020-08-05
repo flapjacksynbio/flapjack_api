@@ -22,9 +22,65 @@ group_fields = {
     'Assay': 'Assay',
     'Media': 'Media', 
     'Strain': 'Strain', 
-    'Supplement': 'Supplements'
+    'Supplement': 'Supplement'
 }
 
+plot_properties = {
+    'Velocity': dict(
+        axis_labels=('Time', 'Velocity'),
+        plot_type='timeseries',
+        data_column='Velocity'
+        ),
+    'Expression Rate (direct)': dict(
+        axis_labels=('Time', 'Expression rate'),
+        plot_type='timeseries',
+        data_column='Rate'
+        ),
+    'Expression Rate (indirect)': dict(
+        axis_labels=('Time', 'Expression rate'),
+        plot_type='timeseries',
+        data_column='Rate'
+        ),
+    'Mean Expression': dict(
+        axis_labels=(None, 'Mean expression'),
+        plot_type='bar',
+        data_column='Expression'
+        ),
+    'Max Expression': dict(
+        axis_labels=(None, 'Max. expression'),
+        plot_type='bar',
+        data_column='Expression'
+        ),
+    'Mean Velocity': dict(
+        axis_labels=(None, 'Mean velocity'),
+        plot_type='bar',
+        data_column='Velocity'
+        ),
+    'Max Velocity': dict(
+        axis_labels=(None, 'Max. velocity'),
+        plot_type='bar',
+        data_column='Velocity'
+        ),
+    'Induction Curve': dict(
+        axis_labels=('Concentration', None),
+        plot_type='induction'
+        ),
+    'Kymograph': dict(
+        axis_labels=('Concentration', 'Time'),
+        plot_type='kymograph'
+        ),
+    'Rho':  dict(
+        axis_labels=(None, 'Rho'),
+        plot_type='bar',
+        data_column='Rho'
+        ),
+    'Alpha': dict(
+        axis_labels=(None, 'Alpha'),
+        plot_type='bar',
+        data_column='Alpha'
+        ),
+}
+'''
 axis_labels = {
     'Velocity': ('Time', 'Velocity'),
     'Expression Rate (direct)': ('Time', 'Rate'),
@@ -33,7 +89,7 @@ axis_labels = {
     'Max Expression': (None, 'Expression'),
     'Mean Velocity': (None, 'Velocity'),
     'Max Velocity': (None, 'Velocity'),
-    'Induction Curve': ('Concentration', 'Expression'),
+    'Induction Curve': ('Concentration', None),
     'Kymograph': ('Concentration', 'Time'),
     'Rho': (None, 'Rate'),
     'Alpha': (None, 'Rate')
@@ -52,6 +108,7 @@ plot_types = {
     'Induction Curve': 'induction',
     'Kymograph': 'kymograph'
 }
+'''
 
 class PlotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -72,6 +129,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
                     font_size=10,
                     xlabel='Time',
                     ylabel='Measurement',
+                    xcolumn='Time',
+                    ycolumn='Measurement',
                     plot_type='timeseries'):
         '''
             Generate plot data for frontend plotly plot generation
@@ -121,9 +180,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 row = 1 + subplot_index//cols
                 col = 1 + subplot_index%cols
 
-                # Linear axes by default
-                xaxis_type = None
-                yaxis_type = None
+                
 
                 # Add traces to figure
                 if plot_type == 'timeseries':
@@ -137,8 +194,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                             show_legend_group=show_legend_group,
                             group_name=str(name2),
                             row=row, col=col,
-                            xlabel=xlabel,
-                            ylabel=ylabel
+                            ycolumn=ycolumn
                         )
                 elif plot_type == 'bar':
                     fig = plotting.make_bar_traces(
@@ -151,8 +207,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
                             show_legend_group=show_legend_group,
                             group_name=str(name2),
                             row=row, col=col,
-                            xlabel=groupby2,
-                            ylabel=ylabel
+                            xcolumn=groupby2,
+                            ycolumn=ycolumn
                         )
                 elif plot_type == 'induction':
                     fig = plotting.make_induction_traces(
@@ -164,9 +220,9 @@ class PlotConsumer(AsyncWebsocketConsumer):
                             normalize=normalize,
                             show_legend_group=show_legend_group,
                             group_name=str(name2),
-                            row=row, col=col
+                            row=row, col=col,
+                            ycolumn=ycolumn
                         )
-                    xaxis_type = 'log'
                 elif plot_type == 'kymograph':
                     fig = plotting.make_kymograph_traces(
                             fig,
@@ -178,10 +234,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
                             show_legend_group=show_legend_group,
                             group_name=str(name2),
                             row=row, col=col,
-                            xlabel=xlabel,
-                            ylabel=ylabel
+                            ycolumn=ycolumn
                         )
-                    xaxis_type = 'log'
                 else:
                     print('Unsupported plot type, ', plot_type, flush=True)
                 
@@ -201,6 +255,10 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 await asyncio.sleep(0)
             # Next subplot
             subplot_index += 1
+        if plot_type=='kymograph' or plot_type=='induction':
+            xaxis_type, yaxis_type = 'log', None
+        else:
+            xaxis_type, yaxis_type = None, None
         plotting.layout_screen(fig, xaxis_type=xaxis_type, yaxis_type=yaxis_type, font_size=font_size)
         return fig
 
@@ -233,6 +291,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
 
             # Default axis labels for raw measurements
             xlabel, ylabel = 'Time', 'Measurement'
+            xcolumn, ycolumn = 'Time', 'Measurement'
 
             # Default plot type for raw measurements
             plot_type = 'timeseries'
@@ -240,17 +299,30 @@ class PlotConsumer(AsyncWebsocketConsumer):
             # Run analysis if selected
             analysis_params = params.get('analysis')
             if analysis_params:
+                # What analysis to run
                 analysis_type = analysis_params['type']
-                xlabel, ylabel = axis_labels[analysis_type]
-                plot_type = plot_types[analysis_type]
+
+                # Is this a kymograph or induction curve or other nested analysis?
+                analysis_function = analysis_params.get('function')
+                if analysis_function:
+                    ycolumn = plot_properties[analysis_function]['data_column']
+                else:
+                    ycolumn = plot_properties[analysis_type]['data_column']
+
+                # Set up the properties of the plot
+                xlabel, ylabel = plot_properties[analysis_type]['axis_labels']
+                plot_type = plot_properties[analysis_type]['plot_type']
+
+                # Analyze the data
                 analysis = Analysis(analysis_params, signals)
                 df = await self.run_analysis(df, analysis)
 
+            # Normalize the data if required
             normalize = plot_options['normalize']
             if normalize and normalize!='None':
                 print('normalizing', flush=True)
                 print('normalize', normalize, flush=True)
-                df = normalize_data(df, normalize, ylabel)
+                df = normalize_data(df, normalize, ycolumn)
 
             # Plot figure
             subplots = plot_options['subplots']
@@ -263,6 +335,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                                 groupby2=markers,
                                 mean=mean, std=std,
                                 xlabel=xlabel, ylabel=ylabel,
+                                xcolumn=xcolumn, ycolumn=ycolumn,
                                 plot_type=plot_type,
                                 normalize=normalize
                                 )
