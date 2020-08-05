@@ -20,7 +20,7 @@ remove_background = {
         'Max Expression': True,
         'Induction Curve': True,
         'Kymograph': True,
-        'Alpha': True,
+        'Alpha': False,
         'Rho': True
     }
 
@@ -511,11 +511,12 @@ class Analysis:
             #y = np.log(odval[odval>0.]) - np.log(np.nanmin(odval[odval>0.]))
 
             # Fit Gompertz model
-            try:
-                z,_=curve_fit(gompertz, odt, odval, bounds=self.bounds)
-            except:
-                print('Gompertz fitting failed', flush=True)
-                break
+            #try:
+            self.bounds = ([1e-2,0.01,0,-24], [1,4,2,24])
+            z,_ = curve_fit(gompertz, odt, odval, bounds=self.bounds)
+            #except:
+            #    print('Gompertz fitting failed', flush=True)
+            #    break
                 
             y0 = z[0]
             ymax = z[1]
@@ -531,10 +532,10 @@ class Analysis:
             # Time range to consider exponential growth phase
             t1 = tm
             t2 = tm + self.n_doubling_times * dt
-            print('t1, t2', t1, t2, flush=True)
+            #print('t1, t2', t1, t2, flush=True)
 
             # Compute alpha as slope of fluo vs od for each measurement name
-            grouped_name = data.groupby('Signal')
+            grouped_name = data.groupby('Signal_id')
             for name,data in grouped_name:
                 # fluorescence measurements
                 mdf = data[(data['Time']>=t1) & (data['Time']<=t2)]
@@ -554,7 +555,7 @@ class Analysis:
 
                     tmin = max(odt.min(), mt.min())
                     tmax = min(odt.max(), mt.max())
-                    print('tmin, tmax', tmin, tmax, flush=True)
+                    #print('tmin, tmax', tmin, tmax, flush=True)
                     times = np.linspace(tmin,tmax,100)
 
                     z = np.polyfit(sodval(times), smval(times), 1)
@@ -583,32 +584,16 @@ class Analysis:
         #   density_df = dataframe containing biomass measurements
         #   ref_df = dataframe containing reference measurements
         #   ndt = number of doubling times to extend exponential phase
-        density_df = df[df['Signal_id']==self.density_name]
-        ref_df = df[(df.Signal_id==self.ref_name) | (df.Signal_id==self.density_name)]
-
         alpha = self.ratiometric_alpha(df)
-        alpha_ref = self.ratiometric_alpha(ref_df)
+        alpha_ref = alpha[alpha.Signal_id==self.ref_name]
 
         if len(alpha)==0 or len(alpha_ref)==0:
             return(df)
-        #print('alpha_ref cols ', alpha_ref.columns, flush=True)
 
         alpha = alpha.sort_values('Sample')
         alpha_ref = alpha_ref.sort_values('Sample')
 
-        alpha['Rho'] = alpha['Alpha'] / alpha_ref['Alpha']
-        '''
-        result = pd.DataFrame()
-        rows = [] 
-        grouped = alpha.groupby('Signal_id')
-        # Normalise each measurement separately by the reference
-        for name_id,data in grouped:
-            data = data.sort_values('Sample')
-            vals = data['Rate'].values
-            ref = alpha_ref['Rate'].values
-            data['Measurement'] = vals / ref
-            rows.append(data)
-        result = result.append(rows)
-        return result     
-        '''
+        rho_vals = alpha['Alpha'].values / alpha_ref['Alpha'].values
+        alpha = alpha.assign(Rho=rho_vals)
+
         return alpha

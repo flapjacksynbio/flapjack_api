@@ -354,7 +354,7 @@ def make_timeseries_traces(
                                     showlegend=False)
             fig.add_trace(scatter2, row=row, col=col)
     else:
-        scatter = go.Scattergl(x=df[xlabel], y=df[ylabel], 
+        scatter = go.Scattergl(x=df['Time'], y=df[ycolumn], 
                                 mode='markers',
                                 marker_color=color,
                                 marker_size=6,
