@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import wellfare as wf
 
 # Model functions for fitting to data
 # -----------------------------------------------------------------------------------
