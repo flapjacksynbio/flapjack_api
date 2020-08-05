@@ -256,14 +256,35 @@ def make_induction_traces(
     x = xx[xx>0.]
     y = df[ycolumn].values
     y = y[xx>0.]
-    
+    error_y = None
+
+    # If selected, compute mean and std
+    if mean:
+        agg = {}
+        for column_name in df.columns:
+            if column_name!='Concentration':
+                agg[column_name] = 'first'
+        agg[ycolumn] = 'mean'
+        grouped_conc = df.groupby(['Concentration'], as_index=False)
+        mean = grouped_conc.agg(agg)
+        x = mean['Concentration'].values
+        y = mean[ycolumn].values
+        if std:
+            agg[ycolumn] = 'std'
+            std = grouped_conc.agg(agg)
+            y_error = std[ycolumn].values
+            error_y=dict(type='data', # value of error bar given in data coordinates
+                        array=y_error,
+                        visible=True
+                        )
     scatter1 = go.Scatter(x=x, y=y, 
                             mode='markers',
                             marker=marker,
                             marker_size=6,
                             legendgroup=group_name,
                             name=group_name,
-                            showlegend=show_legend_group,)
+                            showlegend=show_legend_group,
+                            error_y=error_y)
     fig.add_trace(scatter1, row=row, col=col)
     return fig
 
