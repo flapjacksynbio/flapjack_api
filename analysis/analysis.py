@@ -585,10 +585,11 @@ class Analysis:
         #   ref_df = dataframe containing reference measurements
         #   ndt = number of doubling times to extend exponential phase
         alpha = self.ratiometric_alpha(df)
+        if len(alpha)==0:
+            return(alpha)
         alpha_ref = alpha[alpha.Signal_id==self.ref_name]
-
-        if len(alpha)==0 or len(alpha_ref)==0:
-            return(df)
+        if len(alpha_ref)==0:
+            return(alpha_ref)
 
         alpha = alpha.sort_values('Sample')
         alpha_ref = alpha_ref.sort_values('Sample')
