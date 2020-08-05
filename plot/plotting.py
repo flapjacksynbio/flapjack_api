@@ -149,7 +149,8 @@ def layout_screen(fig, xaxis_type=None, yaxis_type=None, font_size=10):
                     tickwidth=1, 
                     title_font=dict(size=font_size), 
                     tickfont=dict(size=font_size),
-                    hoverformat=".2e"
+                    hoverformat=".2e",
+                    showgrid=False
                     )
     if yaxis_type:
         fig.update_yaxes(type=yaxis_type)
@@ -159,7 +160,8 @@ def layout_screen(fig, xaxis_type=None, yaxis_type=None, font_size=10):
                     tickwidth=1, 
                     title_font=dict(size=font_size), 
                     tickfont=dict(size=font_size),
-                    hoverformat=".2e"
+                    hoverformat=".2e",
+                    showgrid=False
                     )
     if xaxis_type:
         fig.update_xaxes(type=xaxis_type)
