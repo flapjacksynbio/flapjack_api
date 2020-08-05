@@ -217,18 +217,21 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 # What analysis to run
                 analysis_type = analysis_params['type']
 
+                # Set up the properties of the plot
+                xlabel, ylabel = plotting.plot_properties[analysis_type]['axis_labels']
+                plot_type = plotting.plot_properties[analysis_type]['plot_type']
+                
                 # Is this a kymograph or induction curve or other nested analysis?
                 analysis_function = analysis_params.get('function')
                 if analysis_function:
                     # If so, use the data column for that analysis
                     ycolumn = plotting.plot_properties[analysis_function]['data_column']
+                    # Analysis does not specify ylabel, use that from analysis function
+                    if not ylabel:
+                        _,ylabel = plotting.plot_properties[analysis_function]['axis_labels']
                 else:
                     # Otherwise use the top level analysis type's data column
                     ycolumn = plotting.plot_properties[analysis_type]['data_column']
-
-                # Set up the properties of the plot
-                xlabel, ylabel = plotting.plot_properties[analysis_type]['axis_labels']
-                plot_type = plotting.plot_properties[analysis_type]['plot_type']
 
                 # Analyze the data
                 analysis = Analysis(analysis_params, signals)
