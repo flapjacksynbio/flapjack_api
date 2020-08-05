@@ -14,13 +14,13 @@ remove_background = {
         'Velocity': False,
         'Mean Velocity': False,
         'Max Velocity': False,
-        'Expression Rate (indirect)': False,
+        'Expression Rate (indirect)': True,
         'Expression Rate (direct)': True,
         'Mean Expression': True,
         'Max Expression': True,
         'Induction Curve': True,
         'Kymograph': True,
-        'Alpha': False,
+        'Alpha': True,
         'Rho': True
     }
 
@@ -271,7 +271,7 @@ class Analysis:
         # Loop over samples
         si = 1
         for samp_id, samp_data in grouped_sample:
-            print('Computing expression rate of sample %d of %d'%(si, n_samples), flush=True)
+            print('Computing indirect expression rate of sample %d of %d'%(si, n_samples), flush=True)
             si += 1
             for meas_name, data in samp_data.groupby('Signal_id'):
                 data = data.sort_values('Time')
@@ -369,7 +369,7 @@ class Analysis:
         # Loop over samples
         si = 1
         for samp_id, samp_data in grouped_sample:
-            print('Computing expression rate of sample %d of %d'%(si, n_samples), flush=True)
+            print('Computing direct expression rate of sample %d of %d'%(si, n_samples), flush=True)
             si += 1
             for meas_name, data in samp_data.groupby('Signal_id'):
                 data = data.sort_values('Time')
