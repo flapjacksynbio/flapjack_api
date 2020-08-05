@@ -565,10 +565,10 @@ class Analysis:
 
                     # Get dataframe with single row containing alpha for this sample, name
                     data = data.iloc[0]
-                    data['Rate'] = alpha
+                    data['Alpha'] = alpha
                 else:
                     data = data.iloc[0]
-                    data['Rate'] = np.nan
+                    data['Alpha'] = np.nan
                 # Append to list of rows to append to result
                 rows.append(data)
         # Append alpha values to result df
@@ -596,7 +596,7 @@ class Analysis:
         alpha = alpha.sort_values('Sample')
         alpha_ref = alpha_ref.sort_values('Sample')
 
-        alpha['Rate'] = alpha['Rate'] / alpha_ref['Rate']
+        alpha['Rho'] = alpha['Alpha'] / alpha_ref['Alpha']
         '''
         result = pd.DataFrame()
         rows = [] 

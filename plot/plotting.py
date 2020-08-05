@@ -8,6 +8,62 @@ import wellfare as wf
 import time
 import pandas as pd
 
+# Properties to use for each analysis/plot type
+plot_properties = {
+    'Velocity': dict(
+        axis_labels=('Time', 'Velocity'),
+        plot_type='timeseries',
+        data_column='Velocity'
+        ),
+    'Expression Rate (direct)': dict(
+        axis_labels=('Time', 'Expression rate'),
+        plot_type='timeseries',
+        data_column='Rate'
+        ),
+    'Expression Rate (indirect)': dict(
+        axis_labels=('Time', 'Expression rate'),
+        plot_type='timeseries',
+        data_column='Rate'
+        ),
+    'Mean Expression': dict(
+        axis_labels=(None, 'Mean expression'),
+        plot_type='bar',
+        data_column='Expression'
+        ),
+    'Max Expression': dict(
+        axis_labels=(None, 'Max. expression'),
+        plot_type='bar',
+        data_column='Expression'
+        ),
+    'Mean Velocity': dict(
+        axis_labels=(None, 'Mean velocity'),
+        plot_type='bar',
+        data_column='Velocity'
+        ),
+    'Max Velocity': dict(
+        axis_labels=(None, 'Max. velocity'),
+        plot_type='bar',
+        data_column='Velocity'
+        ),
+    'Induction Curve': dict(
+        axis_labels=('Concentration', None),
+        plot_type='induction'
+        ),
+    'Kymograph': dict(
+        axis_labels=('Concentration', 'Time'),
+        plot_type='kymograph'
+        ),
+    'Rho':  dict(
+        axis_labels=(None, 'Rho'),
+        plot_type='bar',
+        data_column='Rho'
+        ),
+    'Alpha': dict(
+        axis_labels=(None, 'Alpha'),
+        plot_type='bar',
+        data_column='Alpha'
+        ),
+}
 
 # Set of colors to use for plot markers/lines
 #palette = DEFAULT_PLOTLY_COLORS
@@ -226,7 +282,7 @@ def make_bar_traces(
     ): 
     x = [df[xcolumn].values[0]]
     y = [df[ycolumn].mean()]
-    error_y = [df[ylabel].std()]
+    error_y = [df[ycolumn].std()]
     bar = go.Bar(x=x, y=y,
                             error_y=dict(
                                         type='data', # value of error bar given in data coordinates

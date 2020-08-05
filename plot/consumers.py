@@ -25,91 +25,6 @@ group_fields = {
     'Supplement': 'Supplement'
 }
 
-plot_properties = {
-    'Velocity': dict(
-        axis_labels=('Time', 'Velocity'),
-        plot_type='timeseries',
-        data_column='Velocity'
-        ),
-    'Expression Rate (direct)': dict(
-        axis_labels=('Time', 'Expression rate'),
-        plot_type='timeseries',
-        data_column='Rate'
-        ),
-    'Expression Rate (indirect)': dict(
-        axis_labels=('Time', 'Expression rate'),
-        plot_type='timeseries',
-        data_column='Rate'
-        ),
-    'Mean Expression': dict(
-        axis_labels=(None, 'Mean expression'),
-        plot_type='bar',
-        data_column='Expression'
-        ),
-    'Max Expression': dict(
-        axis_labels=(None, 'Max. expression'),
-        plot_type='bar',
-        data_column='Expression'
-        ),
-    'Mean Velocity': dict(
-        axis_labels=(None, 'Mean velocity'),
-        plot_type='bar',
-        data_column='Velocity'
-        ),
-    'Max Velocity': dict(
-        axis_labels=(None, 'Max. velocity'),
-        plot_type='bar',
-        data_column='Velocity'
-        ),
-    'Induction Curve': dict(
-        axis_labels=('Concentration', None),
-        plot_type='induction'
-        ),
-    'Kymograph': dict(
-        axis_labels=('Concentration', 'Time'),
-        plot_type='kymograph'
-        ),
-    'Rho':  dict(
-        axis_labels=(None, 'Rho'),
-        plot_type='bar',
-        data_column='Rho'
-        ),
-    'Alpha': dict(
-        axis_labels=(None, 'Alpha'),
-        plot_type='bar',
-        data_column='Alpha'
-        ),
-}
-'''
-axis_labels = {
-    'Velocity': ('Time', 'Velocity'),
-    'Expression Rate (direct)': ('Time', 'Rate'),
-    'Expression Rate (indirect)': ('Time', 'Rate'),
-    'Mean Expression': (None, 'Expression'),
-    'Max Expression': (None, 'Expression'),
-    'Mean Velocity': (None, 'Velocity'),
-    'Max Velocity': (None, 'Velocity'),
-    'Induction Curve': ('Concentration', None),
-    'Kymograph': ('Concentration', 'Time'),
-    'Rho': (None, 'Rate'),
-    'Alpha': (None, 'Rate')
-}
-
-plot_types = {
-    'Velocity': 'timeseries',
-    'Expression Rate (direct)': 'timeseries',
-    'Expression Rate (indirect)': 'timeseries',
-    'Mean Expression': 'bar',
-    'Max Expression': 'bar',
-    'Mean Velocity': 'bar',
-    'Max Velocity': 'bar',
-    'Rho': 'bar',
-    'Alpha': 'bar',
-    'Induction Curve': 'induction',
-    'Kymograph': 'kymograph'
-}
-'''
-
 class PlotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
@@ -305,13 +220,15 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 # Is this a kymograph or induction curve or other nested analysis?
                 analysis_function = analysis_params.get('function')
                 if analysis_function:
-                    ycolumn = plot_properties[analysis_function]['data_column']
+                    # If so, use the data column for that analysis
+                    ycolumn = plotting.plot_properties[analysis_function]['data_column']
                 else:
-                    ycolumn = plot_properties[analysis_type]['data_column']
+                    # Otherwise use the top level analysis type's data column
+                    ycolumn = plotting.plot_properties[analysis_type]['data_column']
 
                 # Set up the properties of the plot
-                xlabel, ylabel = plot_properties[analysis_type]['axis_labels']
-                plot_type = plot_properties[analysis_type]['plot_type']
+                xlabel, ylabel = plotting.plot_properties[analysis_type]['axis_labels']
+                plot_type = plotting.plot_properties[analysis_type]['plot_type']
 
                 # Analyze the data
                 analysis = Analysis(analysis_params, signals)
