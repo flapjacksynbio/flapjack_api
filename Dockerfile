@@ -13,4 +13,4 @@ RUN pip install -r requirements.txt
 # Adds application code to the image
 COPY . .
 
-EXPOSE 8000
+EXPOSE $PORT
