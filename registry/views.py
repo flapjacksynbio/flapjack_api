@@ -285,7 +285,7 @@ class VectorViewSet(viewsets.ModelViewSet):
     serializer_class = VectorSerializer
     filter_class = VectorFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = ['names', 'dnas']
+    search_fields = ['name']
 
 
 class SupplementViewSet(viewsets.ModelViewSet):

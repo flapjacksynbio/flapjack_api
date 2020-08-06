@@ -3,1063 +3,598 @@ import pandas as pd
 from scipy.optimize import curve_fit
 from django_pandas.io import read_frame
 from registry.models import *
+from registry.util import *
+from analysis.util import *
 from scipy.interpolate import interp1d, UnivariateSpline
 from scipy.signal import medfilt, savgol_filter
 import wellfare as wf
 import time
 
-
-
-def normalize_min_max(data):    
-    val = data['value'].values
-    nval = (val-np.nanmin(val)) / (np.nanmax(val) - np.nanmin(val))
-    data = data.assign(value=nval)
-    return data
-
-def normalize_mean_std(data):    
-    val = data['value'].values
-    nval = (val-np.nanmean(val)) / np.nanstd(val)
-    data = data.assign(value=nval)
-    return data
-
-def normalize_temporal_mean(data):    
-    val = data['value'].values
-    t = data['time'].values
-    sval = wf.curves.Curve(x=t, y=val)
-    sval = sval.normalized()
-    nval = sval(t)
-    data = data.assign(value=nval)
-    return data
-
-def normalize_data(df, norm_type):
-    norm_funcs = {
-        'min_max': normalize_min_max,
-        'mean_std': normalize_mean_std,
-        'temporal_mean': normalize_temporal_mean
+remove_background = {
+        'Velocity': False,
+        'Mean Velocity': False,
+        'Max Velocity': False,
+        'Expression Rate (indirect)': True,
+        'Expression Rate (direct)': True,
+        'Mean Expression': True,
+        'Max Expression': True,
+        'Induction Curve': True,
+        'Kymograph': True,
+        'Alpha': True,
+        'Rho': True
     }
-    norm_func = norm_funcs.get(norm_type, None)
-    rows = []
-    result = pd.DataFrame()
-    if norm_func:
-        grouped_samp = df.groupby('sample__id')
-        for samp_id,samp_data in grouped_samp:
-            grouped_name = samp_data.groupby('name')
-            for name,meas in grouped_name:
-                meas = norm_func(meas)
-                rows.append(meas)
-        if len(rows)>0:
-            result = result.append(rows)
-        return result
-    else:
+
+class Analysis:
+    def __init__(self, params, signals):
+        self.set_params(params)
+        self.signals = signals
+        # Functions to call for particular analysis types
+        self.analysis_funcs = {
+            'Velocity': self.velocity,
+            'Expression Rate (indirect)': self.expression_rate_indirect,
+            'Expression Rate (direct)': self.expression_rate_direct,
+            'Mean Velocity': self.mean_velocity,
+            'Max Velocity': self.max_velocity,
+            'Mean Expression': self.mean_expression,
+            'Max Expression': self.max_expression,
+            'Induction Curve': self.induction_curve,
+            'Kymograph': self.kymograph,
+            'Alpha': self.ratiometric_alpha,
+            'Rho': self.ratiometric_rho
+        }
+        self.background = {}
+
+    def set_params(self, params):
+        self.analysis_type = params['type']
+        self.density_name = params.get('biomass_signal')
+        self.ref_name = params.get('ref_signal')
+        self.bg_std_devs = float(params.get('bg_correction', 0))
+        self.min_density = float(params.get('min_biomass', 0))
+        self.n_doubling_times = float(params.get('ndt', 2))
+        self.remove_data = bool(params.get('remove_data', False))
+        self.smoothing_type = params.get('smoothing_type', 'savgol')
+        self.smoothing_param1 = int(params.get('pre_smoothing', 21))
+        self.smoothing_param2 = int(params.get('post_smoothing', 21))
+        self.degr = float(params.get('degr', 0.))
+        self.eps_L = float(params.get('eps_L', 1e-7))
+        self.chemical_id = params.get('chemical', None)
+        self.ref_name = params.get('ref_signal')
+        self.bounds = [[0,0,0,0], [1,1,1,24]]
+        self.function = params.get('function')
+
+    def analyze_data(self, df):     
+        # Is it necessary to remove background for this analysis?
+        if remove_background[self.analysis_type]:
+            df = self.bg_correct(df)
+        # Apply analysis to dataframe
+        analysis_func = self.analysis_funcs[self.analysis_type]
+        df = analysis_func(df)
         return df
 
-def compute_background(assay, media, strain):
-    s = Sample.objects.filter(assay__name__exact=assay) \
-                        .filter(media__name__exact=media)
-    samps_no_cells = s.filter(dna__names__exact=['None']).filter(strain__name__exact='None')
-    samps_no_dna = s.filter(dna__names__exact=['None']).filter(strain__name__exact=strain)
-    meas_no_cells = get_measurements(samps_no_cells)
-    meas_no_dna = get_measurements(samps_no_dna)
+    def compute_background(self, assay, media, strain):
+        s = Sample.objects.filter(assay__name__exact=assay) \
+                            .filter(media__name__exact=media)
+        samps_no_cells = s.filter(vector__name__in=['none', 'None']).filter(strain__name__in=['none', 'None'])
+        samps_no_dna = s.filter(vector__name__in=['none', 'None']).filter(strain__name__exact=strain)
+        meas_no_cells = get_measurements(samps_no_cells)
+        meas_no_dna = get_measurements(samps_no_dna)
 
-    # Compute media background
-    bg_media = {}
-    grouped_meas = meas_no_cells.groupby('name')
-    for name,data_meas in grouped_meas:
-        vals = []
-        grouped_samp = data_meas.groupby('sample__id')
-        for samp_id,data_samp in grouped_samp:
-            data_samp = data_samp.sort_values('time')
-            vals.append(data_samp['value'].values)
-        vals = np.array(vals)
-        bg_media[name] = (np.mean(vals, axis=0), np.std(vals, axis=0))
+        # Compute media background
+        bg_media = {}
+        grouped_meas = meas_no_cells.groupby('Signal_id')
+        for name,data_meas in grouped_meas:
+            vals = []
+            grouped_samp = data_meas.groupby('Sample')
+            for samp_id,data_samp in grouped_samp:
+                data_samp = data_samp.sort_values('Time')
+                vals.append(data_samp['Measurement'].values)
+            vals = np.array(vals)
+            bg_media[name] = (np.mean(vals, axis=0), np.std(vals, axis=0))
 
-    # Compute strain background
-    bg_strain = {}
-    grouped_meas = meas_no_dna.groupby('name')
-    for name,data_meas in grouped_meas:
-        vals = []
-        grouped_samp = data_meas.groupby('sample__id')
-        for samp_id,data_samp in grouped_samp:
-            data_samp = data_samp.sort_values('time')
-            vals.append(data_samp['value'].values)
-        vals = np.array(vals)
-        bg_strain[name] = (np.mean(vals, axis=0), np.std(vals, axis=0))
+        # Compute strain background
+        bg_strain = {}
+        grouped_meas = meas_no_dna.groupby('Signal_id')
+        for name,data_meas in grouped_meas:
+            vals = []
+            grouped_samp = data_meas.groupby('Sample')
+            for samp_id,data_samp in grouped_samp:
+                data_samp = data_samp.sort_values('Time')
+                vals.append(data_samp['Measurement'].values)
+            vals = np.array(vals)
+            bg_strain[name] = (np.mean(vals, axis=0), np.std(vals, axis=0))
 
-    return bg_media,bg_strain
+        return bg_media,bg_strain
 
-def get_bg_corrected(samples, density_name, bg_std_devs=2., min_density=0.05, remove_data=False):
-    bg_all = {}
+    def get_background(self, assay, media, strain):
+        key = (assay, media, strain)
+        if key not in self.background:
+            self.background[key] = self.compute_background(assay, media, strain)
+        return self.background[key]
 
-    # Empty dataframe to accumulate result
-    meas_bg_corrected = pd.DataFrame()
+    def bg_correct(self, df):
+        # Empty dataframe to accumulate result
+        meas_bg_corrected = pd.DataFrame()
 
-    # Ignore background samples
-    meas = get_measurements(samples.exclude(dna__names__exact=['None']))
-    # Loop over samples
-    rows = []
-    grouped_sample = meas.groupby('sample__id')
-    for samp_id,sample_data in grouped_sample:
-        assay = sample_data['sample__assay__name'].values[0]
-        media = sample_data['sample__media__name'].values[0]
-        strain = sample_data['sample__strain__name'].values[0]
-        key = (assay,media,strain)
-        if key not in bg_all:
-            bg_media,bg_strain = compute_background(assay, media, strain)
-            #print('Computed background for ', key, bg_media, bg_strain)
-            bg_all[key] = bg_media, bg_strain
-        else:
-            bg_media, bg_strain = bg_all[key]
-        grouped_name = sample_data.groupby('name')   
-        # Loop over measurement names
-        for name,meas_data in grouped_name:
-            meas_data = meas_data.sort_values('time')
-            time = meas_data['time']
-            vals = meas_data['value'].values
-            if name==density_name:
-                # Correct OD
-                bg_media_mean, bg_media_std = bg_media.get(name, (0.,0.))
-                vals_corrected = vals - bg_media_mean
-                if remove_data:
-                    print('Correcting OD bg', flush=True)
-                    print('Removing %d data points'%np.sum(vals_corrected < bg_std_devs*bg_media_std), flush=True)
-                    vals_corrected[vals_corrected < np.maximum(bg_std_devs*bg_media_std, min_density)] = np.nan
-                #print('bgmean, bgstd = ', bg_media_mean, bg_media_std)
-            else:
-                # Correct fluorescence
-                bg_strain_mean, bg_strain_std = bg_strain.get(name, (0.,0.))
-                vals_corrected = vals - bg_strain_mean
-                if remove_data:
-                    print('Correcting fluo bg', flush=True)
-                    print('Removing %d data points'%np.sum(vals_corrected < bg_std_devs*bg_strain_std), flush=True)
-                    vals_corrected[vals_corrected < bg_std_devs*bg_strain_std] = np.nan
-                #print('bgmean, bgstd = ', bg_strain_mean, bg_strain_std)
+        # Ignore background samples
+        if len(df)==0:
+            print('bg_correct got empty dataframe', flush=True)
+            return df
+        meas = df[~df.Vector.isin(['none','None'])]
+        if len(meas)==0:
+            print('bg_correct got empty meas dataframe', flush=True)
+            return df
 
-            # Remove all data at times earlier than the last NaN
-            idx = np.where(np.isnan(vals_corrected[::-1]))[0]
-            if len(idx)>0:
-                # Set all data before this time to NaN
-                vals_corrected[:len(vals_corrected)-idx[0]] = np.nan
-                
-            # Put values into dataframe
-            meas_data = meas_data.assign(value=vals_corrected)
-            rows.append(meas_data)
-
-    if len(rows)>0:
-        meas_bg_corrected = meas_bg_corrected.append(rows)        
-    # Remove data meeting correction criteria
-    meas_bg_corrected = meas_bg_corrected.dropna()
-    return(meas_bg_corrected)
-
-def get_samples(filter):
-    print('get_samples', flush=True)
-    start = time.time()
-    print(f"filter: {filter}", flush=True)
-    studies = filter.get('study')
-    assays = filter.get('assay')
-    dnas = filter.get('dna')
-    meds = filter.get('media')
-    strains = filter.get('strain')
-    inducers = filter.get('inducer')
-    print(f"in get_samples inducers: {inducers}", flush=True)
-
-    s = Sample.objects.all()
-    filter_exist = False
-
-    if studies:
-        s = s.filter(assay__study__id__in=studies)
-        filter_exist = True    
-    if assays:
-        s = s.filter(assay__id__in=assays)
-        filter_exist = True    
-    if dnas:
-        s = s.filter(dna__id__in=dnas)
-        filter_exist = True    
-    if meds:
-        s = s.filter(media__id__in=meds)  
-        filter_exist = True    
-    if strains:
-        s = s.filter(strain__id__in=strains)
-        filter_exist = True    
-
-    if not filter_exist:
-        s = Sample.objects.none()
-
-    end = time.time()
-    print('get_samples took %f seconds'%(end-start), flush=True)
-    return s
-##################
-### TIMESERIES ###
-##################
-
-# Get dataframe of measurement values for a set of samples in a query
-# -----------------------------------------------------------------------------------
-def get_measurements(samples):
-    # Get measurements for a given samples
-    print('get_measurements', flush=True)
-    start = time.time()
-    samp_ids = [samp.id for samp in samples]
-    m = Measurement.objects.filter(sample__id__in=samp_ids)
-    df = read_frame(m, fieldnames=['name', \
-                                    'value', \
-                                    'time', \
-                                    'sample__id', \
-                                    'sample__assay__name', \
-                                    'sample__assay__study__name', \
-                                    'sample__media__name', \
-                                    'sample__strain__name', \
-                                    'sample__dna__names', \
-                                    'sample__inducer__names', \
-                                    'sample__inducer__concentrations', \
-                                    'sample__row', 'sample__col'])
-    end = time.time()
-    print('get_measurements took ', end-start, flush=True)
-    return df
-
-# Model functions for fitting to data
-# -----------------------------------------------------------------------------------
-def exponential_growth(t, y0, k):
-    od = y0*np.exp(k*t)
-    return(od)
-
-def exponential_growth_rate(t, y0, k):
-    return(k)
-
-def gompertz(t, y0, ymax, um, l):
-    A = np.log(ymax/y0)
-    log_rel_od = (A*np.exp(-np.exp((((um*np.exp(1))/A)*(l-t))+1)))
-    od = y0 * np.exp(log_rel_od)
-    return(od)
-
-def gompertz_growth_rate(t, y0, ymax, um, l):
-    A = np.log(ymax/y0)
-    gr = um *np.exp((np.exp(1)* um *(l - t))/A - \
-            np.exp((np.exp(1)* um *(l - t))/A + 1) + 2)
-    return(gr)
-
-# Analysis functions that compute timeseries from a dataframe with given keyword args
-# -----------------------------------------------------------------------------------
-
-'''
-def ratiometric_rho(df, **kwargs):
-    # Parameters:
-    #   df = data frame to analyse
-    #   density_name = name of measurement to use for biomass or density
-    rho_x = kwargs.get('rho_x', 'CFP')
-    rho_y = kwargs.get('rho_y', 'RFP')
-
-    result = pd.DataFrame()
-    rows_to_append = []
-    lowess = sm.nonparametric.lowess
-
-    # Loop over samples
-    print(f"Samples: {len(df.groupby('sample__id'))}", flush=True)
-    for samp_id, data in df.groupby('sample__id'):
-        data = data.sort_values('time')
-        xdata = data[data['name']==rho_x]
-        ydata = data[data['name']==rho_y]
-        if len(xdata>21) and len(ydata>21):
-            tx = xdata['time']
-            x = savgol_filter(xdata['value'], 21, 3, mode='interp') 
-            #medfilt(xdata['value'],11) #.rolling(window=10, min_periods=1).median()
-            ty = ydata['time']
-            y = savgol_filter(ydata['value'], 21, 3, mode='interp')  
-            #medfilt(ydata['value'],11) #.rolling(window=10, min_periods=1).median()
-            
-            if(len(x) > 1 and len(tx) > 1 and len(y) > 1 and len(ty) > 1):
-                ix = interp1d(tx,x)
-                iy = interp1d(ty,y)
-
-                # Compute time range
-                tmin = max(tx.min(), ty.min())
-                tmax = min(tx.max(), ty.max())
-                t = np.linspace(tmin, tmax, 100)
-
-                sx = ix(t) #savgol_filter(ix(t), 21, 3, mode='interp')             
-                sy = iy(t) #savgol_filter(iy(t), 21, 3, mode='interp') 
-
-                iz = interp1d(sx, sy)
-                xmin = sx.min()
-                xmax = sx.max()
-                xx = np.linspace(xmin, xmax, 100)
-                
-                sz = UnivariateSpline(xx, iz(xx), s=0, k=1)
-                rho = sz.derivative()(x)
-
-                rows = data[data['name']==rho_x]
-                rows = rows.assign(value=rho)
-                # Reslice data to new time range
-                rows = rows[ (rows.time>=tmin) & (rows.time<tmax) ]
-                #print('tmin, tmax: ', tmin, tmax, flush=True)
-                rows_to_append.append(rows)
-    if len(rows_to_append)>0:
-        result = result.append(rows)
-    return(result)
-'''
-
-def velocity(df, **kwargs):
-    '''
-    Parameters:
-       df = data frame to analyse
-       pre_smoothing = Savitsky-Golay filter parameter (window size)
-       post_smoothing = Savitsky-Golay filter parameter (window size)
-    '''
-    smoothing_type = kwargs.get('smoothing_type', 'savgol')
-    smoothing_param1 = kwargs.get('pre_smoothing', 21)
-    smoothing_param2 = kwargs.get('post_smoothing', 21)
-
-    print(smoothing_param1, smoothing_param2, flush=True)
-    
-    result = pd.DataFrame()
-    rows = []
-
-    if smoothing_type=='lowess':
-        lowess = sm.nonparametric.lowess
-
-    grouped_sample = df.groupby('sample__id')
-    n_samples = len(grouped_sample)
-    # Loop over samples
-    si = 1
-    for samp_id, samp_data in grouped_sample:
-        print('Computing velocity of sample %d of %d'%(si, n_samples), flush=True)
-        si += 1
-        for meas_name, data in samp_data.groupby('name'):
-            data = data.sort_values('time')
-            time = data['time'].values
-            val = data['value'].values
-            
-            if smoothing_type=='savgol':
-                min_data_pts = max(smoothing_param1,smoothing_param2)
-            else:
-                min_data_pts = 2
-            print(len(val), flush=True)
-            if len(val)>min_data_pts:
-                # Interpolation
-                ival = interp1d(time, val)
-                
-                # Savitzky-Golay filter
-                if smoothing_param1>0:
-                    if smoothing_type=='savgol':
-                        print('Applying savgol filter', flush=True)
-                        sval = savgol_filter(val, int(smoothing_param1), 2, mode='interp')
-                        print(len(val), flush=True)
-                    elif smoothing_type=='lowess':
-                        print('Applying lowess filter', flush=True)
-                        z = lowess(val, time, frac=smoothing_param1)
-                        sval = z[:,1]
-                        print(len(val), flush=True)
-
-                # Interpolation
-                sval = interp1d(time, sval)
-
-                # Compute expression rate for time series
-                velocity = savgol_filter(ival(time), int(smoothing_param1), 2, deriv=1, mode='interp')
- 
-                # Final Savitzky-Golay filtering of expression rate profile
-                if smoothing_param2>0:
-                    if smoothing_type=='savgol':
-                        velocity = savgol_filter(velocity, int(smoothing_param2), 2, mode='interp')
-                    elif smoothing_type=='lowess':
-                        z = lowess(velocity, time, frac=smoothing_param2)
-                        ksynth = z[:,1]
-                # Put result in dataframe
-                data = data.assign(value=velocity)
-                rows.append(data)
-    if len(rows)>0:
-        result = result.append(rows)
-    else:
-       print('No rows to add to velocity dataframe', flush=True)
-
-    return(result)
-
-def expression_rate_indirect(df, **kwargs):
-    '''
-    Parameters:
-       df = data frame to analyse
-       density_df = dataframe with density measurements
-       pre_smoothing = Savitsky-Golay filter parameter (window size)
-       post_smoothing = Savitsky-Golay filter parameter (window size)
-    '''
-    density_name = kwargs.get('density_name')
-    density_df = df[df['name']==density_name]
-    smoothing_type = kwargs.get('smoothing_type', 'savgol')
-    smoothing_param1 = kwargs.get('pre_smoothing', 0.1)
-    smoothing_param2 = kwargs.get('post_smoothing', 0.1)
-
-    print(smoothing_param1, smoothing_param2, flush=True)
-    
-    result = pd.DataFrame()
-    rows = []
-
-    if smoothing_type=='lowess':
-        lowess = sm.nonparametric.lowess
-
-    grouped_sample = df.groupby('sample__id')
-    n_samples = len(grouped_sample)
-    # Loop over samples
-    si = 1
-    for samp_id, samp_data in grouped_sample:
-        print('Computing expression rate of sample %d of %d'%(si, n_samples), flush=True)
-        si += 1
-        for meas_name, data in samp_data.groupby('name'):
-            data = data.sort_values('time')
-            time = data['time'].values
-            val = data['value'].values
-            density = density_df[density_df['sample__id']==samp_id]
-            density = density.sort_values('time')
-            density_val = density['value'].values
-            density_time = density['time'].values
-            
-            if smoothing_type=='savgol':
-                min_data_pts = max(smoothing_param1,smoothing_param2)
-            else:
-                min_data_pts = 2
-            print(len(val), flush=True)
-            if len(val)>min_data_pts and len(density_val)>min_data_pts:
-                # Interpolation
-                ival = interp1d(time, val)
-                idensity = interp1d(density_time, density_val)
-
-                # Savitzky-Golay filter
-                if smoothing_param1>0:
-                    if smoothing_type=='savgol':
-                        print('Applying savgol filter', flush=True)
-                        sval = savgol_filter(val, int(smoothing_param1), 2, mode='interp')
-                        sdensity = savgol_filter(density_val, int(smoothing_param1), 2, mode='interp')
-                        print(len(val), len(density_val), flush=True)
-                    elif smoothing_type=='lowess':
-                        print('Applying lowess filter', flush=True)
-                        z = lowess(val, time, frac=smoothing_param1)
-                        sval = z[:,1]
-                        z = lowess(density_val, density_time, frac=smoothing_param1)
-                        sdensity = z[:,1]
-                        print(len(val), len(density_val), flush=True)
-
-                # Interpolation
-                sval = interp1d(time, sval)
-                sdensity = interp1d(density_time, sdensity)
-
-                # Compute time range
-                tmin = max(time.min(), density_time.min())
-                tmax = min(time.max(), density_time.max())
-                time = time[ (time>=tmin) & (time<tmax)]
-
-                # Reslice data to new time range
-                data = data[ (data.time>=tmin) & (data.time<tmax) ]
-
-                # Compute expression rate for time series
-                dvaldt = savgol_filter(ival(time), int(smoothing_param1), 2, deriv=1, mode='interp')
-                ksynth = dvaldt / sdensity(time)
-                #dvaldt = sval.derivative()(time)
-                #ksynth = dvaldt / (sdensity(time) + 0.)
-
-                # Compute promoter activity d/dt(I/A)
-                #conc = sval(time) / sdensity(time)
-                #sconc = UnivariateSpline(time, conc, s=0, k=3)
-                #ksynth = sconc.derivative()(time)
- 
-                # Final Savitzky-Golay filtering of expression rate profile
-                if smoothing_param2>0:
-                    if smoothing_type=='savgol':
-                        ksynth = savgol_filter(ksynth, int(smoothing_param2), 2, mode='interp')
-                    elif smoothing_type=='lowess':
-                        z = lowess(ksynth, time, frac=smoothing_param2)
-                        ksynth = z[:,1]
-                # Put result in dataframe
-                data = data.assign(value=ksynth)
-                rows.append(data)
-    if len(rows)>0:
-        result = result.append(rows)
-    else:
-       print('No rows to add to expression rate dataframe', flush=True)
-
-    return(result)
-
-def expression_rate_direct(df, **kwargs):
-    '''
-    Parameters:
-        df = data frame to analyse
-        density_df = dataframe containing density (biomass) measurements
-        degr = degradation rate of reporter protein
-        eps_L = insignificant value for model fitting
-    '''
-    density_name = kwargs.get('density_name')
-    density_df = df[df['name']==density_name]
-    degr = kwargs.get('degr', 0.)
-    eps_L = kwargs.get('eps_L', 1e-7)
-
-    print(degr, eps_L, flush=True)
-    
-    result = pd.DataFrame()
-    rows = []
-
-    grouped_sample = df.groupby('sample__id')
-    n_samples = len(grouped_sample)
-    # Loop over samples
-    si = 1
-    for samp_id, samp_data in grouped_sample:
-        print('Computing expression rate of sample %d of %d'%(si, n_samples), flush=True)
-        si += 1
-        for meas_name, data in samp_data.groupby('name'):
-            data = data.sort_values('time')
-            time = data['time']
-            val = data['value']
-            density = density_df[density_df['sample__id']==samp_id]
-            density = density.sort_values('time')
-            density_val = density['value']
-            density_time = density['time']
-
-            if len(val)>1:
-                # Construct curves
-                fpt = time.values
-                fpy = val.values
-                cfp = wf.curves.Curve(x=fpt, y=fpy)
-                odt = density_time.values
-                ody = density_val.values
-                cod = wf.curves.Curve(x=odt, y=ody)
-                # Compute time range
-                xmin, xmax = cod.xlim()
-                ttu = np.arange(xmin, xmax, 0.1)
-                # Fit model
-                if meas_name==density_name:
-                    ksynth, _, _, _, _ = wf.infer_growth_rate(cod, ttu, 
-                                                                eps_L=eps_L, 
-                                                                positive=True)
+        # Loop over samples
+        rows = []
+        grouped_sample = meas.groupby('Sample')
+        for samp_id,sample_data in grouped_sample:
+            assay = sample_data['Assay'].values[0]
+            media = sample_data['Media'].values[0]
+            strain = sample_data['Strain'].values[0]
+            bg_media, bg_strain = self.get_background(assay, media, strain)
+            grouped_name = sample_data.groupby('Signal_id')   
+            # Loop over measurement names
+            for name,meas_data in grouped_name:
+                meas_data = meas_data.sort_values('Time')
+                time = meas_data['Time']
+                vals = meas_data['Measurement'].values
+                if name==self.density_name:
+                    # Correct OD
+                    bg_media_mean, bg_media_std = bg_media.get(name, (0.,0.))
+                    vals_corrected = vals - bg_media_mean
+                    if self.remove_data:
+                        print('Correcting OD bg', flush=True)
+                        print('Removing %d data points'%np.sum(vals_corrected < self.bg_std_devs*bg_media_std), flush=True)
+                        vals_corrected[vals_corrected < np.maximum(self.bg_std_devs*bg_media_std, self.min_density)] = np.nan
+                    #print('bgmean, bgstd = ', bg_media_mean, bg_media_std)
                 else:
-                    ksynth, _, _, _, _ = wf.infer_synthesis_rate_onestep(cfp, cod, ttu, 
-                                                                            degr=degr, eps_L=eps_L, 
-                                                                            positive=True)
-                data = data.assign(value=ksynth(fpt))
-                rows.append(data)
-    if len(rows)>0:
-        result = result.append(rows)
-    else:
-        print('No rows to add to expression rate dataframe', flush=True)
-    return(result.dropna())
+                    # Correct fluorescence
+                    bg_strain_mean, bg_strain_std = bg_strain.get(name, (0.,0.))
+                    vals_corrected = vals - bg_strain_mean
+                    if self.remove_data:
+                        print('Correcting fluo bg', flush=True)
+                        print('Removing %d data points'%np.sum(vals_corrected < self.bg_std_devs*bg_strain_std), flush=True)
+                        vals_corrected[vals_corrected < self.bg_std_devs*bg_strain_std] = np.nan
+                    #print('bgmean, bgstd = ', bg_strain_mean, bg_strain_std)
 
+                # Remove all data at times earlier than the last NaN
+                idx = np.where(np.isnan(vals_corrected[::-1]))[0]
+                if len(idx)>0:
+                    # Set all data before this time to NaN
+                    vals_corrected[:len(vals_corrected)-idx[0]] = np.nan
 
+                # Put values into dataframe
+                meas_data = meas_data.assign(Measurement=vals_corrected)
+                #meas_data['Measurement'] = vals_corrected
+                rows.append(meas_data)
 
-# Analysis functions that compute value from a dataframe with given keyword args
-# ----------------------------------------------------------------------------------
-def ratiometric_alpha(df, **kwargs):
-    # Parameters:
-    #   bounds = tuple of list of min and max values for  Gompertz model parameters
-    #   df = dataframe of measurements including OD
-    #   density_df = dataframe containing biomass measurements
-    #   ndt = number of doubling times to extend exponential phase
-    density_name = kwargs.get('density_name')
-    density_df = df[df['name']==density_name]
-    bounds = kwargs['bounds']
-    ndt = kwargs['ndt']
+        if len(rows)>0:
+            meas_bg_corrected = meas_bg_corrected.append(rows)        
+        # Remove data meeting correction criteria
+        if len(meas_bg_corrected)>0:
+            meas_bg_corrected = meas_bg_corrected.dropna(subset=['Measurement'])
+        else:
+            print("bg_correct returning empty dataframe", flush=True)
+        return(meas_bg_corrected)
 
-    result = pd.DataFrame()
-    rows = []
-
-    grouped_samples = df.groupby('sample__id')
-    for samp_id,data in grouped_samples:
-        # input values for Gompertz model fit
-        oddf = density_df[density_df['sample__id']==samp_id]
-        oddf = oddf.sort_values('time')
-        odt = oddf['time'].values
-        odval = oddf['value'].values
-        odt = odt[odval>0.]
-        odval = odval[odval>0.]
-        #y = np.log(odval[odval>0.]) - np.log(np.nanmin(odval[odval>0.]))
-
-        # Fit Gompertz model
-        try:
-            z,_=curve_fit(gompertz, odt, odval, bounds=bounds)
-        except:
-            break
-            
-        y0 = z[0]
-        ymax = z[1]
-        A = np.log(ymax/y0)
-        um = z[2]
-        l = z[3]
-
-
-        print('y0, ymax, um, l', y0, ymax, um, l, flush=True)
-
-        # Compute time of peak growth
-        tm = ((A/(np.exp(1)*um))+l)
-        # Compute doubling time at peak growth
-        dt = np.log(2)/um
-        # Time range to consider exponential growth phase
-        t1 = tm
-        t2 = tm + ndt*dt
-
-        print('t1, t2', t1, t2, flush=True)
-
-        # Compute alpha as slope of fluo vs od for each measurement name
-        grouped_name = data.groupby('name')
-        for name,data in grouped_name:
-            # fluorescence measurements
-            mdf = data[(data['time']>=t1) & (data['time']<=t2)]
-            mdf = mdf.sort_values('time')
-            mval = mdf['value'].values
-            mt = mdf['time'].values
-            
-             # od measurements
-            oddf = oddf[(oddf['time']>=t1)&(oddf['time']<=t2)]
-            oddf = oddf.sort_values('time')
-            odval = oddf['value'].values
-            odt = oddf['time'].values
-            
-            if len(mt)>1 and len(odt)>1:
-                smval = interp1d(mt, mval, kind='linear', bounds_error=False)
-                sodval = interp1d(odt, odval, kind='linear', bounds_error=False)
-
-                tmin = max(odt.min(), mt.min())
-                tmax = min(odt.max(), mt.max())
-                print('tmin, tmax', tmin, tmax, flush=True)
-                times = np.linspace(tmin,tmax,100)
-
-                z = np.polyfit(sodval(times), smval(times), 1)
-                p = np.poly1d(z)
-
-                # Get slope as alpha
-                alpha = z[0]
-
-                # Get dataframe with single row containing alpha for this sample, name
-                data = data.iloc[0]
-                data['value'] = alpha
-            else:
-                data = data.iloc[0]
-                data['value'] = np.nan
-            # Append to list of rows to append to result
-            rows.append(data)
-    # Append alpha values to result df
-    if len(rows)>0:
-        result=result.append(rows)
-    return result
-
-def ratiometric_rho(df, **kwargs):
-    # Parameters:
-    #   bounds = tuple of list of min and max values for  Gompertz model parameters
-    #   df = dataframe of measurements including OD
-    #   density_df = dataframe containing biomass measurements
-    #   ref_df = dataframe containing reference measurements
-    #   ndt = number of doubling times to extend exponential phase
-    density_name = kwargs.get('density_name')
-    ref_name = kwargs.get('ref_name')
-    density_df = df[df['name']==density_name]
-    ref_df = df[df['name']==ref_name]
-    bounds = kwargs['bounds']
-    ndt = kwargs['ndt']
-
-    alpha = ratiometric_alpha(df, **kwargs)
-    alpha_ref = ratiometric_alpha(ref_df, **kwargs)
-
-    alpha = alpha.sort_values('sample__id')
-    alpha_ref = alpha_ref.sort_values('sample__id')
-
-    result = pd.DataFrame()
-    rows = [] 
-    grouped = alpha.groupby('name')
-    # Normalise each measurement separately by the reference
-    for name_id,data in grouped:
-        data = data.sort_values('sample__id')
-        vals = data['value'].values
-        ref = alpha_ref['value'].values
-        data['value'] = vals / ref
-        rows.append(data)
-    result = result.append(rows)
-    return result     
-
-
-
-def mean_expression_ratio(df, **kwargs):
-    '''
-    Return a dataframe containing the ratio of mean values for each sample,name in the input dataframe df
-    '''
-    all_mean = mean_expression(df, **kwargs)
-    ref_name = kwargs.get('ref_name', None)
-    ref_df = df[df['name']==ref_name]
-    ref_df = mean_expression(ref_df)
-    ref = ref_df['value'].values
-
-    result = pd.DataFrame()
-    rows = [] 
-    grouped = all_mean.groupby('name')
-    # Normalise each measurement separately by the reference
-    for name_id,data in grouped:
-        vals = data['value'].values
-        data['value'] = vals / ref
-        rows.append(data)
-    result = result.append(rows)
-    return result     
-
-
-def mean_expression_rate(df, **kwargs):
-    '''
-    Return a dataframe containing the mean value for each sample,name in the input dataframe df
-    '''
-    density_name = kwargs.get('density_name', None)
-    if density_name:
-        density_df = df[df['name']==density_name]
-    else:
-        return result
-    rows = []
-
-    # Compute mean expression rate as average of time series
-    #expr = expression_rate_direct(df, density_name=density_name)
-    #result = mean_expression(expr)
-
-    # Compute mean expression rate as finite diff between start and end
-    result = pd.DataFrame()
-    grouped = df.groupby('sample__id')
-    for samp_id,data in grouped:
-        density = density_df[density_df['sample__id']==samp_id]
-        density_df = density_df.sort_values('time')
-        mean_density = density['value'].mean()
-        for name,meas in data.groupby('name'):
-            meas = meas.sort_values('time')
-            df = meas['value'].values[-1] - meas['value'].values[0]
-            dt = meas['time'].values[-1] - meas['time'].values[0]
-            meas = meas.iloc[[0]]
-            meas = meas.assign(value=df/dt/mean_density)
-            rows.append(meas)
-    result = result.append(rows)
-    return result
-
-def mean_expression_rate_ratio(df, **kwargs):
-    '''
-    Return a dataframe containing the mean value for each sample,name in the input dataframe df
-    '''
-    result = pd.DataFrame()
-    ref_name = kwargs.get('ref_name', None)
-    if ref_name:
-        ref_df = df[df['name']==ref_name]
-    else:
-        return result
-    rows = []
-    df = df.sort_values('time')
-    grouped = df.groupby('sample__id')
-    for samp_id,data in grouped:
-        ref = ref_df[ref_df['sample__id']==samp_id]
-        for name,meas in data.groupby('name'):
-            df = meas['value'].values[-1] - meas['value'].values[0]
-            dref = ref['value'].values[-1] - ref['value'].values[0]
-            meas = meas.iloc[[0]]
-            meas = meas.assign(value=df/dref)
-            rows.append(meas)
-    result = result.append(rows)
-    return result
-
-
-def mean_expression(df, **kwargs):
-    '''
-    Return a dataframe containing the mean value for each sample,name in the input dataframe df
-    '''
-    agg = {}
-    for column_name in df.columns:
-        if column_name!='sample__id' and column_name!='name':
-            agg[column_name] = 'first'
-    agg['value'] = 'mean'
-    grouped_samples = df.groupby(['sample__id', 'name'], as_index=False)
-    mean = grouped_samples.agg(agg)
-    return mean     
-
-def max_expression(df, **kwargs):
-    '''
-    Return a dataframe containing the max value for each sample,name in the input dataframe df
-    '''
-    agg = {}
-    for column_name in df.columns:
-        if column_name!='sample__id' and column_name!='name':
-            agg[column_name] = 'first'
-    agg['value'] = 'max'
-    grouped_samples = df.groupby(['sample__id', 'name'], as_index=False)
-    max_expr = grouped_samples.agg(agg)
-    return max_expr    
-
-def mean_velocity(df, **kwargs):
-    '''
-    Return a dataframe containing the max value for each sample,name in the input dataframe df
-    '''
-    df = velocity(df, **kwargs)
-    agg = {}
-    for column_name in df.columns:
-        if column_name!='sample__id' and column_name!='name':
-            agg[column_name] = 'first'
-    agg['value'] = 'mean'
-    grouped_samples = df.groupby(['sample__id', 'name'], as_index=False)
-    mean_expr = grouped_samples.agg(agg)
-    return mean_expr    
-
-def max_velocity(df, **kwargs):
-    '''
-    Return a dataframe containing the max value for each sample,name in the input dataframe df
-    '''
-    df = velocity(df, **kwargs)
-    agg = {}
-    for column_name in df.columns:
-        if column_name!='sample__id' and column_name!='name':
-            agg[column_name] = 'first'
-    agg['value'] = 'max'
-    grouped_samples = df.groupby(['sample__id', 'name'], as_index=False)
-    max_expr = grouped_samples.agg(agg)
-    return max_expr    
-
-def kymograph(df, **kwargs):
-    '''
-    Compute kymograph for induced expression, x-axis=inducer concentration
-    '''
-    density_name = kwargs.get('density_name', None)
-    #func = kwargs.get('func', expression_rate_direct)
-    inducer_name = kwargs.get('inducer_name', None)
-
-    concs = []
-    times = []
-    values = []
-
-    for samp_id,samp_data in df.groupby('sample__id'):
-        inducer_names = samp_data['sample__inducer__names_array'].values[0]
-        inducer_concs = samp_data['sample__inducer__concentrations'].values[0]
+    # Analysis functions that compute timeseries from a dataframe with given keyword args
+    # -----------------------------------------------------------------------------------
+    def velocity(self, df):
+        '''
+        Parameters:
+        df = data frame to analyse
+        pre_smoothing = Savitsky-Golay filter parameter (window size)
+        post_smoothing = Savitsky-Golay filter parameter (window size)
+        '''
+        print(self.smoothing_param1, self.smoothing_param2, flush=True)
         
-        if len(inducer_names)==1:
-            if inducer_name==inducer_names[0]:
-                func_df = samp_data #func(samp_data, **kwargs)
-                if len(func_df)>0:
-                    val = func_df['value'].values
-                    time = func_df['time'].values
-                    values.extend(val)
-                    times.extend(time)
-                    concs.extend([inducer_concs[0]]*len(val))
-        elif len(inducer_names)==0: 
-                func_df = samp_data #func(samp_data, **kwargs)
-                if len(func_df)>0:
-                    val = func_df['value'].values
-                    time = func_df['time'].values
-                    values.extend(val)
-                    times.extend(time)
-                    concs.extend([0.]*len(val))
+        result = pd.DataFrame()
+        rows = []
 
-    x = np.array(times)
-    y = np.array(concs)
-    z = np.array(values)
-    idx = np.where(y>0)
+        if self.smoothing_type=='lowess':
+            lowess = sm.nonparametric.lowess
 
-    unique_times = np.unique(x[idx])
-    n_times = len(unique_times) + 2
-    unique_concs = np.unique(y[idx])
-    n_concs = len(unique_concs) + 2
+        grouped_sample = df.groupby('Sample')
+        n_samples = len(grouped_sample)
+        # Loop over samples
+        si = 1
+        for samp_id, samp_data in grouped_sample:
+            print('Computing velocity of sample %d of %d'%(si, n_samples), flush=True)
+            si += 1
+            for meas_name, data in samp_data.groupby('Signal_id'):
+                data = data.sort_values('Time')
+                time = data['Time'].values
+                val = data['Measurement'].values
+                
+                if self.smoothing_type=='savgol':
+                    min_data_pts = max(self.smoothing_param1, self.smoothing_param2)
+                else:
+                    min_data_pts = 2
+                if len(val)>min_data_pts:
+                    # Interpolation
+                    ival = interp1d(time, val)
+                    
+                    # Savitzky-Golay filter
+                    if self.smoothing_param1>0:
+                        if self.smoothing_type=='savgol':
+                            #print('Applying savgol filter', flush=True)
+                            sval = savgol_filter(val, int(self.smoothing_param1), 2, mode='interp')
+                            #print(len(val), flush=True)
+                        elif smoothing_type=='lowess':
+                            #print('Applying lowess filter', flush=True)
+                            z = lowess(val, time, frac=self.smoothing_param1)
+                            sval = z[:,1]
+                            #print(len(val), flush=True)
 
-    df = pd.DataFrame({'value':z[idx], 't':x[idx], 'conc':np.log10(y[idx])})
-    if len(df)>0:
-        c1,bins1 = pd.cut(df.t, bins=n_times, retbins=True)
-        c2,bins2 = pd.cut(df.conc, bins=n_concs, retbins=True)       
-        hm = df.groupby([c1, c2]).value.mean().unstack()
+                    # Interpolation
+                    sval = interp1d(time, sval)
 
-        #print('c1, c2 ', c1, c2, flush=True)
-        print('bin sizes ', len(bins1), len(bins2), flush=True)
-        #print('bins ', bins1, bins2, flush=True)
-        print('size kymo ', hm.shape, flush=True)
-        return hm,bins1,bins2
-    else:
-        return [0],[0],[0]
+                    # Compute expression rate for time series
+                    velocity = savgol_filter(ival(time), int(self.smoothing_param1), 2, deriv=1, mode='interp')
+    
+                    # Final Savitzky-Golay filtering of expression rate profile
+                    if self.smoothing_param2>0:
+                        if self.smoothing_type=='savgol':
+                            velocity = savgol_filter(velocity, int(self.smoothing_param2), 2, mode='interp')
+                        elif smoothing_type=='lowess':
+                            z = lowess(velocity, time, frac=self.smoothing_param2)
+                            ksynth = z[:,1]
+                    # Put result in dataframe
+                    data = data.assign(Velocity=velocity)
+                    rows.append(data)
+        if len(rows)>0:
+            result = result.append(rows)
+        else:
+            print('No rows to add to velocity dataframe', flush=True)
 
-def heatmap(df, **kwargs):
-    # func() takes a dataframe as argument and returns another timeseries, eg. expression rate
-    func = kwargs.get('func', mean_expression)
-    xname = kwargs.get('xname', 'xname')
+        return(result)
 
-    func_df = func(df, **kwargs)
-    c1,bins1 = pd.cut(func_df[xname], bins=100, retbins=True)
-    c2,bins2 = pd.cut(func_df[yname], bins=100, retbins=True)
-    hm = func_df.groupby([c1, c2]).value.mean().unstack()
+    def expression_rate_indirect(self, df):
+        '''
+        Parameters:
+        df = data frame to analyse
+        density_df = dataframe with density measurements
+        pre_smoothing = Savitsky-Golay filter parameter (window size)
+        post_smoothing = Savitsky-Golay filter parameter (window size)
+        '''
+        print(self.smoothing_param1, self.smoothing_param2, flush=True)
+        density_df = df[df['Signal_id']==self.density_name]
+        
+        result = pd.DataFrame()
+        rows = []
 
-    #print('c1, c2 ', c1, c2, flush=True)
-    print('bin sizes ', len(bins1), len(bins2), flush=True)
-    #print('bins ', bins1, bins2, flush=True)
-    print('size heatmap ', hm.shape, flush=True)
-    return hm,bins1,bins2
+        if self.smoothing_type=='lowess':
+            lowess = sm.nonparametric.lowess
 
-def induction_curve(df, **kwargs):
-    '''
-    Arguments:
-        inducer_name = name of inducer over which to compute induction curve
-        func = function to apply to dataframe to get values for response curve
-    '''
-    # Get parameters or set defaults
-    inducer_name = kwargs.get('inducer_name', None)
-    func = kwargs.get('func', None)
+        grouped_sample = df.groupby('Sample')
+        n_samples = len(grouped_sample)
+        # Loop over samples
+        si = 1
+        for samp_id, samp_data in grouped_sample:
+            print('Computing indirect expression rate of sample %d of %d'%(si, n_samples), flush=True)
+            si += 1
+            for meas_name, data in samp_data.groupby('Signal_id'):
+                data = data.sort_values('Time')
+                time = data['Time'].values
+                val = data['Measurement'].values
+                density = density_df[density_df['Sample']==samp_id]
+                density = density.sort_values('Time')
+                density_val = density['Measurement'].values
+                density_time = density['Time'].values
+                
+                if self.smoothing_type=='savgol':
+                    min_data_pts = max(self.smoothing_param1, self.smoothing_param2)
+                else:
+                    min_data_pts = 2
 
-    # Required arguments
-    #if not inducer_name or not func:
-    #    print('induction_curve: must supply name of inducer and function')
-    #    return None
+                if len(val)>min_data_pts and len(density_val)>min_data_pts:
+                    # Interpolation
+                    ival = interp1d(time, val)
+                    idensity = interp1d(density_time, density_val)
 
-    concs = []
-    expr = []
-    grouped_samps = df.groupby('sample__id')
-    for samp_id,samp in grouped_samps:
-        inducer_names = samp['sample__inducer__names'].values[0]
-        inducer_concs = samp['sample__inducer__concentrations'].values[0]
-        if len(inducer_names)==0: 
-            # func_df = func(samp, **kwargs)
-            # if type(func_df) == pd.core.frame.DataFrame:
-            #     concs.append(0.0)
-            #     expr.append(func_df['value'].mean())
-            # elif np.isnan(func_df):
-            #     pass
-            # else:
-            #     concs.append(0.0)
-            #     expr.append(func_df)
-            concs.append(0.0)
-            expr.append(samp['value'].mean())
-        elif inducer_name in inducer_names:
-            ind_idx = inducer_names.index(inducer_name)
-            # func_df = func(samp, **kwargs)
-            # if type(func_df) == pd.core.frame.DataFrame:
-            #     concs.append(inducer_concs[ind_idx])
-            #     expr.append(func_df['value'].mean())
-            # elif np.isnan(func_df):            
-            #     pass
-            # else:
-            #     concs.append(inducer_concs[ind_idx])
-            #     expr.append(func_df)
-            concs.append(inducer_concs[ind_idx])
-            expr.append(samp['value'].mean())
-    df = pd.DataFrame({'Expression':expr, 'Concentration':concs})
-    return df
+                    # Savitzky-Golay filter
+                    if self.smoothing_param1>0:
+                        if self.smoothing_type=='savgol':
+                            #print('Applying savgol filter', flush=True)
+                            sval = savgol_filter(val, int(self.smoothing_param1), 2, mode='interp')
+                            sdensity = savgol_filter(density_val, int(self.smoothing_param1), 2, mode='interp')
+                            #print(len(val), len(density_val), flush=True)
+                        elif smoothing_type=='lowess':
+                            #print('Applying lowess filter', flush=True)
+                            z = lowess(val, time, frac=self.smoothing_param1)
+                            sval = z[:,1]
+                            z = lowess(density_val, density_time, frac=self.smoothing_param1)
+                            sdensity = z[:,1]
+                            #print(len(val), len(density_val), flush=True)
 
-def induction_heatmap(qsamples, func, nbins, **kwargs):
-    # Get inducer concentrations
-    #concs1 = [s.inducers[0].concentration for s in qsamples]
-    #concs2 = [s.inducers[1].concentration for s in qsamples]
+                    # Interpolation
+                    sval = interp1d(time, sval)
+                    sdensity = interp1d(density_time, sdensity)
 
-    #FIX THIS [0] in FlapWeb is [1] in flapjack
-    concs1 = [Inducer.objects.filter(sample__id__exact=s.id)[1].concentration for s in qsamples]
-    concs2 = [Inducer.objects.filter(sample__id__exact=s.id)[0].concentration for s in qsamples]
-    concs1 = np.array(concs1)
-    concs2 = np.array(concs2)
+                    # Compute time range
+                    tmin = max(time.min(), density_time.min())
+                    tmax = min(time.max(), density_time.max())
+                    time = time[ (time>=tmin) & (time<tmax)]
 
-    # Compute values
-    values = []
-    for s in qsamples:
-        df = get_measurements(s)
-        kwargs['df'] = df
-        # Apply function to measurements dataframe
-        value = func(**kwargs)
-        values.append(value)
-    values = np.array(values)
+                    # Reslice data to new time range
+                    data = data[ (data.Time>=tmin) & (data.Time<tmax) ]
 
-    # Group data as heatmap array
-    idx = np.where((concs1>0)*(concs2>0))[0]
-    x = np.log10(concs1[idx])
-    y = np.log10(concs2[idx])
-    z = values[idx]
-    df = pd.DataFrame({'value':z, 'conc1':x, 'conc2':y})
-    c1,bins1 = pd.cut(df.conc1, nbins, retbins=True)
-    c2,bins2 = pd.cut(df.conc2, nbins, retbins=True)
-    hm = df.groupby([c1, c2]).value.mean().unstack()
+                    # Compute expression rate for time series
+                    dvaldt = savgol_filter(ival(time), int(self.smoothing_param1), 2, deriv=1, mode='interp')
+                    ksynth = dvaldt / sdensity(time)
+                    #dvaldt = sval.derivative()(time)
+                    #ksynth = dvaldt / (sdensity(time) + 0.)
 
-    return hm,bins1,bins2
+                    # Compute promoter activity d/dt(I/A)
+                    #conc = sval(time) / sdensity(time)
+                    #sconc = UnivariateSpline(time, conc, s=0, k=3)
+                    #ksynth = sconc.derivative()(time)
+    
+                    # Final Savitzky-Golay filtering of expression rate profile
+                    if self.smoothing_param2>0:
+                        if self.smoothing_type=='savgol':
+                            ksynth = savgol_filter(ksynth, int(self.smoothing_param2), 2, mode='interp')
+                        elif smoothing_type=='lowess':
+                            z = lowess(ksynth, time, frac=self.smoothing_param2)
+                            ksynth = z[:,1]
+                    # Put result in dataframe
+                    data = data.assign(Rate=ksynth)
+                    rows.append(data)
+        if len(rows)>0:
+            result = result.append(rows)
+        else:
+            print('No rows to add to expression rate dataframe', flush=True)
 
-# Analysis functions that take a list of DNA names, and compute some measure, returning a list
-# --------------------------------------------------------------------------------------------
+        return(result)
 
+    def expression_rate_direct(self, df):
+        '''
+        Parameters:
+            df = data frame to analyse
+            density_df = dataframe containing density (biomass) measurements
+            degr = degradation rate of reporter protein
+            eps_L = insignificant value for model fitting
+        '''
+        if len(df)==0:
+            return(df)
 
-def hill(x, a, b, k, n):
-    return (a*(x/k)**n + b) / (1 + (x/k)**n)
+        density_df = df[df['Signal_id']==self.density_name]
+        print(self.degr, self.eps_L, flush=True)
+        
+        result = pd.DataFrame()
+        rows = []
 
-def get_ind_hill(df):
-    expression = df.columns[0]
-    concs = df['Concentration']
-    concs_log = np.log10(concs)
-    inf_ind = np.where(concs>0.)[0]
-    scale_y = df[expression].max()
-    norm_y = df[expression] / scale_y
-    scale_concs = concs.max()
-    norm_concs = concs / scale_concs
-    # Fix maxfev, put it back to 1000 (default) and catch error of not finding optimal parameters
+        grouped_sample = df.groupby('Sample')
+        n_samples = len(grouped_sample)
+        # Loop over samples
+        si = 1
+        for samp_id, samp_data in grouped_sample:
+            print('Computing direct expression rate of sample %d of %d'%(si, n_samples), flush=True)
+            si += 1
+            for meas_name, data in samp_data.groupby('Signal_id'):
+                data = data.sort_values('Time')
+                time = data['Time']
+                val = data['Measurement']
+                density = density_df[density_df['Sample']==samp_id]
+                density = density.sort_values('Time')
+                density_val = density['Measurement']
+                density_time = density['Time']
 
-    # Set sensible bounds for normalised values
-    bounds = ([0., 0., 0., 1.], [1., 1., 1., 5.])
+                if len(val)>1:
+                    # Construct curves
+                    fpt = time.values
+                    fpy = val.values
+                    cfp = wf.curves.Curve(x=fpt, y=fpy)
+                    odt = density_time.values
+                    ody = density_val.values
+                    cod = wf.curves.Curve(x=odt, y=ody)
+                    # Compute time range
+                    od_xmin, od_xmax = cod.xlim()
+                    cfp_xmin, cfp_xmax = cfp.xlim()
+                    xmin = max(od_xmin, cfp_xmin)
+                    xmax = min(od_xmax, cfp_xmax)
+                    ttu = np.linspace(od_xmin, od_xmax, 100, endpoint=False)
+                    # Fit model
+                    try:
+                        if meas_name==self.density_name:
+                            ksynth, _, _, _, _ = wf.infer_growth_rate(cod, ttu, 
+                                                                        eps_L=self.eps_L,
+                                                                        positive=True)
+                        else:
+                            ksynth, _, _, _, _ = wf.infer_synthesis_rate_onestep(cfp, cod, ttu, 
+                                                                                    degr=self.degr, eps_L=self.eps_L,
+                                                                                    positive=True)
+                        data = data.assign(Rate=ksynth(fpt))
+                        rows.append(data)
+                    except:
+                        print('Fitting direct expression rates failed!', flush=True)
 
-    try:
-        z,cov = curve_fit(hill, norm_concs, norm_y, bounds=bounds, maxfev=1000)
-        a,b,k,n = z
-        a_std, b_std, k_std, n_std = np.sqrt(np.diag(cov))
-        x = np.linspace(concs_log[inf_ind].min(),concs_log.max(),200)
+        if len(rows)>0:
+            result = result.append(rows)
+            result = result.dropna(subset=['Rate'])
+        else:
+            print('No rows to add to expression rate dataframe', flush=True)
+        return(result)
 
-        a = a*scale_y
-        b = b*scale_y
-        k = k*scale_concs
-        a_std = a_std*scale_y
-        b_std = b_std*scale_y
-        k_std = k_std*scale_concs
-        concs = 10**x
-        val = hill(10**x, a, b, k, n)
-        params = (a,b,k,n, a_std,b_std,k_std,n_std)
-        return concs, val, params
-    except:
-        print('Hill function fit failed')
-        return None
+    # Analysis functions that compute value from a dataframe with given keyword args
+    # ----------------------------------------------------------------------------------
+    def mean_expression(self, df):
+        '''
+        Return a dataframe containing the mean value for each sample,name in the input dataframe df
+        '''
+        agg = {}
+        for column_name in df.columns:
+            if column_name!='Sample' and column_name!='Signal':
+                agg[column_name] = 'first'
+        agg['Measurement'] = 'mean'
+        grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
+        mean = grouped_samples.agg(agg)
+        mean.columns = ['Expression' if c=='Measurement' else c for c in mean.columns]
+        return mean     
 
-def exp_ratiometric_rho(df, **kwargs):
-    '''
-    Return the value of rho (dx/do/dy/do) for the sample in df
-    '''
-    density_name = kwargs.get('density_name', 'OD')
-    rho_x = kwargs.get('rho_x', 'CFP')
-    rho_y = kwargs.get('rho_y', 'YFP')
+    def max_expression(self, df):
+        '''
+        Return a dataframe containing the mean value for each sample,name in the input dataframe df
+        '''
+        agg = {}
+        for column_name in df.columns:
+            if column_name!='Sample' and column_name!='Signal':
+                agg[column_name] = 'first'
+        agg['Measurement'] = 'max'
+        grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
+        maxx = grouped_samples.agg(agg)
+        maxx.columns = ['Expression' if c=='Measurement' else c for c in maxx.columns]
+        return maxx     
 
-    grouped_df = df.groupby('sample__id')
-    result = pd.DataFrame()
-    si = 0
-    for samp_id, samp in grouped_df:
-        si += 1
-        df_d = samp[(samp['name']==density_name)]
-        df_d = df_d.sort_values(by='time')
-        df_x = samp[(samp['name']==rho_x)]
-        df_x = df_x.sort_values(by='time')
-        df_y = samp[(samp['name']==rho_y)]
-        df_y = df_y.sort_values(by='time')
+    def mean_velocity(self, df):
+        '''
+        Return a dataframe containing the max value for each sample,name in the input dataframe df
+        '''
+        df = self.velocity(df)
+        agg = {}
+        for column_name in df.columns:
+            if column_name!='Sample' and column_name!='Signal':
+                agg[column_name] = 'first'
+        agg['Velocity'] = 'mean'
+        grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
+        mean_expr = grouped_samples.agg(agg)
+        return mean_expr    
 
-        d_value = df_d['value']
-        d_time = df_d['time']   
-        x_value = df_x['value']
-        x_time = df_x['time']
-        y_value = df_y['value']
-        y_time = df_y['time']
+    def max_velocity(self, df):
+        '''
+        Return a dataframe containing the max velocity for each sample,name in the input dataframe df
+        '''
+        df = self.velocity(df)
+        agg = {}
+        for column_name in df.columns:
+            if column_name!='Sample' and column_name!='Signal':
+                agg[column_name] = 'first'
+        agg['Velocity'] = 'max'
+        grouped_samples = df.groupby(['Sample', 'Signal'], as_index=False)
+        max_expr = grouped_samples.agg(agg)
+        return max_expr    
 
-        rho = np.nan
-        try:
-            z,_=curve_fit(gompertz, d_time, d_value, maxfev = 1000)#, bounds=bounds)
+    # Other analysis types that make different forms of resulting data
+    def induction_curve(self, df):
+        data = df[df.Chemical_id==self.chemical_id]
+        analyzed_data = self.analysis_funcs[self.function](data)
+        return analyzed_data
+
+    def kymograph(self, df):
+        '''
+        Compute kymograph for induced expression, x-axis=inducer concentration
+        '''
+        data = df[df.Chemical_id==self.chemical_id]
+        analyzed_data = self.analysis_funcs[self.function](data)
+        return analyzed_data
+        
+    def ratiometric_alpha(self, df):
+        # Parameters:
+        #   bounds = tuple of list of min and max values for  Gompertz model parameters
+        #   df = dataframe of measurements including OD
+        #   density_df = dataframe containing biomass measurements
+        #   ndt = number of doubling times to extend exponential phase
+        density_df = df[df['Signal_id']==self.density_name]
+
+        result = pd.DataFrame()
+        rows = []
+
+        grouped_samples = df.groupby('Sample')
+        for samp_id,data in grouped_samples:
+            # input values for Gompertz model fit
+            oddf = density_df[density_df['Sample']==samp_id]
+            oddf = oddf.sort_values('Time')
+            odt = oddf['Time'].values
+            odval = oddf['Measurement'].values
+            odt = odt[odval>0.]
+            odval = odval[odval>0.]
+            #y = np.log(odval[odval>0.]) - np.log(np.nanmin(odval[odval>0.]))
+
+            # Fit Gompertz model
+            #try:
+            self.bounds = ([1e-2,0.01,0,-24], [1,4,2,24])
+            z,_ = curve_fit(gompertz, odt, odval, bounds=self.bounds)
+            #except:
+            #    print('Gompertz fitting failed', flush=True)
+            #    break
+                
             y0 = z[0]
             ymax = z[1]
+            A = np.log(ymax/y0)
             um = z[2]
             l = z[3]
-            A = np.log(ymax/y0)
-            tm = ((A/(np.exp(1)*um))+l)   
+            print('y0, ymax, um, l', y0, ymax, um, l, flush=True)
 
+            # Compute time of peak growth
+            tm = ((A/(np.exp(1)*um))+l)
             # Compute doubling time at peak growth
-            ndt = 2
             dt = np.log(2)/um
             # Time range to consider exponential growth phase
             t1 = tm
-            t2 = tm + ndt*dt
+            t2 = tm + self.n_doubling_times * dt
+            #print('t1, t2', t1, t2, flush=True)
 
-            print(f"samp : {si} of {len(grouped_df)} samples, t1: {t1}, t2: {t2}")
+            # Compute alpha as slope of fluo vs od for each measurement name
+            grouped_name = data.groupby('Signal_id')
+            for name,data in grouped_name:
+                # fluorescence measurements
+                mdf = data[(data['Time']>=t1) & (data['Time']<=t2)]
+                mdf = mdf.sort_values('Time')
+                mval = mdf['Measurement'].values
+                mt = mdf['Time'].values
+                
+                # od measurements
+                oddf = oddf[(oddf['Time']>=t1)&(oddf['Time']<=t2)]
+                oddf = oddf.sort_values('Time')
+                odval = oddf['Measurement'].values
+                odt = oddf['Time'].values
+                
+                if len(mt)>1 and len(odt)>1:
+                    smval = interp1d(mt, mval, kind='linear', bounds_error=False)
+                    sodval = interp1d(odt, odval, kind='linear', bounds_error=False)
 
-            if t1 > 0:
-                idx = np.where((d_time >= t1) & (d_time <= t2))[0]
-                t_rat = d_time.iloc[idx]
-                d_rat = d_value.iloc[idx]
-                x_rat = x_value.iloc[idx]
-                y_rat = y_value.iloc[idx]
+                    tmin = max(odt.min(), mt.min())
+                    tmax = min(odt.max(), mt.max())
+                    #print('tmin, tmax', tmin, tmax, flush=True)
+                    times = np.linspace(tmin,tmax,100)
 
-                zx = np.polyfit(d_rat, x_rat, 1)
-                zy = np.polyfit(d_rat, y_rat, 1)
+                    z = np.polyfit(sodval(times), smval(times), 1)
+                    p = np.poly1d(z)
 
-                dxda = zx[0]
-                dyda = zy[0]
-                rho = dyda/dxda
-                data = samp.iloc[0]
-                data['value'] = rho
-                result = result.append(data, ignore_index=True)
-        except:
-            pass
-    return result  
+                    # Get slope as alpha
+                    alpha = z[0]
+
+                    # Get dataframe with single row containing alpha for this sample, name
+                    data = data.iloc[0]
+                    data['Alpha'] = alpha
+                else:
+                    data = data.iloc[0]
+                    data['Alpha'] = np.nan
+                # Append to list of rows to append to result
+                rows.append(data)
+        # Append alpha values to result df
+        if len(rows)>0:
+            result=result.append(rows)
+        return result
+
+    def ratiometric_rho(self, df):
+        # Parameters:
+        #   bounds = tuple of list of min and max values for  Gompertz model parameters
+        #   df = dataframe of measurements including OD
+        #   density_df = dataframe containing biomass measurements
+        #   ref_df = dataframe containing reference measurements
+        #   ndt = number of doubling times to extend exponential phase
+        alpha = self.ratiometric_alpha(df)
+        if len(alpha)==0:
+            return(alpha)
+        alpha_ref = alpha[alpha.Signal_id==self.ref_name]
+        if len(alpha_ref)==0:
+            return(alpha_ref)
+
+        alpha = alpha.sort_values('Sample')
+        alpha_ref = alpha_ref.sort_values('Sample')
+
+        rho_vals = alpha['Alpha'].values / alpha_ref['Alpha'].values
+        alpha = alpha.assign(Rho=rho_vals)
+
+        return alpha
