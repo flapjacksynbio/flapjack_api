@@ -8,12 +8,12 @@ services:
     volumes:
       - .:/var/app/flap
     expose:
-      - "8000"
+      - "$PORT"
     ports:
-      - "8000:8000"
+      - "$PORT:$PORT"
     depends_on:
       - db
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:$PORT
 
   db:
     container_name: db

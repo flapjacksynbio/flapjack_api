@@ -1,3 +1,4 @@
+gunicorn
 django==3.0.5
 psycopg2>=2.8.4
 django-cors-headers==3.2.1
@@ -5,6 +6,7 @@ djangorestframework>=3.11.0
 django-filter>=2.2.0
 djangorestframework-filters==1.0.0.dev0
 djangorestframework-simplejwt==4.4.0
+django-heroku
 pylint>=2.5.2
 pylint-django>=2.0.15
 channels
