@@ -99,8 +99,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 if groupby2=='Signal':
                     color_string = g2['Color'].values[0]
                     try:
-                        color_int = int(color_string, 16)
-                        color = '#' + color_string
+                        color_int = int(color_string[1:], 16)
+                        color = color_string
                     except:
                         if color_string in plotting.plotly_colors:
                             color = color_string
