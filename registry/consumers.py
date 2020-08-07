@@ -163,18 +163,20 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                 else:
                     strain = Strain.objects.filter(name__exact=s_strain)[0]
 
-                if len(self.dna_names)==0:
-                    # No vector to create
+                # create Vector object
+                vec_aux = Vector.objects.create()
+                #for dna_id in metadata['dna']:
+                no_dnas = True
+                for dna in meta_dict.loc[meta_dnas][well]:
+                    if dna in self.dna_names:
+                        idx = np.where(np.array(self.dna_names)==dna)[0][0]
+                        vec_aux.dnas.add(Dna.objects.get(id=metadata['dna'][idx]))
+                        no_dnas = False
+                if no_dnas:
+                    # No vector to add
                     vector = None
-                else:
-                    # create Vector object
-                    vec_aux = Vector.objects.create()
-                    #for dna_id in metadata['dna']:
-                    for dna in meta_dict.loc[meta_dnas][well]:
-                        if dna in self.dna_names:
-                            idx = np.where(np.array(self.dna_names)==dna)[0][0]
-                            vec_aux.dnas.add(Dna.objects.get(id=metadata['dna'][idx]))
-                    
+                    vec_aux.delete()
+                else:                    
                     # TO DO: find a better way of doing this
                     # checks if vector already exists in database
                     vec_exists = 0
