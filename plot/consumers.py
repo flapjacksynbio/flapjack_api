@@ -94,15 +94,23 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 # Which position the subplot is in
                 row = 1 + subplot_index//cols
                 col = 1 + subplot_index%cols
-
-                
+            
+                color = colors[name2]
+                if groupby2=='Signal':
+                    color_string = g2['Color'].values[0]
+                    try:
+                        color_int = int(color_string, 16)
+                        color = '#' + color_string
+                    except:
+                        if color_string in plotting.plotly_colors:
+                            color = color_string
 
                 # Add traces to figure
                 if plot_type == 'timeseries':
                     fig = plotting.make_timeseries_traces(
                             fig,
                             g2,
-                            color=colors[name2], 
+                            color=color, 
                             mean=mean, 
                             std=std, 
                             normalize=normalize,
@@ -115,7 +123,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                     fig = plotting.make_bar_traces(
                             fig,
                             g2,
-                            color=colors[name2], 
+                            color=color, 
                             mean=mean, 
                             std=std, 
                             normalize=normalize,
@@ -129,7 +137,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                     fig = plotting.make_induction_traces(
                             fig,
                             g2,
-                            color=colors[name2], 
+                            color=color, 
                             mean=mean, 
                             std=std, 
                             normalize=normalize,
@@ -142,7 +150,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                     fig = plotting.make_kymograph_traces(
                             fig,
                             g2,
-                            color=colors[name2], 
+                            color=color, 
                             mean=mean, 
                             std=std, 
                             normalize=normalize,
