@@ -95,6 +95,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 row = 1 + subplot_index//cols
                 col = 1 + subplot_index%cols
             
+                # Decide color for line, use signal color if appropriate
                 color = colors[name2]
                 if groupby2=='Signal':
                     color_string = g2['Color'].values[0]
