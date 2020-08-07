@@ -74,8 +74,8 @@ class Analysis:
     def compute_background(self, assay, media, strain):
         s = Sample.objects.filter(assay__name__exact=assay) \
                             .filter(media__name__exact=media)
-        samps_no_cells = s.filter(vector__name__in=['none', 'None']).filter(strain__name__in=['none', 'None'])
-        samps_no_dna = s.filter(vector__name__in=['none', 'None']).filter(strain__name__exact=strain)
+        samps_no_cells = s.filter(vector__isnull=True).filter(strain__name__in=['none', 'None'])
+        samps_no_dna = s.filter(vector__isnull=True).filter(strain__name__exact=strain)
         meas_no_cells = get_measurements(samps_no_cells)
         meas_no_dna = get_measurements(samps_no_dna)
 
