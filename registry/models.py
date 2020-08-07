@@ -99,7 +99,7 @@ class Sample(models.Model):
 class Signal(models.Model):
     name = models.TextField()
     description = models.TextField()
-    color = models.CharField(max_length=6, default='')        
+    color = models.CharField(max_length=100, default='')        
     def __str__(self):
         return self.name
 
