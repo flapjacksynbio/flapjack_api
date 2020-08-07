@@ -3,13 +3,13 @@ from registry.models import *
 from registry.util import *
 import plotly.graph_objects as go
 import plotly
-from plotly.colors import DEFAULT_PLOTLY_COLORS
+from matplotlib.colors import CSS4_COLORS
 import wellfare as wf
 import time
 import pandas as pd
 
 # Properties to use for each analysis/plot type
-plot_properties = {
+plot_properties = { 
     'Velocity': dict(
         axis_labels=('Time', 'Velocity'),
         plot_type='timeseries',
@@ -81,6 +81,8 @@ palette = [
     '#000000',
     '#ff0000'
 ]
+
+plotly_colors = CSS4_COLORS
 
 special_case_grids = {
     3: (1,3),

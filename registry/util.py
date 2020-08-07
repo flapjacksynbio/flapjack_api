@@ -5,6 +5,7 @@ import time
 pretty_field_names = {
     'signal__id': 'Signal_id',
     'signal__name': 'Signal',
+    'signal__color': 'Color',
     'value': 'Measurement',
     'time': 'Time',
     'sample__id': 'Sample',
@@ -69,7 +70,9 @@ def get_measurements(samples, signals=None):
     if signals:
         m = m.filter(signal__id__in=signals)
     # Get pandas dataframe 
-    df = read_frame(m, fieldnames=['signal__id', 'signal__name', \
+    df = read_frame(m, fieldnames=['signal__id',
+                                    'signal__color',
+                                    'signal__name', \
                                     'value', \
                                     'time', \
                                     'sample__id', \
