@@ -157,11 +157,14 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                     media = Media.objects.filter(name__exact=s_media)[0]
                 
                 # create Strain object
-                if s_strain not in existing_str:
-                    strain = Strain(name=s_strain, description='')
-                    strain.save()
+                if s_strain.upper()=='NONE':
+                    strain = None
                 else:
-                    strain = Strain.objects.filter(name__exact=s_strain)[0]
+                    if s_strain not in existing_str:
+                        strain = Strain(name=s_strain, description='')
+                        strain.save()
+                    else:
+                        strain = Strain.objects.filter(name__exact=s_strain)[0]
 
                 # create Vector object
                 vec_aux = Vector.objects.create()
