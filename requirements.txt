@@ -13,6 +13,7 @@ numpy
 scipy
 pandas
 plotly==4.3.0
+matplotlib
 git+https://github.com/ibis-inria/wellFARE.git
 cvxopt
 django-pandas
