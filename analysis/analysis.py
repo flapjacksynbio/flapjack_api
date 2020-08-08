@@ -119,10 +119,10 @@ class Analysis:
         if len(df)==0:
             print('bg_correct got empty dataframe', flush=True)
             return df
-        meas = df[~df.Vector.isin(['none','None'])]
+        meas = df.dropna(subset=['Vector'])
         if len(meas)==0:
             print('bg_correct got empty meas dataframe', flush=True)
-            return df
+            return meas
 
         # Loop over samples
         rows = []
@@ -359,7 +359,8 @@ class Analysis:
             return(df)
 
         density_df = df[df['Signal_id']==self.density_name]
-        print(self.degr, self.eps_L, flush=True)
+        if len(density_df)==0:
+            return density_df
         
         result = pd.DataFrame()
         rows = []
