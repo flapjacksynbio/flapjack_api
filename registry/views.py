@@ -84,7 +84,7 @@ class VectorFilter(FilterSet):
     dnas = RelatedFilter(DnaFilter, field_name='dnas',
                         queryset=Dna.objects.all())
     sboluri = RelatedFilter(DnaFilter, field_name='dnas__sboluri',
-                        queryset=Dna.objects.all())
+                        queryset=Dna.objects.all(), lookup_expr='icontains')
     class Meta:
         model = Vector
         fields = ('name','dnas','sboluri')
