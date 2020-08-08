@@ -12,6 +12,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .upload import *
 from .models import *
 
+empty_dna_names = ['none', 'None', '']
 
 class RegistryConsumer(AsyncWebsocketConsumer): 
     def __init__(self, scope, **kwargs):
@@ -64,7 +65,11 @@ class RegistryConsumer(AsyncWebsocketConsumer):
         # get dnas and chemicals names to ask for metadata to the user
         dna_keys = [val for val in self.meta_dict.index if "DNA" in val]
         dna_lists = [list(np.unique(self.meta_dict.loc[k])) for k in dna_keys]
-        self.dna_names = list(np.unique([dna for dna_list in dna_lists for dna in dna_list]))
+        self.dna_names = list(
+            np.unique(
+                [dna for dna_list in dna_lists for dna in dna_list if dna not in empty_dna_names]
+                )
+            )
         chem_names_excel = [val for val in self.meta_dict.index if "chem" in val]
 
         # Ask for dna, chemicals and signals
@@ -152,36 +157,45 @@ class RegistryConsumer(AsyncWebsocketConsumer):
                     media = Media.objects.filter(name__exact=s_media)[0]
                 
                 # create Strain object
-                if s_strain not in existing_str:
-                    strain = Strain(name=s_strain, description='')
-                    strain.save()
+                if s_strain.upper()=='NONE':
+                    strain = None
                 else:
-                    strain = Strain.objects.filter(name__exact=s_strain)[0]
+                    if s_strain not in existing_str:
+                        strain = Strain(name=s_strain, description='')
+                        strain.save()
+                    else:
+                        strain = Strain.objects.filter(name__exact=s_strain)[0]
 
                 # create Vector object
                 vec_aux = Vector.objects.create()
                 #for dna_id in metadata['dna']:
+                no_dnas = True
                 for dna in meta_dict.loc[meta_dnas][well]:
                     if dna in self.dna_names:
                         idx = np.where(np.array(self.dna_names)==dna)[0][0]
                         vec_aux.dnas.add(Dna.objects.get(id=metadata['dna'][idx]))
-                
-                # TO DO: find a better way of doing this
-                # checks if vector already exists in database
-                vec_exists = 0
-                for v in existing_vec:
-                    if set(vec_aux.dnas.all())==set(v.dnas.all()):
-                        vec_exists = 1
-                        vector = v
-                        vec_aux.delete()
-                        break
-                if not vec_exists:
-                    # add names
-                    names = [dna.name for dna in vec_aux.dnas.all()]
-                    names.sort()
-                    vec_aux.name = '+'.join(names)
-                    vec_aux.save()
-                    vector = vec_aux
+                        no_dnas = False
+                if no_dnas:
+                    # No vector to add
+                    vector = None
+                    vec_aux.delete()
+                else:                    
+                    # TO DO: find a better way of doing this
+                    # checks if vector already exists in database
+                    vec_exists = 0
+                    for v in existing_vec:
+                        if set(vec_aux.dnas.all())==set(v.dnas.all()):
+                            vec_exists = 1
+                            vector = v
+                            vec_aux.delete()
+                            break
+                    if not vec_exists:
+                        # add names
+                        names = [dna.name for dna in vec_aux.dnas.all()]
+                        names.sort()
+                        vec_aux.name = '+'.join(names)
+                        vec_aux.save()
+                        vector = vec_aux
 
                 # create chemicals and supplements
                 # checking either len(metadata['chemical']) or len(meta_inds) > 0

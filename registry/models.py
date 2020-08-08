@@ -85,9 +85,9 @@ class Vector(models.Model):
 
 class Sample(models.Model):
     assay = models.ForeignKey(Assay, on_delete=models.CASCADE)
-    media = models.ForeignKey(Media, on_delete=models.CASCADE)
-    strain = models.ForeignKey(Strain, on_delete=models.CASCADE)
-    vector = models.ForeignKey(Vector, on_delete=models.CASCADE)
+    media = models.ForeignKey(Media, null=True, on_delete=models.CASCADE)
+    strain = models.ForeignKey(Strain, null=True, on_delete=models.CASCADE)
+    vector = models.ForeignKey(Vector, null=True, on_delete=models.CASCADE)
     supplements = models.ManyToManyField(Supplement, related_name='samples')
     row = models.CharField(max_length=10)
     col = models.IntegerField()
