@@ -6,7 +6,7 @@ from rest_framework_filters.backends import RestFrameworkFilterBackend
 from .models import *
 from .serializers import AssaySerializer, DnaSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer, VectorSerializer, SupplementSerializer, ChemicalSerializer
 from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission, VectorPermission, SupplementPermission, ChemicalPermission
-
+import django_filters
 
 class DnaFilter(FilterSet):
     name = CharFilter(lookup_expr='icontains')
@@ -83,10 +83,11 @@ class ChemicalFilter(FilterSet):
 class VectorFilter(FilterSet):
     dnas = RelatedFilter(DnaFilter, field_name='dnas',
                         queryset=Dna.objects.all())
-
+    sboluri = RelatedFilter(DnaFilter, field_name='dnas__sboluri',
+                        queryset=Dna.objects.all())
     class Meta:
         model = Vector
-        fields = ('name','dnas')
+        fields = ('name','dnas','sboluri')
 
 
 class SupplementFilter(FilterSet):
