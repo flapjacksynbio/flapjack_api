@@ -72,6 +72,6 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
                 'data': {'progress': int(100 * progress / n_samples)}
             }))
             await asyncio.sleep(0)
-        df = pd.concat(result_dfs)
+        df = pd.concat(result_dfs, ignore_index=True)
         return df
 
