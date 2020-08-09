@@ -57,7 +57,7 @@ class Analysis:
         self.smoothing_param2 = int(params.get('post_smoothing', 21))
         self.degr = float(params.get('degr', 0.))
         self.eps_L = float(params.get('eps_L', 1e-7))
-        self.chemical_id = params.get('chemical', None)
+        self.chemical_id = params.get('analyte', None)
         self.ref_name = params.get('ref_signal')
         self.bounds = [[0,0,0,0], [1,1,1,24]]
         self.function = params.get('function')
