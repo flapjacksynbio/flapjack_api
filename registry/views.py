@@ -74,10 +74,11 @@ class AssayFilter(FilterSet):
 class ChemicalFilter(FilterSet):
     name = CharFilter(lookup_expr='icontains')
     description = CharFilter(lookup_expr='icontains')
+    description = NumberFilter(lookup_expr='exact')
 
     class Meta:
         model = Chemical
-        fields = ('name','description')
+        fields = ('name','description','pubchemid')
 
 
 class VectorFilter(FilterSet):
