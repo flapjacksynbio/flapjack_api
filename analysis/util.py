@@ -23,6 +23,7 @@ def gompertz_growth_rate(t, y0, ymax, um, l):
             np.exp((np.exp(1)* um *(l - t))/A + 1) + 2)
     return(gr)
 
+# Normalization functions
 def normalize_min_max(data, column):    
     val = data[column].values
     nval = (val-np.nanmin(val)) / (np.nanmax(val) - np.nanmin(val))

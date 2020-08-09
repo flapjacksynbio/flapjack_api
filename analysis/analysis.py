@@ -57,7 +57,7 @@ class Analysis:
         self.smoothing_param2 = int(params.get('post_smoothing', 21))
         self.degr = float(params.get('degr', 0.))
         self.eps_L = float(params.get('eps_L', 1e-7))
-        self.chemical_id = params.get('chemical', None)
+        self.chemical_id = params.get('analyte', None)
         self.ref_name = params.get('ref_signal')
         self.bounds = [[0,0,0,0], [1,1,1,24]]
         self.function = params.get('function')
@@ -119,10 +119,10 @@ class Analysis:
         if len(df)==0:
             print('bg_correct got empty dataframe', flush=True)
             return df
-        meas = df[~df.Vector.isin(['none','None'])]
+        meas = df.dropna(subset=['Vector'])
         if len(meas)==0:
             print('bg_correct got empty meas dataframe', flush=True)
-            return df
+            return meas
 
         # Loop over samples
         rows = []
@@ -359,7 +359,8 @@ class Analysis:
             return(df)
 
         density_df = df[df['Signal_id']==self.density_name]
-        print(self.degr, self.eps_L, flush=True)
+        if len(density_df)==0:
+            return density_df
         
         result = pd.DataFrame()
         rows = []
