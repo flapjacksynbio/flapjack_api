@@ -4,7 +4,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, BooleanFilter
 from rest_framework_filters.backends import RestFrameworkFilterBackend
 from .models import *
-from .serializers import AssaySerializer, DnaSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer, VectorSerializer, SupplementSerializer, ChemicalSerializer
+from .serializers import AssaySerializer, DnaSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer, VectorSerializer, VectorAllSerializer, SupplementSerializer, ChemicalSerializer
 from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission, VectorPermission, SupplementPermission, ChemicalPermission
 import django_filters
 
@@ -276,6 +276,18 @@ class StrainViewSet(viewsets.ModelViewSet):
         studies = get_objects_for_user(user, 'LoadData.view_study')
         return Strain.objects.filter(assays__study__in=studies).distinct()
     '''
+
+
+class VectorAllViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows vector to be viewed or edited.
+    """
+    permission_classes = [VectorPermission]
+    queryset = Vector.objects.all()
+    serializer_class = VectorAllSerializer
+    filter_class = VectorFilter
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    search_fields = ['name']
 
 
 class VectorViewSet(viewsets.ModelViewSet):

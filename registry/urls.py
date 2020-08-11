@@ -16,6 +16,7 @@ router.register(r'signal', views.SignalViewSet)
 router.register(r'supplement', views.SupplementViewSet)
 router.register(r'chemical', views.ChemicalViewSet)
 router.register(r'vector', views.VectorViewSet)
+router.register(r'vectorall', views.VectorAllViewSet)
 
 #router.register(r'inducer', views.InducerViewSet)
 #router.register(r'user', views.UserViewSet)
