@@ -45,15 +45,19 @@ class DnaSerializer(serializers.ModelSerializer):
         model = Dna
         fields = '__all__'
 
-
-class VectorSerializer(serializers.ModelSerializer):
+class VectorAllSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     dnas = DnaSerializer(many=True)
     class Meta:
         model = Vector
-        fields = ['name', 'id', 'dnas']
-
-
+        fields = ['id', 'name', 'dnas']
+        
+class VectorSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+    class Meta:
+        model = Vector
+        fields = ['id', 'name', 'dnas']
+        
 class ChemicalSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
 
