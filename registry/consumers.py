@@ -45,7 +45,7 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
         
 class UploadConsumer(AsyncWebsocketConsumer): 
     def __init__(self, scope, **kwargs):
-        super(RegistryConsumer, self).__init__(scope, **kwargs)
+        super(UploadConsumer, self).__init__(scope, **kwargs)
         # for most attrs is not necessary to declared them, it is  
         # for having an idea of which parameters the instance has
         self.columns = [x+str(y) for x in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] for y in range(1,13)]
