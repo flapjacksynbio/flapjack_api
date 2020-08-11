@@ -38,11 +38,11 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
 
     async def generate_data(self, event):
         params = event['params']
-        signals = params.get('signalIds')
+        signals = params.get('signal')
         analysis_params = params.get('analysis')
+        s = get_samples(params)
+        df = get_measurements(s, signals)
         if analysis_params:
-            s = get_samples(params)
-            df = get_measurements(s, signals)
             analysis = Analysis(analysis_params, signals)
             df = await self.run_analysis(df, analysis)
             # Send back analyzed data
@@ -52,11 +52,17 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
             }))
         else:
             await self.send(text_data=json.dumps({
+                'type': 'analysis',
+                'data': df.to_json()
+            }))
+            '''
+            await self.send(text_data=json.dumps({
                 'type': 'error',
                 'data': {
                     'message': 'No analysis parameters provided'
                 }
-            }))            
+            }))
+            '''            
 
     async def run_analysis(self, df, analysis):
         grouped = df.groupby('Sample')
