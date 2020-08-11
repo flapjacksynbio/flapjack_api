@@ -26,11 +26,11 @@ def get_samples(filter):
     print('get_samples', flush=True)
     start = time.time()
     print(f"filter: {filter}", flush=True)
-    studies = filter.get('studyIds')
-    assays = filter.get('assayIds')
-    vectors = filter.get('vectorIds')
-    meds = filter.get('mediaIds')
-    strains = filter.get('strainIds')
+    studies = filter.get('study')
+    assays = filter.get('assay')
+    vectors = filter.get('vector')
+    meds = filter.get('media')
+    strains = filter.get('strain')
 
     s = Sample.objects.all()
     filter_exist = False
