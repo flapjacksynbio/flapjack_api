@@ -289,6 +289,14 @@ class VectorAllViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     search_fields = ['name']
 
+    def get_queryset(self):
+        user = self.request.user
+        return Vector.objects.filter(
+            Q(sample__assay__study__owner=user) |
+            Q(sample__assay__study__public=True) |
+            Q(sample__assay__study__shared_with=user)
+        ).distinct()
+
 
 class VectorViewSet(viewsets.ModelViewSet):
     """
