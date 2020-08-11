@@ -313,7 +313,6 @@ class ChemicalViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     search_fields = ['name', 'description']
 
-
 class MeasurementViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows measurements to be viewed or edited.
@@ -325,54 +324,7 @@ class MeasurementViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     # filterset_fields = ['signal', 'time',
     #                    'value', 'sample', 'sample__assay__name']
-    search_fields = ['signal', 'sample__assay__name']
-
-    """
-    def list(self, request):
-        start = time.time()
-        # qs = self.get_queryset()
-        # qs = self.filter_queryset(qs)
-        # df = read_frame(qs)
-        
-        samples = Sample.objects.all() #filter(assay__name='RV7 - python')
-        
-        m = Measurement.objects.prefetch_related('sample__id') \
-                                .prefetch_related('sample__assay__name') \
-                                .prefetch_related('sample__assay__study__name') \
-                                .prefetch_related('sample__media__name') \
-                                .prefetch_related('sample__strain__name') \
-                                .prefetch_related('sample__dna__names') \
-                                .prefetch_related('sample__inducer__names') \
-                                .prefetch_related('sample__inducer__concentrations') \
-                                .prefetch_related('sample__row') \
-                                .prefetch_related('sample__col') \
-                                .filter(sample__in=samples)
-        '''
-        df = read_frame(m, fieldnames=['name', \
-                                        'value', \
-                                        'time', \
-                                        'sample__id', \
-                                        'sample__assay__name', \
-                                        'sample__assay__study__name', \
-                                        'sample__media__name', \
-                                        'sample__strain__name', \
-                                        'sample__dna__names', \
-                                        'sample__inducer__names', \
-                                        'sample__inducer__concentrations', \
-                                        'sample__row', 'sample__col'])
-        
-        json_df = json.loads(df.to_json())
-        '''
-        end = time.time()
-        print('list took %f seconds'%(end-start), flush=True)
-        return Response('')
-    """
-    '''
-    def get_queryset(self):
-        user = self.request.user
-        studies = get_objects_for_user(user, 'LoadData.view_study')
-        return Measurement.objects.filter(sample__assay__study__in=studies)
-    '''
+    search_fields = ['signal', 'sample__assay__name', 'sample__assay__study__name']
 
 
 class SignalViewSet(viewsets.ModelViewSet):
@@ -393,35 +345,3 @@ class SignalViewSet(viewsets.ModelViewSet):
         return Signal.objects.filter(study__in=studies)
     '''
 
-
-'''
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['username']
-    search_fields = ['username']
-
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name']
-    search_fields = ['name']
-
-class UserProfileInfoViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = UserProfileInfo.objects.all()
-    serializer_class = UserProfileInfoSerializer
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['user', 'portfolio_site']
-    search_fields = ['user', 'portfolio_site']
-'''
