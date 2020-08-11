@@ -11,10 +11,39 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 # Scripts.
 from .upload import *
 from .models import *
+from .util import *
 
 empty_dna_names = ['none', 'None', '']
 
-class RegistryConsumer(AsyncWebsocketConsumer): 
+class MeasurementsConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.accept()
+        await self.channel_layer.group_add(
+            "measurements",
+            self.channel_name
+        )
+        
+    async def receive(self, text_data):
+        print(f"Receive. text_data: {text_data}", flush=True)
+        data = json.loads(text_data)
+        if data['type'] == 'measurements':
+            params = data['parameters']
+            signals = params.get('signal')
+            analysis_params = params.get('analysis')
+            s = get_samples(params)
+            df = get_measurements(s, signals)
+            await self.send(text_data=json.dumps({
+                'type': 'measurements',
+                'data': df.to_json()
+            }))
+
+    async def disconnect(self, message):
+        await self.channel_layer.group_discard(
+            "measurements",
+            self.channel_name
+        )
+        
+class UploadConsumer(AsyncWebsocketConsumer): 
     def __init__(self, scope, **kwargs):
         super(RegistryConsumer, self).__init__(scope, **kwargs)
         # for most attrs is not necessary to declared them, it is  
@@ -121,6 +150,7 @@ class RegistryConsumer(AsyncWebsocketConsumer):
             elif data['type'] == 'metadata':
                 print("metadata", flush=True)
                 await self.parse_metadata(data['data'])
+
         if bytes_data:
             print('received bytes data:', len(bytes_data), flush=True)
             await self.read_binary(bytes_data)

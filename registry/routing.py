@@ -1,10 +1,14 @@
 from django.urls import path
 from channels.routing import ProtocolTypeRouter, URLRouter
 
-from .consumers import RegistryConsumer
+from .consumers import UploadConsumer, MeasurementsConsumer
 websockets = URLRouter([
     path(
-        "upload", RegistryConsumer,
-        name="registry-ws",
+        "upload", UploadConsumer,
+        name="upload-ws",
     ),
+    path(
+        "measurements", MeasurementsConsumer,
+        name="measurements-ws",
+    ),        
 ])
