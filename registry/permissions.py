@@ -94,8 +94,8 @@ class ChemicalPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            for supp in obj.sample_set.all():
-                for sample in supp.sample_set.all():             
+            for supp in obj.supplement_set.all():
+                for sample in supp.samples.all():
                     if request.user.has_perm('view_study', sample.assay.study):
                         return True
         return False
@@ -110,7 +110,7 @@ class SupplementPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            for sample in obj.sample_set.all():
+            for sample in obj.samples.all():
                 if request.user.has_perm('view_study', sample.assay.study):
                     return True
         return False
