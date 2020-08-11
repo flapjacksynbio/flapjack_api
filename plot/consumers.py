@@ -207,7 +207,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
         params = event['params']
         plot_options = params['plotOptions']
         s = get_samples(params)
-        signals = params.get('signalIds')
+        signals = params.get('signal')
         n_samples = s.count()
         if n_samples > 0:
             # Get measurements to plot/analyze
