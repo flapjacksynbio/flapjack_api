@@ -2,33 +2,23 @@ version: "3.3"
 
 services:
   flapjack_api:
-    container_name: api
-    restart: always
-    build: .
-    volumes:
-      - .:/var/app/flap
-    expose:
-      - "8000"
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    command: gunicorn flapjack_api.wsgi:application --bind 0.0.0.0:8000
     ports:
       - "8000:8000"
     env_file:
-      - ./.env
+      - ./.env.prod
     depends_on:
       - db
-    command: python manage.py runserver 0.0.0.0:8000
 
   db:
-    container_name: db
-    restart: always
     image: postgres:12.1
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: registry
-      POSTGRES_USER: guillermo
-      POSTGRES_PASSWORD: 123456
     volumes:
       - db:/var/pg/data
+    env_file:
+      - ./.env.prod.db
 
   redis:
     image: redis
