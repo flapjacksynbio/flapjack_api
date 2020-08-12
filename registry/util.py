@@ -87,6 +87,40 @@ def get_measurements(samples, signals=None):
                                     'sample__supplements__concentration', \
                                     'sample__row', 'sample__col'])
     df.columns = [pretty_field_names[col] for col in df.columns]
+
+    # Merge to get one column per chemical for the relevant columns
+    # Columns of interest
+    on = list(df.columns)
+    on.remove('Chemical')
+    on.remove('Chemical_id')
+    on.remove('Supplement')
+    on.remove('Concentration')
+
+    # Do recursive join over all chemicals
+    chemicals = df.Chemical.unique()
+    merge = df[df.Chemical==chemicals[0]]
+    for i in range(1, len(chemicals)):
+        to_merge = df[df.Chemical==chemicals[i]]
+        merge = merge.merge(to_merge, on=on, suffixes=['', str(i+1)])
+
+    # Original supplement becomes Supplement1 etc.
+    merge = merge.rename(columns={
+        'Supplement': 'Supplement1',
+        'Concentration': 'Concentration1',
+        'Chemical': 'Chemical1',
+        'Chemical_id': 'Chemical_id1',
+    })
+
+    # Create a new Supplement and Chemical column combining the individual names
+    merge['Supplement'] = merge.Supplement1
+    merge['Chemical'] = merge.Chemical1
+    for i in range(1, len(chemicals)):
+        merge['Supplement'] += ' + ' + merge[f'Supplement{i+1}']
+        merge['Chemical'] += ' + ' + merge[f'Chemical{i+1}']
+
+    # Merge chemical ids into lists    
+    merge['Chemical_id'] = merge[[f'Chemical{c+1}' for c in range(len(chemicals))]].values.tolist()
+
     end = time.time()
     print('get_measurements took ', end-start, flush=True)
-    return df
+    return merge
