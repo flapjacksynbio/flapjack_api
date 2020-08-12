@@ -35,7 +35,7 @@ class SampleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sample
-        fields = '__all__'
+        fields = ['id', 'assay', 'row', 'col', 'vector', 'supplements'] #'__all__'
 
 
 class DnaSerializer(serializers.ModelSerializer):
