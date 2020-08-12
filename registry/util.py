@@ -96,8 +96,14 @@ def get_measurements(samples, signals=None):
     on.remove('Supplement')
     on.remove('Concentration')
 
-    # Do recursive join over all chemicals
     chemicals = df.Chemical.unique()
+    # If no chemicals we are done...
+    if len(chemicals)==0:
+        end = time.time()
+        print('get_measurements took ', end-start, flush=True)
+        return df
+
+    # Do recursive join over all chemicals
     merge = df[df.Chemical==chemicals[0]]
     for i in range(1, len(chemicals)):
         to_merge = df[df.Chemical==chemicals[i]]
