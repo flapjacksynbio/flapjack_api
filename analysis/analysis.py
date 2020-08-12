@@ -491,6 +491,9 @@ class Analysis:
         '''
         #data = df[df.Chemical_id==self.chemical_id]
         data = df[df['Chemical_id'].apply(lambda x: self.chemical_id in x)]
+        chem_ids = data.Chemical_id.values[0]
+        idx = np.where(np.array(chem_ids)==self.chemical_id)[0][0]
+        data['Concentration'] = data[f'Concentration{idx+1}']
         analyzed_data = self.analysis_funcs[self.function](data)
         return analyzed_data
         
