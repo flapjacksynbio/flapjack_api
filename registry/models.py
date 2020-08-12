@@ -77,11 +77,6 @@ class Vector(models.Model):
     dnas = models.ManyToManyField(Dna, related_name='vectors')
 
     def __str__(self):
-        """
-        dnas = self.dnas.all()
-        dna_names = [dna.name for dna in dnas]
-        return ' + '.join(dna_names)
-        """
         return self.name
 
 class Sample(models.Model):
