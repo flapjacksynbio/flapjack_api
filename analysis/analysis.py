@@ -476,12 +476,22 @@ class Analysis:
         return max_expr    
 
     # Other analysis types that make different forms of resulting data
+    # ----
     def induction_curve(self, df):
-        #data = df[df.Chemical_id==self.chemical_id]
         data = df[df['Chemical_id'].apply(lambda x: self.chemical_id in x)]
+        if len(data)==0:
+            # The data does not correspond to the specified chemicals
+            return pd.DataFrame()
         chem_ids = data.Chemical_id.values[0]
+        if len(chem_ids)==0:
+            # The data does not correspond to the specified chemicals
+            return pd.DataFrame()
         idx = np.where(np.array(chem_ids)==self.chemical_id)[0][0]
-        data['Concentration'] = data[f'Concentration{idx+1}']
+        idx = np.where(np.array(chem_ids)==self.chemical_id)[0]
+        if len(idx)==0:
+            # The data does not correspond to the specified chemicals
+            return pd.DataFrame()
+        data['Concentration'] = data[f'Concentration{idx[0]+1}']
         analyzed_data = self.analysis_funcs[self.function](data)
         return analyzed_data
 
@@ -489,14 +499,41 @@ class Analysis:
         '''
         Compute kymograph for induced expression, x-axis=inducer concentration
         '''
-        #data = df[df.Chemical_id==self.chemical_id]
-        data = df[df['Chemical_id'].apply(lambda x: self.chemical_id in x)]
+        return self.induction_curve(df)
+
+    def heatmap(self, df):
+        '''
+        Compute heatmap for two-input induced expression
+        '''
+        # Slice the data for the specified chemicals
+        data = df[df['Chemical_id'].apply(lambda x: self.chemical_id1 in x)]
+        data = data[data['Chemical_id'].apply(lambda x: self.chemical_id2 in x)]
+        if len(data)==0:
+            # The data does not correspond to the specified chemicals
+            return pd.DataFrame()
+
+        # The chemicals in the data
         chem_ids = data.Chemical_id.values[0]
-        idx = np.where(np.array(chem_ids)==self.chemical_id)[0][0]
-        data['Concentration'] = data[f'Concentration{idx+1}']
+        if len(chem_ids)==0:
+            # The data does not correspond to the specified chemicals
+            return pd.DataFrame()
+
+        # Find the relevant chemicals in the lists
+        idx1 = np.where(np.array(chem_ids)==self.chemical_id1)[0]
+        idx2 = np.where(np.array(chem_ids)==self.chemical_id2)[0]
+
+        if len(idx1)==0 or len(idx2)==0:
+            # The data does not correspond to the specified chemicals
+            return pd.DataFrame()
+
+        # New columns with the concentrations of each chemical
+        data['Concentration A'] = data[f'Concentration{idx1[0]+1}']
+        data['Concentration A'] = data[f'Concentration{idx1[0]+1}']
+
+        # Analyze the data and return
         analyzed_data = self.analysis_funcs[self.function](data)
         return analyzed_data
-        
+
     def ratiometric_alpha(self, df):
         # Parameters:
         #   bounds = tuple of list of min and max values for  Gompertz model parameters
