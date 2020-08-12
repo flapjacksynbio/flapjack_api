@@ -49,9 +49,10 @@ class DnaPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            for assay in obj.assays.all():
-                if request.user.has_perm('view_study', assay.study):
-                    return True
+            for vector in dna.vectors.all():
+                for sample in vector.sample_set.all():
+                    if request.user.has_perm('view_study', sample.assay.study):
+                        return True
         return False
 
 
@@ -125,10 +126,9 @@ class VectorPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            for dna in obj.dnas.all():
-                for assay in dna.assays.all():
-                    if request.user.has_perm('view_study', assay.study):
-                        return True
+            for sample in vector.sample_set.all():
+                if request.user.has_perm('view_study', sample.assay.study):
+                    return True
         return False
 
 
