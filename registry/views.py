@@ -14,7 +14,7 @@ class DnaFilter(FilterSet):
 
     class Meta:
         model = Dna
-        fields = ('sboluri', 'name', 'assays')
+        fields = ('sboluri', 'name')
 
 
 class MediaFilter(FilterSet):
@@ -234,10 +234,10 @@ class DnaViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return Dna.objects.filter(
-            Q(assays__study__owner=user) |
-            Q(assays__study__public=True) |
-            Q(assays__study__shared_with=user)
-        )
+            Q(vectors__sample__assay__study__owner=user) |
+            Q(vectors__sample__assay__study__public=True) |
+            Q(vectors__sample__assay__study__shared_with=user)
+        ).distinct()
 
 
 class MediaViewSet(viewsets.ModelViewSet):
