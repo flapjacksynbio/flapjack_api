@@ -112,4 +112,4 @@ class Measurement(models.Model):
     time = models.FloatField()
 
     def __str__(self):
-        return self.value
+        return str(self.value)
