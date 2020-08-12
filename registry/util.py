@@ -119,7 +119,7 @@ def get_measurements(samples, signals=None):
         merge['Chemical'] += ' + ' + merge[f'Chemical{i+1}']
 
     # Merge chemical ids into lists    
-    merge['Chemical_id'] = merge[[f'Chemical{c+1}' for c in range(len(chemicals))]].values.tolist()
+    merge['Chemical_id'] = merge[[f'Chemical_id{c+1}' for c in range(len(chemicals))]].values.tolist()
 
     end = time.time()
     print('get_measurements took ', end-start, flush=True)
