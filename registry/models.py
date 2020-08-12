@@ -66,7 +66,6 @@ class Supplement(models.Model):
 class Dna(models.Model):
     name = models.CharField(max_length=100)
     sboluri = models.URLField(blank=True)
-    assays = models.ManyToManyField(Assay, related_name='dnas')
 
     def __str__(self):
         return self.name
