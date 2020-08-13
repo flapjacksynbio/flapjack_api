@@ -3,8 +3,10 @@ import json
 import asyncio
 import io
 import time
+from django.db.models import Q
 # Third Party imports.
 import openpyxl as opxl
+import numpy as np
 import pandas as pd
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -55,8 +57,10 @@ class UploadConsumer(AsyncWebsocketConsumer):
         self.signal_names = []
         self.ws = ''
         self.dna_names = []
+        self.binary_file = b''
 
     async def connect(self):
+        self.user = User.objects.get(username=self.scope["user"])
         await self.accept()
         await self.channel_layer.group_add(
             "upload",
@@ -85,48 +89,119 @@ class UploadConsumer(AsyncWebsocketConsumer):
 
 
     async def read_binary(self, bin_data):
-        # load workbook, sheet containing data and extract metadata information
-        wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
-        self.ws = wb['Data']
-        self.signal_names = synergy_get_signal_names(self.ws)
-        self.meta_dict = synergy_load_meta(wb, self.columns)
-        
-        # get dnas and chemicals names to ask for metadata to the user
-        dna_keys = [val for val in self.meta_dict.index if "DNA" in val]
-        dna_lists = [list(np.unique(self.meta_dict.loc[k])) for k in dna_keys]
-        self.dna_names = list(
-            np.unique(
-                [dna for dna_list in dna_lists for dna in dna_list if dna not in empty_dna_names]
+        ## IF MACHINE SYNERGY
+        if 'synergy' in self.machine.lower():
+            # load workbook, sheet containing data and extract metadata information
+            wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
+            self.ws = wb['Data']
+            self.signal_names = synergy_get_signal_names(self.ws)[:-1]
+            self.meta_dict = synergy_load_meta(wb, self.columns)
+            
+            # get dnas and chemicals names to ask for metadata to the user
+            dna_keys = [val for val in self.meta_dict.index if "DNA" in val]
+            dna_lists = [list(np.unique(self.meta_dict.loc[k])) for k in dna_keys]
+            self.dna_names = list(
+                np.unique(
+                    [dna for dna_list in dna_lists for dna in dna_list if dna not in empty_dna_names]
+                    )
                 )
-            )
-        chem_names_excel = [val for val in self.meta_dict.index if "chem" in val]
+            chem_names_file = [val for val in self.meta_dict.index if "chem" in val]
 
+
+        ## IF MACHINE FLUOPI
+        elif 'fluopi' in self.machine.lower():
+            self.binary_file = bin_data
+            data = json.loads(self.binary_file.decode())
+            
+            # dnas
+            col_dnas = data['dnas']
+            self.dna_names = list(np.unique(list(col_dnas.values())))
+            # as for now, no chemicals are included
+            chem_names_file = []
+            # fluo per channel per colony
+            fluo = data['Fluorescence Intensity']
+            self.signal_names = list(fluo.keys())
+
+        ## IF MACHINE BMG
+
+
+        ## SEND CORRECT DATA DEPENDING ON THE FILE
         # Ask for dna, chemicals and signals
         await self.send(text_data=json.dumps({
                 'type': 'input_requests',
                 'data': {
                     'dna': self.dna_names,
-                    'chemical': chem_names_excel,
-                    'signal': self.signal_names[:-1]
+                    'chemical': chem_names_file,
+                    'signal': self.signal_names
                 }
             }))
 
 
     async def parse_metadata(self, metadata):
         print(f"metadata: {metadata}", flush=True)
-        # get dnas and inducers
-        # construct signal_map ({signal_name: signal from machine})
-        signal_map = {self.signal_names[i]:Signal.objects.get(id=s_id).name 
-                        for i, s_id in enumerate(metadata['signal'])} 
+        ## IF MACHINE SYNERGY
+        if 'synergy' in self.machine.lower():
+            # get dnas and inducers
+            # construct signal_map ({signal_name: signal from machine})
+            signal_map = {self.signal_names[i]:Signal.objects.get(id=s_id).name 
+                            for i, s_id in enumerate(metadata['signal'])} 
 
-        # load data from "Data" sheet as a DataFrame
-        dfs = synergy_load_data(self.ws, self.signal_names, signal_map)
-        
-        # upload data
-        start = time.time()
-        await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata)
-        end = time.time()
-        print(f"UPLOAD FINISHED. Took {end-start} secs")
+            # load data from "Data" sheet as a DataFrame
+            signal_names_aux = self.signal_names.copy()
+            signal_names_aux.append('Results')
+            dfs = synergy_load_data(self.ws, signal_names_aux, signal_map)
+            
+            # upload data
+            start = time.time()
+            await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata)
+            end = time.time()
+            print(f"UPLOAD SYNERGY FINISHED. Took {end-start} secs")
+
+
+        ## IF MACHINE FLUOPI
+        elif 'fluopi' in self.machine.lower():
+            data = json.loads(self.binary_file.decode())
+
+            # time domain for the experiment
+            time_serie = data['Times']
+            # dnas
+            col_dnas = data['dnas']
+            # selected colonies when creating .json file with FluoPi's package
+            sel_cols = data['Selected colonies']
+            # used for?
+            cols_in_assay = len(sel_cols)
+            col_per_assay = len(sel_cols)
+            # radius in time for each colony
+            rad = data['Radius']
+            # colony positions
+            pos = data['pos']
+            # fluo
+            fluo = data['Fluorescence Intensity']
+            # media
+            media = data['media']
+            # strain
+            strain = data['strain']
+
+            dna_map = {self.dna_names[idx]: dna_id for idx, dna_id in enumerate(metadata['dna'])}
+            signal_map = {self.signal_names[idx]: signal_id for idx, signal_id in enumerate(metadata['signal'])}
+
+            start = time.time()
+            await self.fluopi_upload(self.assay_id, 
+                        time_serie, 
+                        sel_cols,
+                        rad,
+                        pos,
+                        fluo,
+                        self.dna_names,
+                        media[0],
+                        strain[0],
+                        col_dnas,
+                        dna_map,
+                        signal_map)       
+            
+            end = time.time()
+            print(f"UPLOAD FLUOPI FINISHED. Took {end-start} secs")
+        ## IF MACHINE BMG
         
         await self.send(text_data=json.dumps({
                 'type': 'creation_done'
@@ -285,14 +360,13 @@ class UploadConsumer(AsyncWebsocketConsumer):
                 for sup in sample_supps:
                     samp.supplements.add(sup)
 
-                # status update
-                process_percent = (well_idx+1)/(len(columns))
-                await self.progress_update(process_percent)
-
                 # Data value for each well
                 measurements = []
                 for key, dfm in dfs.items():
-                    signal = Signal.objects.get(name=key)
+                    # TO DO: decide whether to check for user's signals or public ones
+                    signal = Signal.objects.filter(name=key)[0]
+                    #signal = Signal.objects.filter(Q(measurement__sample__assay__study__owner=self.user) & 
+                    #                               Q(name='OD')).distinct()[0]
                     for i, value in enumerate(dfm[well]):
                         m_value = value
                         m_time = dfm['Time'].iloc[i]
@@ -300,5 +374,108 @@ class UploadConsumer(AsyncWebsocketConsumer):
                         measurements.append(m)
                 Measurement.objects.bulk_create(measurements)
 
+                # status update
+                process_percent = (well_idx+1)/(len(columns))
+                await self.progress_update(process_percent)
+
             else:
                 print("I'm Media None")
+
+    async def fluopi_upload(self, 
+                            assay_id, 
+                            time_serie, 
+                            sel_cols,
+                            rad,
+                            pos,
+                            fluo,
+                            dna_names,
+                            media,
+                            strain,
+                            col_dnas,
+                            dna_map,
+                            signal_map):
+        
+        existing_med = [m.name for m in Media.objects.all()]
+        existing_str = [s.name for s in Strain.objects.all()]
+
+        # Media
+        if media not in existing_med:
+            media = Media(name=media, description='')
+            media.save()
+        else:
+            media = Media.objects.filter(name__exact=media)[0]
+
+        # Strain
+        if strain not in existing_str:
+            strain = Strain(name=strain, description='')
+            strain.save()
+        else:
+            strain = Strain.objects.filter(name__exact=strain)[0]
+
+        measurements = []
+        for col_idx, col in enumerate(sel_cols):
+            # Vector
+            # construct a list of lists, each containing the ids of the dnas
+            # in each vector, for the requesting user
+            user_vectors = Vector.objects.filter(
+                Q(sample__assay__study__owner=self.user) |
+                Q(sample__assay__study__public=True) |
+                Q(sample__assay__study__shared_with=self.user)
+            ).distinct()
+            
+            vectors_dna_ids = []
+            vector_ids = [v.id for v in user_vectors]
+            for v in user_vectors:
+                vector_dna_ids = [dna.id for dna in v.dnas.all()]
+                vector_dna_ids.sort()
+                vectors_dna_ids.append(vector_dna_ids)
+
+            # dna in this colony (col_dnas[col])
+            col_dna_ids = [dna_map[d] for d in col_dnas[str(col)]]
+            col_dna_ids.sort()
+
+            # if colony dnas already exist in a vector, we assign that object
+            if col_dna_ids in vectors_dna_ids:
+                idx = vectors_dna_ids.index(col_dna_ids)
+                vector_id = vector_ids[idx]
+                vector = Vector.objects.get(id=vector_id)
+            else:
+                vector = Vector.objects.create()
+                for dna_id in col_dna_ids:
+                    vector.dnas.add(Dna.objects.get(id=dna_id))
+                vector.save()     
+
+            # Sample 
+            samp = Sample(assay=Assay.objects.get(id=assay_id), 
+                                    media=media, 
+                                    strain=strain, 
+                                    vector=vector, 
+                                    row=pos[str(col)][0], 
+                                    col=pos[str(col)][1])
+            samp.save()
+            
+            # area as OD
+            # TO DO: Area Signal is created if not exists. Think on a better way
+            try:
+                od_signal = Signal.objects.get(name='Area')
+            except:
+                od_signal = Signal(name='Area', description='', color='')
+                od_signal.save()
+            
+            for idx, r in enumerate(rad[str(col)]):
+                mar = Measurement(sample=samp, signal=od_signal, value=(r**2)*np.pi, time=time_serie[idx])
+                measurements.append(mar)
+            
+            # Fluo
+            for f_name in fluo.keys():
+                f_signal = Signal.objects.get(id=signal_map[f_name])
+                for idx, val in enumerate(fluo[f_name][str(col)]):
+                    m = Measurement(sample=samp, signal=f_signal, value=val, time=time_serie[idx])
+                    measurements.append(m)
+
+            # status update
+            process_percent = (col_idx+1)/(len(sel_cols))
+            await self.progress_update(process_percent)
+
+        Measurement.objects.bulk_create(measurements)
+        
