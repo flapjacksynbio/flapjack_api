@@ -272,6 +272,9 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 chem2 = Chemical.objects.get(id=analysis.chemical_id2)
                 xlabel = 'Concentration ' + chem1.name
                 ylabel = 'Concentration ' + chem2.name
+            elif plot_type == 'kymograph':
+                chem = Chemical.objects.get(id=analysis.chemical_id)
+                xlabel = 'Concentration ' + chem.name
 
             # Plot figure
             subplots = plot_options['subplots']
