@@ -84,7 +84,7 @@ class Sample(models.Model):
     strain = models.ForeignKey(Strain, null=True, on_delete=models.CASCADE)
     vector = models.ForeignKey(Vector, null=True, on_delete=models.CASCADE)
     supplements = models.ManyToManyField(Supplement, related_name='samples')
-    row = models.CharField(max_length=10)
+    row = models.IntegerField()
     col = models.IntegerField()
 
     def __str__(self):
