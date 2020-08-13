@@ -49,6 +49,10 @@ plot_properties = {
         axis_labels=('Concentration', None),
         plot_type='induction'
         ),
+    'Heatmap': dict(
+        axis_labels=('Concentration A', 'Concentration B'),
+        plot_type='heatmap'
+        ),
     'Kymograph': dict(
         axis_labels=('Concentration', 'Time'),
         plot_type='kymograph'
@@ -202,10 +206,39 @@ def format_axes(
                         linewidth=3,
                         row=row, col=col)
 
+def make_heatmap_traces(
+        fig,
+        df,
+        mean=False, 
+        std=False, 
+        normalize=False,
+        show_legend_group=False,
+        group_name='',
+        row=1, col=1,
+        ycolumn='Rate',
+    ):
+    if len(df)>0:
+        unique_concs1 = np.sort(df['Concentration A'].unique())
+        unique_concs2 = np.sort(df['Concentration B'].unique())
+        c1,bins1 = pd.cut(df['Concentration A'], bins=unique_concs1, retbins=True)
+        c2,bins2 = pd.cut(df['Concentration B'], bins=unique_concs2, retbins=True)       
+        hm = df.groupby([c1, c2])[ycolumn].mean().unstack()
+        # Always normalize the heatmap since there is only 1 colorbar
+        hm = np.array(hm)
+        hm /= hm.max()
+
+        heatmap = go.Heatmap(x=bins2, y=bins1, z=hm, 
+                            showscale=show_legend_group,
+                            colorscale='Viridis',
+                            zmin=0., zmax=1.)
+        fig.add_trace(heatmap, row=row, col=col)
+    else:
+        print('Cannot make kymograph of empty dataframe, ', df, flush=True)
+    return fig
+
 def make_kymograph_traces(
         fig,
-        df, 
-        color='blue', 
+        df,
         mean=False, 
         std=False, 
         normalize=False,

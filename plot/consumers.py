@@ -147,11 +147,22 @@ class PlotConsumer(AsyncWebsocketConsumer):
                             row=row, col=col,
                             ycolumn=ycolumn
                         )
+                elif plot_type == 'heatmap':
+                    fig = plotting.make_heatmap_traces(
+                            fig,
+                            g2, 
+                            mean=mean, 
+                            std=std, 
+                            normalize=normalize,
+                            show_legend_group=show_legend_group,
+                            group_name=str(name2),
+                            row=row, col=col,
+                            ycolumn=ycolumn
+                        )
                 elif plot_type == 'kymograph':
                     fig = plotting.make_kymograph_traces(
                             fig,
-                            g2,
-                            color=color, 
+                            g2, 
                             mean=mean, 
                             std=std, 
                             normalize=normalize,
@@ -181,6 +192,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
             subplot_index += 1
         if plot_type=='kymograph' or plot_type=='induction':
             xaxis_type, yaxis_type = 'log', None
+        elif plot_type=='heatmap':
+            xaxis_type, yaxis_type = 'log', 'log'
         else:
             xaxis_type, yaxis_type = None, None
         plotting.layout_screen(fig, xaxis_type=xaxis_type, yaxis_type=yaxis_type, font_size=font_size)

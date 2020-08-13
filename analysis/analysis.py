@@ -19,6 +19,7 @@ remove_background = {
         'Mean Expression': True,
         'Max Expression': True,
         'Induction Curve': True,
+        'Heatmap': True,
         'Kymograph': True,
         'Alpha': True,
         'Rho': True
@@ -38,6 +39,7 @@ class Analysis:
             'Mean Expression': self.mean_expression,
             'Max Expression': self.max_expression,
             'Induction Curve': self.induction_curve,
+            'Heatmap': self.heatmap,
             'Kymograph': self.kymograph,
             'Alpha': self.ratiometric_alpha,
             'Rho': self.ratiometric_rho
@@ -58,6 +60,8 @@ class Analysis:
         self.degr = float(params.get('degr', 0.))
         self.eps_L = float(params.get('eps_L', 1e-7))
         self.chemical_id = params.get('analyte', None)
+        self.chemical_id1 = params.get('analyte1', None)
+        self.chemical_id2 = params.get('analyte2', None)
         self.ref_name = params.get('ref_signal')
         self.bounds = [[0,0,0,0], [1,1,1,24]]
         self.function = params.get('function')
@@ -517,7 +521,7 @@ class Analysis:
 
         chem_data = []
         for id, samp_data in data.groupby('Sample'):
-            # The chemicals in the data
+            # The chemicals in the sample
             chem_ids = samp_data.Chemical_id.values[0]
             if len(chem_ids)==0:
                 # The data does not correspond to the specified chemicals
