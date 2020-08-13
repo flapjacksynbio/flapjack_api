@@ -482,17 +482,20 @@ class Analysis:
         if len(data)==0:
             # The data does not correspond to the specified chemicals
             return pd.DataFrame()
-        chem_ids = data.Chemical_id.values[0]
-        if len(chem_ids)==0:
-            # The data does not correspond to the specified chemicals
-            return pd.DataFrame()
-        idx = np.where(np.array(chem_ids)==self.chemical_id)[0][0]
-        idx = np.where(np.array(chem_ids)==self.chemical_id)[0]
-        if len(idx)==0:
-            # The data does not correspond to the specified chemicals
-            return pd.DataFrame()
-        data['Concentration'] = data[f'Concentration{idx[0]+1}']
-        analyzed_data = self.analysis_funcs[self.function](data)
+        chem_data = []
+        for id, samp_data in data.groupby('Sample'):
+            chem_ids = samp_data.Chemical_id.values[0]
+            if len(chem_ids)==0:
+                # The data does not correspond to the specified chemicals
+                return pd.DataFrame()
+            idx = np.where(np.array(chem_ids)==self.chemical_id)[0]
+            if len(idx)==0:
+                # The data does not correspond to the specified chemicals
+                return pd.DataFrame()
+            samp_data['Concentration'] = samp_data[f'Concentration{idx[0]+1}']
+            chem_data.append(samp_data)
+        chem_data = pd.concat(chem_data)
+        analyzed_data = self.analysis_funcs[self.function](chem_data)
         return analyzed_data
 
     def kymograph(self, df):
@@ -512,26 +515,29 @@ class Analysis:
             # The data does not correspond to the specified chemicals
             return pd.DataFrame()
 
-        # The chemicals in the data
-        chem_ids = data.Chemical_id.values[0]
-        if len(chem_ids)==0:
-            # The data does not correspond to the specified chemicals
-            return pd.DataFrame()
+        chem_data = []
+        for id, samp_data in data.groupby('Sample'):
+            # The chemicals in the data
+            chem_ids = samp_data.Chemical_id.values[0]
+            if len(chem_ids)==0:
+                # The data does not correspond to the specified chemicals
+                return pd.DataFrame()
 
-        # Find the relevant chemicals in the lists
-        idx1 = np.where(np.array(chem_ids)==self.chemical_id1)[0]
-        idx2 = np.where(np.array(chem_ids)==self.chemical_id2)[0]
+            # Find the relevant chemicals in the lists
+            idx1 = np.where(np.array(chem_ids)==self.chemical_id1)[0]
+            idx2 = np.where(np.array(chem_ids)==self.chemical_id2)[0]
 
-        if len(idx1)==0 or len(idx2)==0:
-            # The data does not correspond to the specified chemicals
-            return pd.DataFrame()
+            if len(idx1)==0 or len(idx2)==0:
+                # The data does not correspond to the specified chemicals
+                return pd.DataFrame()
 
-        # New columns with the concentrations of each chemical
-        data['Concentration A'] = data[f'Concentration{idx1[0]+1}']
-        data['Concentration A'] = data[f'Concentration{idx1[0]+1}']
-
+            # New columns with the concentrations of each chemical
+            samp_data['Concentration A'] = samp_data[f'Concentration{idx1[0]+1}']
+            samp_data['Concentration B'] = samp_data[f'Concentration{idx2[0]+1}']
+            chem_data.append(samp_data)
+        chem_data = pd.concat(chem_data)
         # Analyze the data and return
-        analyzed_data = self.analysis_funcs[self.function](data)
+        analyzed_data = self.analysis_funcs[self.function](chem_data)
         return analyzed_data
 
     def ratiometric_alpha(self, df):
