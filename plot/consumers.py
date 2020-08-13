@@ -266,7 +266,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 print('normalize', normalize, flush=True)
                 df = normalize_data(df, normalize, ycolumn)
 
-            # Correct axis labels for heatmap
+            # Correct axis labels for heatmap and kymograph
             if plot_type == 'heatmap':
                 chem1 = Chemical.objects.get(id=analysis.chemical_id1)
                 chem2 = Chemical.objects.get(id=analysis.chemical_id2)

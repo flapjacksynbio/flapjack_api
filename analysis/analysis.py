@@ -262,7 +262,7 @@ class Analysis:
         post_smoothing = Savitsky-Golay filter parameter (window size)
         '''
         print(self.smoothing_param1, self.smoothing_param2, flush=True)
-        density_df = df[df['Signal_id']==self.density_name]
+        density_df = get_biomass(df, self.density_name)
         
         result = pd.DataFrame()
         rows = []
@@ -362,7 +362,7 @@ class Analysis:
         if len(df)==0:
             return(df)
 
-        density_df = df[df['Signal_id']==self.density_name]
+        density_df = get_biomass(df, self.density_name)
         if len(density_df)==0:
             return density_df
         
@@ -550,7 +550,7 @@ class Analysis:
         #   df = dataframe of measurements including OD
         #   density_df = dataframe containing biomass measurements
         #   ndt = number of doubling times to extend exponential phase
-        density_df = df[df['Signal_id']==self.density_name]
+        density_df = get_biomass(df, self.density_name)
 
         result = pd.DataFrame()
         rows = []

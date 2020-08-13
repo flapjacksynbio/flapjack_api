@@ -2,6 +2,26 @@ from registry.models import *
 from django_pandas.io import read_frame
 import time
 
+field_names = [
+    'signal__id',
+    'signal__name',
+    'signal__color',
+    'value',
+    'time',
+    'sample__id',
+    'sample__assay__name',
+    'sample__assay__study__name',
+    'sample__media__name',
+    'sample__strain__name',
+    'sample__vector__name',
+    'sample__supplements__name',
+    'sample__supplements__chemical__name',
+    'sample__supplements__chemical__id',
+    'sample__supplements__concentration',
+    'sample__row', 
+    'sample__col'
+]
+
 pretty_field_names = {
     'signal__id': 'Signal_id',
     'signal__name': 'Signal',
@@ -70,22 +90,7 @@ def get_measurements(samples, signals=None):
     if signals:
         m = m.filter(signal__id__in=signals)
     # Get pandas dataframe 
-    df = read_frame(m, fieldnames=['signal__id',
-                                    'signal__color',
-                                    'signal__name', \
-                                    'value', \
-                                    'time', \
-                                    'sample__id', \
-                                    'sample__assay__name', \
-                                    'sample__assay__study__name', \
-                                    'sample__media__name', \
-                                    'sample__strain__name', \
-                                    'sample__vector__name', \
-                                    'sample__supplements__name', \
-                                    'sample__supplements__chemical__name', \
-                                    'sample__supplements__chemical__id', \
-                                    'sample__supplements__concentration', \
-                                    'sample__row', 'sample__col'])
+    df = read_frame(m, fieldnames=field_names)
     df.columns = [pretty_field_names[col] for col in df.columns]
 
     # Merge to get one column per chemical for the relevant columns
@@ -130,3 +135,11 @@ def get_measurements(samples, signals=None):
     end = time.time()
     print('get_measurements took ', end-start, flush=True)
     return merge
+
+def get_biomass(df, biomass_signal):
+    samp_ids = df.Sample.unique()
+    m = Measurement.objects.filter(sample__id__in=samp_ids)
+    m = m.filter(signal__id__exact=biomass_signal)
+    biomass_df = read_frame(m, fieldnames=field_names)
+    biomass_df.columns = [pretty_field_names[col] for col in biomass_df.columns]
+    return biomass_df
