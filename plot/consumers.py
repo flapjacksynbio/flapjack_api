@@ -8,7 +8,7 @@ from . import plotting
 from analysis.analysis import Analysis 
 from analysis.util import *
 from registry.util import get_samples, get_measurements
-from registry.models import Signal
+from registry.models import Signal, Chemical
 from plotly.subplots import make_subplots
 import plotly
 import pandas as pd
@@ -265,6 +265,13 @@ class PlotConsumer(AsyncWebsocketConsumer):
                 print('normalizing', flush=True)
                 print('normalize', normalize, flush=True)
                 df = normalize_data(df, normalize, ycolumn)
+
+            # Correct axis labels for heatmap
+            if plot_type == 'heatmap':
+                chem1 = Chemical.objects.get(id=analysis.chemical_id1)
+                chem2 = Chemical.objects.get(id=analysis.chemical_id2)
+                xlabel = 'Concentration ' + chem1.name
+                ylabel = 'Concentration ' + chem2.name
 
             # Plot figure
             subplots = plot_options['subplots']
