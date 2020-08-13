@@ -200,6 +200,8 @@ class PlotConsumer(AsyncWebsocketConsumer):
         return fig
 
     async def run_analysis(self, df, analysis):
+        if len(df)==0:
+            return df
         grouped = df.groupby('Sample')
         result_dfs = []
         n_samples = len(grouped)
