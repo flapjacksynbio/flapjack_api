@@ -151,9 +151,11 @@ class UploadConsumer(AsyncWebsocketConsumer):
             signal_names_aux.append('Results')
             dfs = synergy_load_data(self.ws, signal_names_aux, signal_map)
             
+            signal_ids = {signal_map[name]: metadata['signal'][idx] 
+                            for idx, name in enumerate(self.signal_names)}
             # upload data
             start = time.time()
-            await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata)
+            await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata, signal_ids)
             end = time.time()
             print(f"UPLOAD SYNERGY FINISHED. Took {end-start} secs")
 
@@ -238,7 +240,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
         )
 
     # TO DO: move part of this function to upload.py utils
-    async def upload_data(self, assay_id, meta_dict, dfs, metadata):
+    async def upload_data(self, assay_id, meta_dict, dfs, metadata, signal_ids):
         columns = list(meta_dict.columns)
         meta_dnas = [k for k in list(meta_dict.index) if 'DNA' in k]
         meta_inds = [k for k in list(meta_dict.index) if 'chem' in k]
@@ -364,7 +366,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
                 measurements = []
                 for key, dfm in dfs.items():
                     # TO DO: decide whether to check for user's signals or public ones
-                    signal = Signal.objects.filter(name=key)[0]
+                    signal = Signal.objects.filter(id=signal_ids[key])[0]
                     #signal = Signal.objects.filter(Q(measurement__sample__assay__study__owner=self.user) & 
                     #                               Q(name='OD')).distinct()[0]
                     for i, value in enumerate(dfm[well]):
