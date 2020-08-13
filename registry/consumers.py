@@ -247,8 +247,13 @@ class UploadConsumer(AsyncWebsocketConsumer):
         for well_idx, well in enumerate(columns):
             existing_med = [i.name for i in Media.objects.all()]
             existing_str = [i.name for i in Strain.objects.all()]
-            existing_vec = [vec for vec in Vector.objects.all()]
+            #existing_vec = [vec for vec in Vector.objects.all()]
             existing_sup = [(s.chemical.id, s.concentration) for s in Supplement.objects.all()]
+            existing_vec = Vector.objects.filter(
+                Q(sample__assay__study__owner=self.user) |
+                Q(sample__assay__study__public=True) |
+                Q(sample__assay__study__shared_with=self.user)
+            ).distinct()
 
             # Metadata value for each well (sample): strain and media
             s_media = meta_dict.loc['Media'][well]
@@ -355,7 +360,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
                                 media=media, 
                                 strain=strain, 
                                 vector=vector, 
-                                row=well[0], 
+                                row=ord(well[0])-64, 
                                 col=well[1:])
                 samp.save()
                 # assign supplements to sample
