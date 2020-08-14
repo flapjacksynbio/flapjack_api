@@ -51,7 +51,7 @@ class DnaPermission(IsAuthenticated):
         if request.method in SAFE_METHODS:
             return True
         else:
-            for vector in dna.vectors.all():
+            for vector in obj.vectors.all():
                 for sample in vector.sample_set.all():
                     if request.user != sample.assay.study.owner:
                         return False
@@ -138,7 +138,7 @@ class VectorPermission(IsAuthenticated):
         if request.method in SAFE_METHODS:
             return True
         else:
-            for sample in vector.sample_set.all():
+            for sample in obj.sample_set.all():
                 if request.user != sample.assay.study.owner:
                     return False
             return True
