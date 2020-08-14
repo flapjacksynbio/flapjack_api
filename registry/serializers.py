@@ -30,6 +30,13 @@ class AssaySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class SampleSerializerCreate(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Sample
+        fields = ['id', 'assay', 'row', 'col', 'vector'] #'__all__'
+
 class SampleSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
 

@@ -4,8 +4,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, BooleanFilter
 from rest_framework_filters.backends import RestFrameworkFilterBackend
 from .models import *
-from .serializers import AssaySerializer, DnaSerializer, MeasurementSerializer, MediaSerializer, SampleSerializer, SignalSerializer, StrainSerializer, StudySerializer, VectorSerializer, VectorAllSerializer, SupplementSerializer, ChemicalSerializer
-from .permissions import AssayPermission, DnaPermission, MeasurementPermission, MediaPermission, SamplePermission, StrainPermission, StudyPermission, VectorPermission, SupplementPermission, ChemicalPermission
+from .serializers import *
+from .permissions import *
 import django_filters
 
 class DnaFilter(FilterSet):
@@ -197,7 +197,7 @@ class SampleViewSet(viewsets.ModelViewSet):
     """
     permission_classes = [SamplePermission]
     queryset = Sample.objects.all()
-    serializer_class = SampleSerializer
+    #serializer_class = SampleSerializer
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     filter_class = SampleFilter
     search_fields = [
@@ -209,13 +209,19 @@ class SampleViewSet(viewsets.ModelViewSet):
         'vector__dnas'
     ]
 
-    '''
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return SampleSerializerCreate
+        else:
+            return SampleSerializer
+
     def get_queryset(self):
         user = self.request.user
-        studies = get_objects_for_user(user, 'LoadData.view_study')
-        return Sample.objects.filter(assay__study__in=studies)
-    '''
-
+        return Sample.objects.filter(
+            Q(assay__study__owner=user) |
+            Q(assay__study__public=True) |
+            Q(assay__study__shared_with=user)
+        ).distinct()
 
 class DnaViewSet(viewsets.ModelViewSet):
     """
@@ -309,6 +315,13 @@ class VectorViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     search_fields = ['name']
 
+    def get_queryset(self):
+        user = self.request.user
+        return Vector.objects.filter(
+            Q(sample__assay__study__owner=user) |
+            Q(sample__assay__study__public=True) |
+            Q(sample__assay__study__shared_with=user)
+        ).distinct()
 
 class SupplementViewSet(viewsets.ModelViewSet):
     """
@@ -346,6 +359,13 @@ class MeasurementViewSet(viewsets.ModelViewSet):
     #                    'value', 'sample', 'sample__assay__name']
     search_fields = ['signal', 'sample__assay__name', 'sample__assay__study__name']
 
+    def get_queryset(self):
+        user = self.request.user
+        return Measurement.objects.filter(
+            Q(sample__assay__study__owner=user) |
+            Q(sample__assay__study__public=True) |
+            Q(sample__assay__study__shared_with=user)
+        ).distinct()
 
 class SignalViewSet(viewsets.ModelViewSet):
     """
