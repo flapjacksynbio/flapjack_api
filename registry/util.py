@@ -1,5 +1,6 @@
 from registry.models import *
 from django_pandas.io import read_frame
+import numpy as np
 import time
 
 field_names = [
@@ -104,7 +105,7 @@ def get_measurements(samples, signals=None):
     chemicals = df.Chemical.unique()
     print('chemicals ', chemicals, flush=True)
     # If no chemicals we are done...
-    if len(chemicals)==0 or chemicals == [None]:
+    if len(chemicals)==0 or np.all(chemicals==None):
         end = time.time()
         print('No chemicals found, get_measurements took ', end-start, flush=True)
         return df
