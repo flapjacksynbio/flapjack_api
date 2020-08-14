@@ -102,10 +102,11 @@ def get_measurements(samples, signals=None):
     on.remove('Concentration')
 
     chemicals = df.Chemical.unique()
+    print('chemicals ', chemicals, flush=True)
     # If no chemicals we are done...
-    if len(chemicals)==0:
+    if len(chemicals)==0 or not chemicals[0]:
         end = time.time()
-        print('get_measurements took ', end-start, flush=True)
+        print('No chemicals found, get_measurements took ', end-start, flush=True)
         return df
 
     # Do recursive join over all chemicals
