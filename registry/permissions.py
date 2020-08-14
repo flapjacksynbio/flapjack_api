@@ -10,7 +10,7 @@ class StudyPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            return request.user.has_perm('view_study', obj)
+            return True
         return request.user == obj.owner
 
 
@@ -22,9 +22,11 @@ class AssayPermission(IsAuthenticated):
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
+        print('Checking Assay permission, request ', request, flush=True)
+        print(SAFE_METHODS)
         if request.method in SAFE_METHODS:
-            return request.user.has_perm('view_study', obj.study)
-        return False
+            return True
+        return request.user == obj.study.owner
 
 
 class SamplePermission(IsAuthenticated):
@@ -36,8 +38,8 @@ class SamplePermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            return request.user.has_perm('view_study', obj.assay.study)
-        return False
+            return True
+        return request.user == obj.assay.study.owner
 
 
 class DnaPermission(IsAuthenticated):
@@ -49,11 +51,13 @@ class DnaPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
+            return True
+        else:
             for vector in dna.vectors.all():
                 for sample in vector.sample_set.all():
-                    if request.user.has_perm('view_study', sample.assay.study):
-                        return True
-        return False
+                    if request.user != sample.assay.study.owner:
+                        return False
+            return True
 
 
 class MediaPermission(IsAuthenticated):
@@ -65,10 +69,12 @@ class MediaPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
+            return True
+        else:
             for sample in obj.sample_set.all():
-                if request.user.has_perm('view_study', sample.assay.study):
-                    return True
-        return False
+                if request.user != sample.assay.study.owner:
+                    return False
+            return True
 
 
 class StrainPermission(IsAuthenticated):
@@ -80,10 +86,12 @@ class StrainPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
+            return True
+        else:
             for sample in obj.sample_set.all():
-                if request.user.has_perm('view_study', sample.assay.study):
-                    return True
-        return False
+                if request.user != sample.assay.study.owner:
+                    return False
+            return True
 
 
 class ChemicalPermission(IsAuthenticated):
@@ -95,10 +103,12 @@ class ChemicalPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
+            True
+        else:
             for supp in obj.supplement_set.all():
                 for sample in supp.samples.all():
-                    if request.user.has_perm('view_study', sample.assay.study):
-                        return True
+                    if request.user != sample.assay.study.owner:
+                        return False
         return False
 
 
@@ -111,10 +121,12 @@ class SupplementPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
+            return True
+        else:
             for sample in obj.samples.all():
-                if request.user.has_perm('view_study', sample.assay.study):
-                    return True
-        return False
+                if request.user != sample.assay.study.owner:
+                    return False
+            return True
 
 
 class VectorPermission(IsAuthenticated):
@@ -126,10 +138,12 @@ class VectorPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
+            return True
+        else:
             for sample in vector.sample_set.all():
-                if request.user.has_perm('view_study', sample.assay.study):
-                    return True
-        return False
+                if request.user != sample.assay.study.owner:
+                    return False
+            return True
 
 
 class MeasurementPermission(IsAuthenticated):
@@ -141,6 +155,6 @@ class MeasurementPermission(IsAuthenticated):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
-            if request.user.has_perm('view_study', obj.sample.assay.study):
-                return True
-        return False
+            return True
+        else:
+            return request.user == obj.sample.assay.study.owner
