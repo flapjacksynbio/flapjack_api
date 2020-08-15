@@ -124,8 +124,12 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
 }
+
+if DEBUG == 0:
+    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = [
+        'rest_framework.renderers.JSONRenderer']
 
 ASGI_APPLICATION = "flapjack_api.routing.application"
 CHANNEL_LAYERS = {
