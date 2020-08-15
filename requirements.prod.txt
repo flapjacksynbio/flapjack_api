@@ -1,5 +1,4 @@
 django==3.0.5
-psycopg2>=2.8.4
 django-cors-headers==3.2.1
 djangorestframework>=3.11.0
 django-filter>=2.2.0
@@ -15,7 +14,7 @@ pandas
 plotly==4.3.0
 matplotlib
 wellfare
-cvxopt
+# cvxopt
 django-pandas
 decorator
 cycler==0.10.0
@@ -36,3 +35,4 @@ statsmodels==0.10.2
 celery==4.3.0
 ipython==7.11.1
 gunicorn==20.0.4
+psycopg2-binary==2.8.5
