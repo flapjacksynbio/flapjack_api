@@ -8,13 +8,16 @@ from .serializers import *
 from .permissions import *
 import django_filters
 
+
+# FilterSets
+
 class DnaFilter(FilterSet):
     name = CharFilter(lookup_expr='icontains')
     sboluri = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Dna
-        fields = ('sboluri', 'name')
+        fields = ('id', 'sboluri', 'name')
 
 
 class MediaFilter(FilterSet):
@@ -23,7 +26,7 @@ class MediaFilter(FilterSet):
 
     class Meta:
         model = Media
-        fields = ('name', 'description')
+        fields = ('id', 'name', 'description')
 
 
 class StrainFilter(FilterSet):
@@ -32,17 +35,7 @@ class StrainFilter(FilterSet):
 
     class Meta:
         model = Strain
-        fields = ('name', 'description')
-
-
-"""
-class InducerFilter(FilterSet):
-    names = CharFilter(lookup_expr='icontains')
-
-    class Meta:
-        model = Inducer
-        fields = ('names',)
-"""
+        fields = ('id', 'name', 'description')
 
 
 class StudyFilter(FilterSet):
@@ -52,7 +45,7 @@ class StudyFilter(FilterSet):
 
     class Meta:
         model = Study
-        fields = ('name', 'doi')
+        fields = ('id', 'name', 'doi')
 
     def filter_is_owner(self, qs, name, value):
         user = self.request.user
@@ -68,7 +61,7 @@ class AssayFilter(FilterSet):
 
     class Meta:
         model = Assay
-        fields = ('name', 'temperature', 'machine')
+        fields = ('id', 'name', 'temperature', 'machine')
 
 
 class ChemicalFilter(FilterSet):
@@ -78,7 +71,7 @@ class ChemicalFilter(FilterSet):
 
     class Meta:
         model = Chemical
-        fields = ('name','description','pubchemid')
+        fields = ('id', 'name','description','pubchemid')
 
 
 class VectorFilter(FilterSet):
@@ -88,7 +81,7 @@ class VectorFilter(FilterSet):
                         queryset=Dna.objects.all(), lookup_expr='icontains')
     class Meta:
         model = Vector
-        fields = ('name','dnas','sboluri')
+        fields = ('id', 'name','dnas','sboluri')
 
 
 class SupplementFilter(FilterSet):
@@ -98,7 +91,7 @@ class SupplementFilter(FilterSet):
 
     class Meta:
         model = Supplement
-        fields = ('concentration',)
+        fields = ('id', 'concentration',)
 
 
 class SampleFilter(FilterSet):
@@ -115,7 +108,7 @@ class SampleFilter(FilterSet):
 
     class Meta:
         model = Sample
-        fields = ('temperature', 'machine')
+        fields = ('id', 'temperature', 'machine')
 
 
 class SignalFilter(FilterSet):
@@ -124,7 +117,7 @@ class SignalFilter(FilterSet):
 
     class Meta:
         model = Signal
-        fields = ('name', 'description')
+        fields = ('id', 'name', 'description')
 
 
 class MeasurementFilter(FilterSet):
@@ -136,8 +129,10 @@ class MeasurementFilter(FilterSet):
 
     class Meta:
         model = Measurement
-        fields = ('value',)
+        fields = ('id', 'value')
 
+
+# ViewSets
 
 class StudyViewSet(viewsets.ModelViewSet):
     """
@@ -186,9 +181,6 @@ class AssayViewSet(viewsets.ModelViewSet):
             Q(study__public=True) |
             Q(study__shared_with=user)
         )
-
-# Define viewsets using the filters
-#
 
 
 class SampleViewSet(viewsets.ModelViewSet):
