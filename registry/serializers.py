@@ -30,19 +30,36 @@ class AssaySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SampleSerializerCreate(serializers.ModelSerializer):
+class MediaSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
 
     class Meta:
-        model = Sample
-        fields = ['id', 'assay', 'row', 'col', 'vector'] #'__all__'
+        model = Media
+        fields = '__all__'
 
-class SampleSerializer(serializers.ModelSerializer):
+
+class StrainSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
 
     class Meta:
-        model = Sample
-        fields = ['id', 'assay', 'row', 'col', 'vector', 'supplements'] #'__all__'
+        model = Strain
+        fields = '__all__'
+
+
+class ChemicalSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Chemical
+        fields = '__all__'
+
+
+class SupplementSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Supplement
+        fields = '__all__'
 
 
 class DnaSerializer(serializers.ModelSerializer):
@@ -64,36 +81,28 @@ class VectorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vector
         fields = ['id', 'name', 'dnas']
-        
-class ChemicalSerializer(serializers.ModelSerializer):
+
+
+class SampleSerializerCreate(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
 
     class Meta:
-        model = Chemical
+        model = Sample
+        fields = ['id', 'assay', 'row', 'col', 'vector']
+
+class SampleSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Sample
         fields = '__all__'
 
 
-class SupplementSerializer(serializers.ModelSerializer):
+class SignalSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
 
     class Meta:
-        model = Supplement
-        fields = '__all__'
-
-
-class MediaSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Media
-        fields = '__all__'
-
-
-class StrainSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Strain
+        model = Signal
         fields = '__all__'
 
 
@@ -128,14 +137,6 @@ class MeasurementSerializer(serializers.ModelSerializer):
     def get_inducer(self, obj):
         return obj.sample.inducer.names
     '''
-
-
-class SignalSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Signal
-        fields = '__all__'
 
 
 '''
