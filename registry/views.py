@@ -307,7 +307,6 @@ class SampleViewSet(viewsets.ModelViewSet):
         'assay__study__name',
         'assay__study__description',
         'vector__name',
-        'supplements__name'
     ]
 
     def get_serializer_class(self):
