@@ -134,7 +134,7 @@ class StudyViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     filterset_class = StudyFilter
     search_fields = ['name',  'description', 'doi']
-
+    
     def get_queryset(self):
         user = self.request.user
         return Study.objects.filter(
@@ -142,7 +142,7 @@ class StudyViewSet(viewsets.ModelViewSet):
             Q(public=True) | 
             Q(shared_with=user)
         )
-
+    
 
 class AssayViewSet(viewsets.ModelViewSet):
     """
@@ -248,12 +248,12 @@ class DnaViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        return Dna.objects.filter(owner=user)
+        """
         return Dna.objects.filter(
-            Q(vectors__sample__assay__study__owner=user) |
-            Q(vectors__sample__assay__study__public=True) |
-            Q(vectors__sample__assay__study__shared_with=user)
+            Q(owner=user)
         ).distinct()
-
+        """
 
 class VectorAllViewSet(viewsets.ModelViewSet):
     """
@@ -268,12 +268,14 @@ class VectorAllViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        return Vector.objects.filter(owner=user)
+        """
         return Vector.objects.filter(
             Q(sample__assay__study__owner=user) |
             Q(sample__assay__study__public=True) |
             Q(sample__assay__study__shared_with=user)
         ).distinct()
-
+        """
 
 class VectorViewSet(viewsets.ModelViewSet):
     """
@@ -288,12 +290,14 @@ class VectorViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        return Vector.objects.filter(owner=user)
+        """
         return Vector.objects.filter(
             Q(sample__assay__study__owner=user) |
             Q(sample__assay__study__public=True) |
             Q(sample__assay__study__shared_with=user)
         ).distinct()
-
+        """
 
 class SampleViewSet(viewsets.ModelViewSet):
     """
@@ -332,6 +336,7 @@ class SignalViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows signals to be viewed or edited.
     """
+    permission_classes = [SignalPermission]
     queryset = Signal.objects.all()
     serializer_class = SignalSerializer
     filter_class = SignalFilter
