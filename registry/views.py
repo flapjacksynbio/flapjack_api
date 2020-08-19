@@ -137,7 +137,11 @@ class StudyViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Study.objects.filter(Q(owner=user) | Q(public=True) | Q(shared_with=user))
+        return Study.objects.filter(
+            Q(owner=user) | 
+            Q(public=True) | 
+            Q(shared_with=user)
+        )
 
 
 class AssayViewSet(viewsets.ModelViewSet):

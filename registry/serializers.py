@@ -32,55 +32,83 @@ class AssaySerializer(serializers.ModelSerializer):
 
 class MediaSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Media
         fields = '__all__'
 
+    def get_is_owner(self, obj):
+        return self.context['request'].user.id == obj.owner.id
+
 
 class StrainSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Strain
         fields = '__all__'
 
+    def get_is_owner(self, obj):
+            return self.context['request'].user.id == obj.owner.id
 
 class ChemicalSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Chemical
         fields = '__all__'
 
+    def get_is_owner(self, obj):
+        return self.context['request'].user.id == obj.owner.id
 
 class SupplementSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Supplement
         fields = '__all__'
 
+    def get_is_owner(self, obj):
+        return self.context['request'].user.id == obj.owner.id
+
 
 class DnaSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Dna
         fields = '__all__'
 
+    def get_is_owner(self, obj):
+        return self.context['request'].user.id == obj.owner.id
+
 class VectorAllSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     dnas = DnaSerializer(many=True)
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Vector
         fields = ['id', 'name', 'dnas']
+
+    def get_is_owner(self, obj):
+        return self.context['request'].user.id == obj.owner.id
         
 class VectorSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Vector
         fields = ['id', 'name', 'dnas']
+
+    def get_is_owner(self, obj):
+        return self.context['request'].user.id == obj.owner.id
 
 
 class SampleSerializerCreate(serializers.ModelSerializer):
@@ -100,11 +128,14 @@ class SampleSerializer(serializers.ModelSerializer):
 
 class SignalSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Signal
         fields = '__all__'
-
+        
+    def get_is_owner(self, obj):
+            return self.context['request'].user.id == obj.owner.id
 
 class MeasurementSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
