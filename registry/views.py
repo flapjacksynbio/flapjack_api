@@ -181,13 +181,6 @@ class MediaViewSet(viewsets.ModelViewSet):
     filter_class = MediaFilter
     search_fields = ['name', 'description']
 
-    '''
-    def get_queryset(self):
-        user = self.request.user
-        studies = get_objects_for_user(user, 'LoadData.view_study')
-        return Media.objects.filter(assays__study__in=studies).distinct()
-    '''
-
 
 class StrainViewSet(viewsets.ModelViewSet):
     """
@@ -199,13 +192,6 @@ class StrainViewSet(viewsets.ModelViewSet):
     filter_class = StrainFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     search_fields = ['name', 'description']
-
-    '''
-    def get_queryset(self):
-        user = self.request.user
-        studies = get_objects_for_user(user, 'LoadData.view_study')
-        return Strain.objects.filter(assays__study__in=studies).distinct()
-    '''
 
 
 class ChemicalViewSet(viewsets.ModelViewSet):
@@ -249,11 +235,7 @@ class DnaViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return Dna.objects.filter(owner=user)
-        """
-        return Dna.objects.filter(
-            Q(owner=user)
-        ).distinct()
-        """
+
 
 class VectorAllViewSet(viewsets.ModelViewSet):
     """
@@ -269,13 +251,7 @@ class VectorAllViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return Vector.objects.filter(owner=user)
-        """
-        return Vector.objects.filter(
-            Q(sample__assay__study__owner=user) |
-            Q(sample__assay__study__public=True) |
-            Q(sample__assay__study__shared_with=user)
-        ).distinct()
-        """
+
 
 class VectorViewSet(viewsets.ModelViewSet):
     """
@@ -291,13 +267,7 @@ class VectorViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return Vector.objects.filter(owner=user)
-        """
-        return Vector.objects.filter(
-            Q(sample__assay__study__owner=user) |
-            Q(sample__assay__study__public=True) |
-            Q(sample__assay__study__shared_with=user)
-        ).distinct()
-        """
+
 
 class SampleViewSet(viewsets.ModelViewSet):
     """
@@ -342,13 +312,6 @@ class SignalViewSet(viewsets.ModelViewSet):
     filter_class = SignalFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     search_fields = ['name', 'description', 'color']
-
-    '''
-    def get_queryset(self):
-        user = self.request.user
-        studies = get_objects_for_user(user, 'LoadData.view_study')
-        return Signal.objects.filter(study__in=studies)
-    '''
 
 
 class MeasurementViewSet(viewsets.ModelViewSet):
