@@ -26,16 +26,13 @@ class StudyFilter(FilterSet):
 
 
 class AssayFilter(FilterSet):
-    #study = RelatedFilter(StudyFilter, field_name='study',
-    #                    queryset=Study.objects.all())
     name = CharFilter(lookup_expr='icontains')
     machine = CharFilter(lookup_expr='icontains')
     description = CharFilter(lookup_expr='icontains')
-    temperature = NumberFilter(lookup_expr='exact')
 
     class Meta:
         model = Assay
-        fields = ('id', 'study',)
+        fields = ('id', 'study', 'temperature')
 
 
 class MediaFilter(FilterSet):
@@ -68,8 +65,6 @@ class ChemicalFilter(FilterSet):
 
 class SupplementFilter(FilterSet):
     name = CharFilter(lookup_expr='icontains')
-    #chemical = RelatedFilter(ChemicalFilter, field_name='chemical',
-    #                        queryset=Chemical.objects.all())
     concentration = NumberFilter(lookup_expr='exact')
 
     class Meta:
@@ -97,20 +92,18 @@ class VectorFilter(FilterSet):
 
 
 class SampleFilter(FilterSet):
-    #assay = RelatedFilter(AssayFilter, field_name='assay',
-    #                      queryset=Assay.objects.all())
-    #media = RelatedFilter(MediaFilter, field_name='media',
-    #                      queryset=Media.objects.all())
-    #strain = RelatedFilter(StrainFilter, field_name='strain',
-    #                      queryset=Strain.objects.all())
-    #vector = RelatedFilter(VectorFilter, field_name='vector',
-    #                      queryset=Dna.objects.all())
-    supplements = RelatedFilter(SupplementFilter, field_name='supplements',
-                          queryset=Supplement.objects.all())
-
     class Meta:
         model = Sample
-        fields = ('id', 'assay', 'media', 'strain', 'vector', 'row', 'col')
+        fields = (
+                'id', 
+                'assay', 
+                'media', 
+                'strain', 
+                'vector', 
+                'supplements', 
+                'row', 
+                'col'
+        )
 
 
 class SignalFilter(FilterSet):
@@ -124,12 +117,6 @@ class SignalFilter(FilterSet):
 
 
 class MeasurementFilter(FilterSet):
-    #sample = RelatedFilter(SampleFilter, field_name='sample',
-    #                       queryset=Sample.objects.all())
-    #signal = RelatedFilter(SignalFilter, field_name='signal',
-    #                       queryset=Signal.objects.all())
-    #value = NumberFilter(lookup_expr='exact')
-
     class Meta:
         model = Measurement
         fields = ('id', 'sample', 'signal', 'value')
@@ -146,17 +133,11 @@ class StudyViewSet(viewsets.ModelViewSet):
     serializer_class = StudySerializer
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     filterset_class = StudyFilter
-    search_fields = ['name', 'doi', 'description']
+    search_fields = ['name',  'description', 'doi']
 
     def get_queryset(self):
         user = self.request.user
         return Study.objects.filter(Q(owner=user) | Q(public=True) | Q(shared_with=user))
-
-    '''
-    def perform_create(self, serializer):
-        obj = serializer.save()
-        assign_perm('view_study', self.request.user, obj)
-    '''
 
 
 class AssayViewSet(viewsets.ModelViewSet):
@@ -170,7 +151,6 @@ class AssayViewSet(viewsets.ModelViewSet):
     filterset_class = AssayFilter
     search_fields = [
         'name',
-        'temperature',
         'machine',
         'description',
         'study__name',
@@ -245,7 +225,7 @@ class SupplementViewSet(viewsets.ModelViewSet):
     serializer_class = SupplementSerializer
     filter_class = SupplementFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = ['chemical', 'concentration']
+    search_fields = ['name']
 
 
 class DnaViewSet(viewsets.ModelViewSet):
@@ -317,16 +297,17 @@ class SampleViewSet(viewsets.ModelViewSet):
     """
     permission_classes = [SamplePermission]
     queryset = Sample.objects.all()
-    #serializer_class = SampleSerializer
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     filter_class = SampleFilter
     search_fields = [
-        'media__name',
         'assay__name',
+        'media__name',
+        'strain__name',
         'assay__description',
         'assay__study__name',
         'assay__study__description',
-        'vector__dnas'
+        'vector__name',
+        'supplements__name'
     ]
 
     def get_serializer_class(self):
@@ -342,7 +323,7 @@ class SampleViewSet(viewsets.ModelViewSet):
             Q(assay__study__public=True) |
             Q(assay__study__shared_with=user)
         ).distinct()
-        
+
 
 class SignalViewSet(viewsets.ModelViewSet):
     """
@@ -352,8 +333,7 @@ class SignalViewSet(viewsets.ModelViewSet):
     serializer_class = SignalSerializer
     filter_class = SignalFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    # filterset_fields = ['name', 'description']
-    search_fields = ['name', 'description']
+    search_fields = ['name', 'description', 'color']
 
     '''
     def get_queryset(self):
@@ -372,9 +352,10 @@ class MeasurementViewSet(viewsets.ModelViewSet):
     serializer_class = MeasurementSerializer
     filter_class = MeasurementFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    # filterset_fields = ['signal', 'time',
-    #                    'value', 'sample', 'sample__assay__name']
-    search_fields = ['signal', 'sample__assay__name', 'sample__assay__study__name']
+    search_fields = [
+        'signal__name', 
+        'sample__assay__name', 
+        'sample__assay__study__name']
 
     def get_queryset(self):
         user = self.request.user
