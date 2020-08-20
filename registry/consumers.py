@@ -26,7 +26,6 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
         )
         
     async def receive(self, text_data):
-        print(f"Receive. text_data: {text_data}", flush=True)
         data = json.loads(text_data)
         if data['type'] == 'measurements':
             params = data['parameters']
@@ -37,6 +36,17 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 'type': 'measurements',
                 'data': df.to_json()
+            }))
+        elif data['type'] == 'upload':
+            params = data['parameters']
+            sample = params['sample']
+            signal = params['signal']
+            json_data = data['data']
+            df = pd.read_json(json_data)
+            upload_measurements(df, sample, signal)
+            await self.send(text_data=json.dumps({
+                'type': 'upload',
+                'data': 'success'
             }))
 
     async def disconnect(self, message):
@@ -247,7 +257,6 @@ class UploadConsumer(AsyncWebsocketConsumer):
         for well_idx, well in enumerate(columns):
             existing_med = [i.name for i in Media.objects.all()]
             existing_str = [i.name for i in Strain.objects.all()]
-            #existing_vec = [vec for vec in Vector.objects.all()]
             existing_sup = [(s.chemical.id, s.concentration) for s in Supplement.objects.all()]
             existing_vec = Vector.objects.filter(
                 Q(sample__assay__study__owner=self.user) |
@@ -263,7 +272,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
             if s_media.upper() != 'NONE':
                 # create Media object
                 if s_media not in existing_med:
-                    media = Media(name=s_media, description='')
+                    media = Media(owner=self.user, name=s_media, description='')
                     media.save()
                 else:
                     media = Media.objects.filter(name__exact=s_media)[0]
@@ -273,13 +282,13 @@ class UploadConsumer(AsyncWebsocketConsumer):
                     strain = None
                 else:
                     if s_strain not in existing_str:
-                        strain = Strain(name=s_strain, description='')
+                        strain = Strain(owner=self.user, name=s_strain, description='')
                         strain.save()
                     else:
                         strain = Strain.objects.filter(name__exact=s_strain)[0]
 
                 # create Vector object
-                vec_aux = Vector.objects.create()
+                vec_aux = Vector.objects.create(owner=self.user)
                 #for dna_id in metadata['dna']:
                 no_dnas = True
                 for dna in meta_dict.loc[meta_dnas][well]:
@@ -347,7 +356,8 @@ class UploadConsumer(AsyncWebsocketConsumer):
                                 elif (conc_log <= -9) and (conc_log) > -12:
                                     units = 'pM'
                                     cons_str= f"{concs[i]*1e12:.2f}"
-                                sup = Supplement(name=f"{chemical.name} = {cons_str} {units}", 
+                                sup = Supplement(owner=self.user,
+                                                name=f"{chemical.name} = {cons_str} {units}", 
                                                 chemical=chemical, 
                                                 concentration=concs[i])
                                 sup.save()

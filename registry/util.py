@@ -1,5 +1,6 @@
 from registry.models import *
 from django_pandas.io import read_frame
+import numpy as np
 import time
 
 field_names = [
@@ -102,10 +103,11 @@ def get_measurements(samples, signals=None):
     on.remove('Concentration')
 
     chemicals = df.Chemical.unique()
+    print('chemicals ', chemicals, flush=True)
     # If no chemicals we are done...
-    if len(chemicals)==0:
+    if len(chemicals)==0 or np.all(chemicals==None):
         end = time.time()
-        print('get_measurements took ', end-start, flush=True)
+        print('No chemicals found, get_measurements took ', end-start, flush=True)
         return df
 
     # Do recursive join over all chemicals
@@ -143,3 +145,16 @@ def get_biomass(df, biomass_signal):
     biomass_df = read_frame(m, fieldnames=field_names)
     biomass_df.columns = [pretty_field_names[col] for col in biomass_df.columns]
     return biomass_df
+
+def upload_measurements(df, sample, signal):
+    # df contains Time and Measurement for the given sample
+    measurements = []
+    for index,row in df.iterrows():
+        sig = Signal.objects.get(id=signal[0])
+        samp = Sample.objects.get(id=sample[0])
+        m = Measurement(sample=samp, signal=sig, value=row.Measurement, time=row.Time)
+        measurements.append(m)
+    if len(measurements)==0:
+        return False
+    Measurement.objects.bulk_create(measurements)
+    return True

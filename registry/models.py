@@ -30,6 +30,8 @@ class Assay(models.Model):
 
 
 class Media(models.Model):
+    owner = models.ForeignKey(
+        'auth.User', related_name='medias', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
 
@@ -38,6 +40,8 @@ class Media(models.Model):
 
 
 class Strain(models.Model):
+    owner = models.ForeignKey(
+        'auth.User', related_name='strains', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
 
@@ -46,6 +50,8 @@ class Strain(models.Model):
 
 
 class Chemical(models.Model):
+    owner = models.ForeignKey(
+        'auth.User', related_name='chemicals', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
     pubchemid = models.IntegerField(null=True)
@@ -55,6 +61,8 @@ class Chemical(models.Model):
 
 
 class Supplement(models.Model):
+    owner = models.ForeignKey(
+        'auth.User', related_name='supplements', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE)
     concentration = models.FloatField()
@@ -64,6 +72,8 @@ class Supplement(models.Model):
 
 
 class Dna(models.Model):
+    owner = models.ForeignKey(
+        'auth.User', related_name='dnas', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     sboluri = models.URLField(blank=True)
 
@@ -72,6 +82,8 @@ class Dna(models.Model):
 
 
 class Vector(models.Model):
+    owner = models.ForeignKey(
+        'auth.User', related_name='vectors', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     dnas = models.ManyToManyField(Dna, related_name='vectors')
 
@@ -92,6 +104,8 @@ class Sample(models.Model):
 
 
 class Signal(models.Model):
+    owner = models.ForeignKey(
+        'auth.User', related_name='signals', on_delete=models.CASCADE)
     name = models.TextField()
     description = models.TextField()
     color = models.CharField(max_length=100, default='')        
