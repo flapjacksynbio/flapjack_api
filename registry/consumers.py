@@ -26,7 +26,6 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
         )
         
     async def receive(self, text_data):
-        print(f"Receive. text_data: {text_data}", flush=True)
         data = json.loads(text_data)
         if data['type'] == 'measurements':
             params = data['parameters']
@@ -37,6 +36,17 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 'type': 'measurements',
                 'data': df.to_json()
+            }))
+        elif data['type'] == 'upload':
+            params = data['parameters']
+            sample = params['sample']
+            signal = params['signal']
+            json_data = data['data']
+            df = pd.read_json(json_data)
+            upload_measurements(df, sample, signal)
+            await self.send(text_data=json.dumps({
+                'type': 'upload',
+                'data': 'success'
             }))
 
     async def disconnect(self, message):

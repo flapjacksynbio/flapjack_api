@@ -145,3 +145,16 @@ def get_biomass(df, biomass_signal):
     biomass_df = read_frame(m, fieldnames=field_names)
     biomass_df.columns = [pretty_field_names[col] for col in biomass_df.columns]
     return biomass_df
+
+def upload_measurements(df, sample, signal):
+    # df contains Time and Measurement for the given sample
+    measurements = []
+    for index,row in df.iterrows():
+        sig = Signal.objects.get(id=signal[0])
+        samp = Sample.objects.get(id=sample[0])
+        m = Measurement(sample=samp, signal=sig, value=row.Measurement, time=row.Time)
+        measurements.append(m)
+    if len(measurements)==0:
+        return False
+    Measurement.objects.bulk_create(measurements)
+    return True
