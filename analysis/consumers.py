@@ -38,6 +38,7 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
 
     async def generate_data(self, event):
         params = event['params']
+        analysis_params = params['analysis']
         signals = params.get('signal')
         s = get_samples(params)
         df = get_measurements(s, signals)
