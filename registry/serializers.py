@@ -6,7 +6,7 @@ from .models import *
 class StudySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    #is_owner = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
     shared_with = serializers.SlugRelatedField(
         many=True,
         slug_field='email',
@@ -18,8 +18,8 @@ class StudySerializer(serializers.ModelSerializer):
         model = Study
         fields = '__all__'
 
-    #def get_is_owner(self, obj):
-    #    return self.context['request'].user.id == obj.owner.id
+    def get_is_owner(self, obj):
+       return self.context['request'].user.id == obj.owner.id
 
 
 class AssaySerializer(serializers.ModelSerializer):
