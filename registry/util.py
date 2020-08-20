@@ -1,5 +1,6 @@
 from registry.models import *
 from django_pandas.io import read_frame
+import pandas as pd
 import numpy as np
 import time
 
@@ -86,57 +87,72 @@ def get_measurements(samples, signals=None):
     print('get_measurements', flush=True)
     start = time.time()
     samp_ids = [samp.id for samp in samples]
-    m = Measurement.objects.filter(sample__id__in=samp_ids)
-    # Filter by signal
-    if signals:
-        m = m.filter(signal__id__in=signals)
-    # Get pandas dataframe 
-    df = read_frame(m, fieldnames=field_names)
-    df.columns = [pretty_field_names[col] for col in df.columns]
+    results = []
+    for s in samples:
+        m = Measurement.objects.filter(sample__id=s.id)
+        # Filter by signal
+        if signals:
+            m = m.filter(signal__id__in=signals)
+        # Get pandas dataframe 
+        df = read_frame(m, fieldnames=field_names)
+        df.columns = [pretty_field_names[col] for col in df.columns]
 
-    # Merge to get one column per chemical for the relevant columns
-    # Columns of interest
-    on = list(df.columns)
-    on.remove('Chemical')
-    on.remove('Chemical_id')
-    on.remove('Supplement')
-    on.remove('Concentration')
+        # Merge to get one column per chemical for the relevant columns
+        # Columns of interest
+        on = list(df.columns)
+        on.remove('Chemical')
+        on.remove('Chemical_id')
+        on.remove('Supplement')
+        on.remove('Concentration')
 
-    chemicals = df.Chemical.unique()
-    print('chemicals ', chemicals, flush=True)
-    # If no chemicals we are done...
-    if len(chemicals)==0 or np.all(chemicals==None):
-        end = time.time()
-        print('No chemicals found, get_measurements took ', end-start, flush=True)
-        return df
+        chemicals = df.Chemical.unique()
+        #chemicals = list(chemicals)
+        #chemicals.remove(None)
+        print('chemicals ', chemicals, flush=True)
+        # If no chemicals we are done...
+        if len(chemicals)==0:
+            end = time.time()
+            print('No chemicals found, get_measurements took ', end-start, flush=True)
+            results.append(df)
+        else:
+            # Do recursive join over all chemicals
+            if chemicals[0]:
+                merge = df[df.Chemical==chemicals[0]]
+            else:
+                merge = df[pd.isnull(df.Chemical)]
+            
+            for i in range(1, len(chemicals)):
+                chemical = chemicals[i]
+                if chemical:
+                    to_merge = df[df.Chemical==chemical]
+                    merge = merge.merge(to_merge, on=on, suffixes=['', str(i+1)])
+                
+            # Original supplement becomes Supplement1 etc.
+            merge = merge.rename(columns={
+                'Supplement': 'Supplement1',
+                'Concentration': 'Concentration1',
+                'Chemical': 'Chemical1',
+                'Chemical_id': 'Chemical_id1',
+            })
 
-    # Do recursive join over all chemicals
-    merge = df[df.Chemical==chemicals[0]]
-    for i in range(1, len(chemicals)):
-        to_merge = df[df.Chemical==chemicals[i]]
-        merge = merge.merge(to_merge, on=on, suffixes=['', str(i+1)])
+            # Create a new Supplement and Chemical column combining the individual names
+            merge['Supplement'] = merge.Supplement1
+            merge['Chemical'] = merge.Chemical1
+            for i in range(1, len(chemicals)):
+                if chemicals[i]:
+                    merge['Supplement'] += ' + ' + merge[f'Supplement{i+1}']
+                    merge['Chemical'] += ' + ' + merge[f'Chemical{i+1}']
 
-    # Original supplement becomes Supplement1 etc.
-    merge = merge.rename(columns={
-        'Supplement': 'Supplement1',
-        'Concentration': 'Concentration1',
-        'Chemical': 'Chemical1',
-        'Chemical_id': 'Chemical_id1',
-    })
+            # Merge chemical ids into lists    
+            merge['Chemical_id'] = merge[[f'Chemical_id{c+1}' for c in range(len(chemicals))]].values.tolist()
 
-    # Create a new Supplement and Chemical column combining the individual names
-    merge['Supplement'] = merge.Supplement1
-    merge['Chemical'] = merge.Chemical1
-    for i in range(1, len(chemicals)):
-        merge['Supplement'] += ' + ' + merge[f'Supplement{i+1}']
-        merge['Chemical'] += ' + ' + merge[f'Chemical{i+1}']
+            end = time.time()
+            if len(merge) == 0:
+                print('get_measurements: no measurements after chemical merge', flush=True)
+            results.append(merge)
 
-    # Merge chemical ids into lists    
-    merge['Chemical_id'] = merge[[f'Chemical_id{c+1}' for c in range(len(chemicals))]].values.tolist()
-
-    end = time.time()
     print('get_measurements took ', end-start, flush=True)
-    return merge
+    return pd.concat(results, ignore_index=True)
 
 def get_biomass(df, biomass_signal):
     samp_ids = df.Sample.unique()
