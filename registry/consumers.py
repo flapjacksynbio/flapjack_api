@@ -258,11 +258,14 @@ class UploadConsumer(AsyncWebsocketConsumer):
             existing_med = [i.name for i in Media.objects.all()]
             existing_str = [i.name for i in Strain.objects.all()]
             existing_sup = [(s.chemical.id, s.concentration) for s in Supplement.objects.all()]
+            existing_vec = Vector.objects.filter(owner=self.user)
+            """
             existing_vec = Vector.objects.filter(
                 Q(sample__assay__study__owner=self.user) |
                 Q(sample__assay__study__public=True) |
                 Q(sample__assay__study__shared_with=self.user)
             ).distinct()
+            """
 
             # Metadata value for each well (sample): strain and media
             s_media = meta_dict.loc['Media'][well]
@@ -417,14 +420,14 @@ class UploadConsumer(AsyncWebsocketConsumer):
 
         # Media
         if media not in existing_med:
-            media = Media(name=media, description='')
+            media = Media(owner=self.user, name=media, description='')
             media.save()
         else:
             media = Media.objects.filter(name__exact=media)[0]
 
         # Strain
         if strain not in existing_str:
-            strain = Strain(name=strain, description='')
+            strain = Strain(owner=self.user, name=strain, description='')
             strain.save()
         else:
             strain = Strain.objects.filter(name__exact=strain)[0]
@@ -434,12 +437,14 @@ class UploadConsumer(AsyncWebsocketConsumer):
             # Vector
             # construct a list of lists, each containing the ids of the dnas
             # in each vector, for the requesting user
+            user_vectors = Vector.objects.filter(owner=self.user)
+            """
             user_vectors = Vector.objects.filter(
                 Q(sample__assay__study__owner=self.user) |
                 Q(sample__assay__study__public=True) |
                 Q(sample__assay__study__shared_with=self.user)
             ).distinct()
-            
+            """
             vectors_dna_ids = []
             vector_ids = [v.id for v in user_vectors]
             for v in user_vectors:
@@ -457,9 +462,11 @@ class UploadConsumer(AsyncWebsocketConsumer):
                 vector_id = vector_ids[idx]
                 vector = Vector.objects.get(id=vector_id)
             else:
-                vector = Vector.objects.create()
+                vector = Vector.objects.create(owner=self.user)
                 for dna_id in col_dna_ids:
                     vector.dnas.add(Dna.objects.get(id=dna_id))
+                # add names to vector
+                vector.name = '+'.join([d.name for d in vector.dnas.all()])
                 vector.save()     
 
             # Sample 
@@ -476,7 +483,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
             try:
                 od_signal = Signal.objects.get(name='Area')
             except:
-                od_signal = Signal(name='Area', description='', color='')
+                od_signal = Signal(owner=self.user, name='Area', description='', color='')
                 od_signal.save()
             
             for idx, r in enumerate(rad[str(col)]):

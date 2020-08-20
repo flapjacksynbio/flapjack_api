@@ -83,6 +83,9 @@ class Analysis:
         meas_no_cells = get_measurements(samps_no_cells)
         meas_no_dna = get_measurements(samps_no_dna)
 
+        if len(meas_no_cells) == 0 or len(meas_no_dna) == 0:
+            return {}, {}
+
         # Compute media background
         bg_media = {}
         grouped_meas = meas_no_cells.groupby('Signal_id')
