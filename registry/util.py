@@ -144,13 +144,16 @@ def get_measurements(samples, signals=None):
             # Merge chemical ids into lists    
             merge['Chemical_id'] = merge[[f'Chemical_id{c+1}' for c in range(len(chemicals))]].values.tolist()
 
-            end = time.time()
             if len(merge) == 0:
                 print('get_measurements: no measurements after chemical merge', flush=True)
             results.append(merge)
-
+    
+    end = time.time()
     print('get_measurements took ', end-start, flush=True)
-    return pd.concat(results, ignore_index=True)
+    if len(results) > 0:
+        return pd.concat(results, ignore_index=True)
+    else:
+        return pd.DataFrame()
 
 def get_biomass(df, biomass_signal):
     samp_ids = df.Sample.unique()
