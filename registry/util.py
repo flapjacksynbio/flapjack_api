@@ -107,9 +107,6 @@ def get_measurements(samples, signals=None):
         on.remove('Concentration')
 
         chemicals = df.Chemical.unique()
-        #chemicals = list(chemicals)
-        #chemicals.remove(None)
-        print('chemicals ', chemicals, flush=True)
         # If no chemicals we are done...
         if len(chemicals)==0:
             end = time.time()
