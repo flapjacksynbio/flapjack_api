@@ -6,7 +6,7 @@ from .models import *
 class StudySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    is_owner = serializers.SerializerMethodField()
+    #is_owner = serializers.SerializerMethodField()
     shared_with = serializers.SlugRelatedField(
         many=True,
         slug_field='email',
@@ -18,8 +18,8 @@ class StudySerializer(serializers.ModelSerializer):
         model = Study
         fields = '__all__'
 
-    def get_is_owner(self, obj):
-        return self.context['request'].user.id == obj.owner.id
+    #def get_is_owner(self, obj):
+    #    return self.context['request'].user.id == obj.owner.id
 
 
 class AssaySerializer(serializers.ModelSerializer):
@@ -30,59 +30,9 @@ class AssaySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SampleSerializerCreate(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Sample
-        fields = ['id', 'assay', 'row', 'col', 'vector'] #'__all__'
-
-class SampleSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Sample
-        fields = ['id', 'assay', 'row', 'col', 'vector', 'supplements'] #'__all__'
-
-
-class DnaSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Dna
-        fields = '__all__'
-
-class VectorAllSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-    dnas = DnaSerializer(many=True)
-    class Meta:
-        model = Vector
-        fields = ['id', 'name', 'dnas']
-        
-class VectorSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-    class Meta:
-        model = Vector
-        fields = ['id', 'name', 'dnas']
-        
-class ChemicalSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Chemical
-        fields = '__all__'
-
-
-class SupplementSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Supplement
-        fields = '__all__'
-
-
 class MediaSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Media
@@ -91,11 +41,82 @@ class MediaSerializer(serializers.ModelSerializer):
 
 class StrainSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Strain
         fields = '__all__'
 
+
+class ChemicalSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Chemical
+        fields = '__all__'
+
+
+class SupplementSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Supplement
+        fields = '__all__'
+
+
+class DnaSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Dna
+        fields = '__all__'
+
+
+class VectorAllSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+    dnas = DnaSerializer(many=True)
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Vector
+        fields = '__all__'#['id', 'name', 'dnas']
+
+        
+class VectorSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Vector
+        fields = '__all__'#['id', 'name', 'dnas']
+
+
+class SampleSerializerCreate(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Sample
+        fields = ['id', 'assay', 'row', 'col', 'vector']
+
+class SampleSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Sample
+        fields = '__all__'
+
+
+class SignalSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Signal
+        fields = '__all__'
+        
 
 class MeasurementSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
@@ -128,14 +149,6 @@ class MeasurementSerializer(serializers.ModelSerializer):
     def get_inducer(self, obj):
         return obj.sample.inducer.names
     '''
-
-
-class SignalSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Signal
-        fields = '__all__'
 
 
 '''
