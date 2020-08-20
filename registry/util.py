@@ -87,16 +87,17 @@ def get_measurements(samples, signals=None):
     print('get_measurements', flush=True)
     start = time.time()
     samp_ids = [samp.id for samp in samples]
-    results = []
-    for s in samples:
-        m = Measurement.objects.filter(sample__id=s.id)
-        # Filter by signal
-        if signals:
-            m = m.filter(signal__id__in=signals)
-        # Get pandas dataframe 
-        df = read_frame(m, fieldnames=field_names)
-        df.columns = [pretty_field_names[col] for col in df.columns]
+    meas = Measurement.objects.filter(sample__id__in=samp_ids)
+    # Filter by signal
+    if signals:
+        meas = meas.filter(signal__id__in=signals)
 
+    # Get pandas dataframe 
+    df_all = read_frame(meas, fieldnames=field_names)
+    df_all.columns = [pretty_field_names[col] for col in df_all.columns]
+
+    results = []
+    for samp_id,df in df_all.groupby('Sample'):
         # Merge to get one column per chemical for the relevant columns
         # Columns of interest
         on = list(df.columns)
