@@ -502,4 +502,5 @@ class UploadConsumer(AsyncWebsocketConsumer):
             await self.progress_update(process_percent)
 
         Measurement.objects.bulk_create(measurements)
-        
+
+print("FKN TEST")
