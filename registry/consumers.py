@@ -154,7 +154,10 @@ class UploadConsumer(AsyncWebsocketConsumer):
             # get dnas and inducers
             # construct signal_map ({signal_name: signal from machine})
             signal_map = {self.signal_names[i]:Signal.objects.get(id=s_id).name 
-                            for i, s_id in enumerate(metadata['signal'])} 
+                            for i, s_id in enumerate(metadata['signal'])}
+            dna_map = {self.dna_names[idx]: dna_id 
+                            for idx, dna_id in enumerate(metadata['dna'])}
+            
 
             # load data from "Data" sheet as a DataFrame
             signal_names_aux = self.signal_names.copy()
@@ -165,7 +168,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
                             for idx, name in enumerate(self.signal_names)}
             # upload data
             start = time.time()
-            await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata, signal_ids)
+            await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata, signal_ids, dna_map)
             end = time.time()
             print(f"UPLOAD SYNERGY FINISHED. Took {end-start} secs")
 
@@ -250,22 +253,16 @@ class UploadConsumer(AsyncWebsocketConsumer):
         )
 
     # TO DO: move part of this function to upload.py utils
-    async def upload_data(self, assay_id, meta_dict, dfs, metadata, signal_ids):
+    async def upload_data(self, assay_id, meta_dict, dfs, metadata, signal_ids, dna_map):
         columns = list(meta_dict.columns)
         meta_dnas = [k for k in list(meta_dict.index) if 'DNA' in k]
         meta_inds = [k for k in list(meta_dict.index) if 'chem' in k]
+        print("dna_names: {self.dna_names}", flush=True)
         for well_idx, well in enumerate(columns):
             existing_med = [i.name for i in Media.objects.all()]
             existing_str = [i.name for i in Strain.objects.all()]
             existing_sup = [(s.chemical.id, s.concentration) for s in Supplement.objects.all()]
-            existing_vec = Vector.objects.filter(owner=self.user)
-            """
-            existing_vec = Vector.objects.filter(
-                Q(sample__assay__study__owner=self.user) |
-                Q(sample__assay__study__public=True) |
-                Q(sample__assay__study__shared_with=self.user)
-            ).distinct()
-            """
+            user_vectors = Vector.objects.filter(owner=self.user)
 
             # Metadata value for each well (sample): strain and media
             s_media = meta_dict.loc['Media'][well]
@@ -290,36 +287,38 @@ class UploadConsumer(AsyncWebsocketConsumer):
                     else:
                         strain = Strain.objects.filter(name__exact=s_strain)[0]
 
-                # create Vector object
-                vec_aux = Vector.objects.create(owner=self.user)
-                #for dna_id in metadata['dna']:
-                no_dnas = True
-                for dna in meta_dict.loc[meta_dnas][well]:
-                    if dna in self.dna_names:
-                        idx = np.where(np.array(self.dna_names)==dna)[0][0]
-                        vec_aux.dnas.add(Dna.objects.get(id=metadata['dna'][idx]))
-                        no_dnas = False
-                if no_dnas:
-                    # No vector to add
+
+                # Vector
+                # TO DO: this is assuming the user uses as Dna name the same name
+                # that is in the excel
+                
+                # dna in this well (meta_dict.loc[meta_dnas][well])
+                well_dnas = meta_dict.loc[meta_dnas][well]
+                well_dna_ids = [dna_map[d] for d in well_dnas if d.lower()!='none']
+                
+                if len(well_dna_ids) > 0:
+                    well_dna_ids.sort()
+                    vector_ids = [v.id for v in user_vectors]
+                    vectors_dna_ids = []
+                    for v in user_vectors:
+                        vector_dna_ids = [dna.id for dna in v.dnas.all()]
+                        vector_dna_ids.sort()
+                        vectors_dna_ids.append(vector_dna_ids)
+                    
+                    # if colony dnas already exist in a vector, we assign that object
+                    if well_dna_ids in vectors_dna_ids:
+                        idx = vectors_dna_ids.index(well_dna_ids)
+                        vector_id = vector_ids[idx]
+                        vector = Vector.objects.get(id=vector_id)
+                    else:
+                        vector = Vector.objects.create(owner=self.user)
+                        for dna_id in well_dna_ids:
+                            vector.dnas.add(Dna.objects.get(id=dna_id))
+                        # add names to vector
+                        vector.name = '+'.join([d.name for d in vector.dnas.all()])
+                        vector.save()
+                else:
                     vector = None
-                    vec_aux.delete()
-                else:                    
-                    # TO DO: find a better way of doing this
-                    # checks if vector already exists in database
-                    vec_exists = 0
-                    for v in existing_vec:
-                        if set(vec_aux.dnas.all())==set(v.dnas.all()):
-                            vec_exists = 1
-                            vector = v
-                            vec_aux.delete()
-                            break
-                    if not vec_exists:
-                        # add names
-                        names = [dna.name for dna in vec_aux.dnas.all()]
-                        names.sort()
-                        vec_aux.name = '+'.join(names)
-                        vec_aux.save()
-                        vector = vec_aux
 
                 # create chemicals and supplements
                 # checking either len(metadata['chemical']) or len(meta_inds) > 0
@@ -367,7 +366,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
                             else:
                                 sup = Supplement.objects.get(chemical=chemical, concentration=concs[i])
                             sample_supps.append(sup)
-
+                
                 # create Sample object
                 samp = Sample(assay=Assay.objects.get(id=assay_id), 
                                 media=media, 
@@ -375,6 +374,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
                                 vector=vector, 
                                 row=ord(well[0])-64, 
                                 col=well[1:])
+
                 samp.save()
                 # assign supplements to sample
                 for sup in sample_supps:
@@ -438,13 +438,6 @@ class UploadConsumer(AsyncWebsocketConsumer):
             # construct a list of lists, each containing the ids of the dnas
             # in each vector, for the requesting user
             user_vectors = Vector.objects.filter(owner=self.user)
-            """
-            user_vectors = Vector.objects.filter(
-                Q(sample__assay__study__owner=self.user) |
-                Q(sample__assay__study__public=True) |
-                Q(sample__assay__study__shared_with=self.user)
-            ).distinct()
-            """
             vectors_dna_ids = []
             vector_ids = [v.id for v in user_vectors]
             for v in user_vectors:
@@ -502,4 +495,3 @@ class UploadConsumer(AsyncWebsocketConsumer):
             await self.progress_update(process_percent)
 
         Measurement.objects.bulk_create(measurements)
-        
