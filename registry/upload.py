@@ -112,7 +112,7 @@ def synergy_load_data(ws, signal_names, signal_map):
 
 def synergy_load_meta(wb, columns):
     meta_dict = {}
-    ws_names = ['Strains', 'Media', 'DNA', 'Inducers']
+    ws_names = ['Strains', 'Media', 'DNA', 'Chemicals']
     for ws_name in ws_names:
         if ws_name in ['Strains', 'Media']:
             name, dict_ws = table_values(wb[ws_name], 1, columns)
@@ -121,8 +121,8 @@ def synergy_load_meta(wb, columns):
             names, dicts_ws = get_all_tables(wb[ws_name], columns)
             for i in range(len(names)):
                 meta_dict[names[i]] = dicts_ws[i]
-        elif ws_name == 'Inducers':
-            if 'Inducers' in wb.sheetnames:
+        elif ws_name == 'Chemicals':
+            if 'Chemicals' in wb.sheetnames:
                 names, dicts_ws = get_all_tables(wb[ws_name], columns)
                 for i in range(len(names)):
                     meta_dict[names[i]+' chemical'] = dicts_ws[i]
