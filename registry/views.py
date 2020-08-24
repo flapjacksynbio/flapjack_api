@@ -234,7 +234,12 @@ class DnaViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Dna.objects.filter(owner=user)
+        return Dna.objects.filter(
+            Q(owner=user) |
+            Q(vectors__sample__assay__study__public=True) |
+            Q(vectors__sample__assay__study__shared_with=user)  |
+            Q(vectors__sample__assay__study__owner=user)
+        ).distinct()
 
 
 class VectorAllViewSet(viewsets.ModelViewSet):
@@ -250,7 +255,12 @@ class VectorAllViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Vector.objects.filter(owner=user)
+        return Vector.objects.filter(
+            Q(owner=user) |
+            Q(sample__assay__study__public=True) |
+            Q(sample__assay__study__shared_with=user) |
+            Q(sample__assay__study__owner=user)
+        ).distinct()
 
 
 class VectorViewSet(viewsets.ModelViewSet):
@@ -266,7 +276,12 @@ class VectorViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Vector.objects.filter(owner=user)
+        return Vector.objects.filter(
+            Q(owner=user) |
+            Q(sample__assay__study__public=True) |
+            Q(sample__assay__study__shared_with=user) |
+            Q(sample__assay__study__owner=user)
+        ).distinct()
 
 
 class SampleViewSet(viewsets.ModelViewSet):
