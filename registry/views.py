@@ -237,7 +237,8 @@ class DnaViewSet(viewsets.ModelViewSet):
         return Dna.objects.filter(
             Q(owner=user) |
             Q(vectors__sample__assay__study__public=True) |
-            Q(vectors__sample__assay__study__shared_with=user)
+            Q(vectors__sample__assay__study__shared_with=user)  |
+            Q(vectors__sample__assay__study__owner=user)
         ).distinct()
 
 
