@@ -266,10 +266,10 @@ class UploadConsumer(AsyncWebsocketConsumer):
             existing_str = [i.name for i in Strain.objects.all()]
             existing_sup = [(s.chemical.id, s.concentration) for s in Supplement.objects.all()]
             user_vectors = Vector.objects.filter(
-                Q(owner=user) |
+                Q(owner=self.user) |
                 Q(sample__assay__study__public=True) |
-                Q(sample__assay__study__shared_with=user) |
-                Q(sample__assay__study__owner=user)
+                Q(sample__assay__study__shared_with=self.user) |
+                Q(sample__assay__study__owner=self.user)
             ).distinct()
 
             # Metadata value for each well (sample): strain and media
@@ -446,7 +446,12 @@ class UploadConsumer(AsyncWebsocketConsumer):
             # Vector
             # construct a list of lists, each containing the ids of the dnas
             # in each vector, for the requesting user
-            user_vectors = Vector.objects.filter(owner=self.user)
+            user_vectors = Vector.objects.filter(
+                Q(owner=self.user) |
+                Q(sample__assay__study__public=True) |
+                Q(sample__assay__study__shared_with=self.user) |
+                Q(sample__assay__study__owner=self.user)
+            ).distinct()
             vectors_dna_ids = []
             vector_ids = [v.id for v in user_vectors]
             for v in user_vectors:
