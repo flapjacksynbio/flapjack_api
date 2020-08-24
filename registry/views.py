@@ -12,8 +12,8 @@ import django_filters
 # FilterSets
 
 class StudyFilter(FilterSet):
-    name = CharFilter(lookup_expr='icontains')
-    doi = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='exact')
+    doi = CharFilter(lookup_expr='exact')
     is_owner = BooleanFilter(field_name='owner', method='filter_is_owner')
 
     class Meta:
@@ -26,7 +26,7 @@ class StudyFilter(FilterSet):
 
 
 class AssayFilter(FilterSet):
-    name = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='exact')
     machine = CharFilter(lookup_expr='icontains')
     description = CharFilter(lookup_expr='icontains')
 
@@ -36,7 +36,7 @@ class AssayFilter(FilterSet):
 
 
 class MediaFilter(FilterSet):
-    name = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='exact')
     description = CharFilter(lookup_expr='icontains')
 
     class Meta:
@@ -45,7 +45,7 @@ class MediaFilter(FilterSet):
 
 
 class StrainFilter(FilterSet):
-    name = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='exact')
     description = CharFilter(lookup_expr='icontains')
 
     class Meta:
@@ -54,7 +54,7 @@ class StrainFilter(FilterSet):
 
 
 class ChemicalFilter(FilterSet):
-    name = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='exact')
     description = CharFilter(lookup_expr='icontains')
     pubchemid = NumberFilter(lookup_expr='exact')
 
@@ -64,7 +64,7 @@ class ChemicalFilter(FilterSet):
 
 
 class SupplementFilter(FilterSet):
-    name = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='exact')
     concentration = NumberFilter(lookup_expr='exact')
 
     class Meta:
@@ -73,7 +73,7 @@ class SupplementFilter(FilterSet):
 
 
 class DnaFilter(FilterSet):
-    name = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='exact')
     sboluri = CharFilter(lookup_expr='icontains')
 
     class Meta:
@@ -82,7 +82,7 @@ class DnaFilter(FilterSet):
 
 
 class VectorFilter(FilterSet):
-    name = CharFilter(lookup_expr='icontains')  
+    name = CharFilter(lookup_expr='exact')  
     dnas = RelatedFilter(DnaFilter, field_name='dnas',
                         queryset=Dna.objects.all())
     
@@ -107,7 +107,7 @@ class SampleFilter(FilterSet):
 
 
 class SignalFilter(FilterSet):
-    name = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='exact')
     description = CharFilter(lookup_expr='icontains')
     color = CharFilter(lookup_expr='icontains')
 
