@@ -257,10 +257,6 @@ class UploadConsumer(AsyncWebsocketConsumer):
         columns = list(meta_dict.columns)
         meta_dnas = [k for k in list(meta_dict.index) if 'DNA' in k]
         meta_inds = [k for k in list(meta_dict.index) if 'chem' in k]
-        print("Info Vector")
-        print(f"dna_names: {self.dna_names}", flush=True)
-        print(f"metadata: {metadata}", flush=True)
-        print(f"dna_map: {dna_map}", flush=True)
         for well_idx, well in enumerate(columns):
             existing_med = [i.name for i in Media.objects.all()]
             existing_str = [i.name for i in Strain.objects.all()]
@@ -302,7 +298,6 @@ class UploadConsumer(AsyncWebsocketConsumer):
                 
                 # dna in this well (meta_dict.loc[meta_dnas][well])
                 well_dnas = meta_dict.loc[meta_dnas][well]
-                print(f"well_dnas: {well_dnas}", flush=True)
                 well_dna_ids = [dna_map[d] for d in well_dnas if d.lower()!='none']
                 
                 if len(well_dna_ids) > 0:
