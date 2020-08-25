@@ -135,6 +135,12 @@ class MeasurementSerializer(serializers.ModelSerializer):
             'inducer'
         )
         '''
+class UserSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+    class Meta:
+        model = User
+        fields = '__all__'
+    
     '''
     def get_study(self, obj):
         return obj.sample.assay.study.name
@@ -152,12 +158,6 @@ class MeasurementSerializer(serializers.ModelSerializer):
 
 
 '''
-class UserSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-    class Meta:
-        model = User
-        fields = '__all__'
-
 class GroupSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     class Meta:

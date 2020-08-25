@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, BooleanFilter
@@ -120,6 +121,14 @@ class MeasurementFilter(FilterSet):
     class Meta:
         model = Measurement
         fields = ('id', 'sample', 'signal', 'value')
+
+class UserFilter(FilterSet):
+    username = CharFilter(lookup_expr='icontains')
+    email = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = User
+        fields = ('id',)
 
 
 # ViewSets
@@ -350,3 +359,15 @@ class MeasurementViewSet(viewsets.ModelViewSet):
             Q(sample__assay__study__public=True) |
             Q(sample__assay__study__shared_with=user)
         ).distinct()
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    permission_classes = [UserPermission]
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    filter_class = UserFilter
+    filter_backends = [SearchFilter, RestFrameworkFilterBackend]
+    filterset_fields = ['username']
+    search_fields = ['username']
