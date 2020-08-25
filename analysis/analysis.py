@@ -22,7 +22,8 @@ remove_background = {
         'Heatmap': True,
         'Kymograph': True,
         'Alpha': True,
-        'Rho': True
+        'Rho': True,
+        'Background Correct': True
     }
 
 class Analysis:
@@ -42,7 +43,8 @@ class Analysis:
             'Heatmap': self.heatmap,
             'Kymograph': self.kymograph,
             'Alpha': self.ratiometric_alpha,
-            'Rho': self.ratiometric_rho
+            'Rho': self.ratiometric_rho,
+            'Background Correct': self.background_correct
         }
         self.background = {}
 
@@ -186,6 +188,10 @@ class Analysis:
 
     # Analysis functions that compute timeseries from a dataframe with given keyword args
     # -----------------------------------------------------------------------------------
+    def background_correct(self, df):
+        # Nothing to do, already corrected background
+        return df
+
     def velocity(self, df):
         '''
         Parameters:
