@@ -150,7 +150,7 @@ class StudyViewSet(viewsets.ModelViewSet):
             Q(owner=user) | 
             Q(public=True) | 
             Q(shared_with=user)
-        )
+        ).distinct()
     
 
 class AssayViewSet(viewsets.ModelViewSet):
@@ -176,7 +176,7 @@ class AssayViewSet(viewsets.ModelViewSet):
             Q(study__owner=user) |
             Q(study__public=True) |
             Q(study__shared_with=user)
-        )
+        ).distinct()
 
 
 class MediaViewSet(viewsets.ModelViewSet):
