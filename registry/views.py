@@ -1,6 +1,8 @@
 from django.db.models import Q
 from django.contrib.auth.models import User
 from rest_framework import viewsets
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework_filters import FilterSet, CharFilter, NumberFilter, RelatedFilter, BooleanFilter
 from rest_framework_filters.backends import RestFrameworkFilterBackend
@@ -360,6 +362,7 @@ class MeasurementViewSet(viewsets.ModelViewSet):
             Q(sample__assay__study__shared_with=user)
         ).distinct()
 
+
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -371,3 +374,63 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     filterset_fields = ['username']
     search_fields = ['username']
+
+
+class AssaysInStudy(viewsets.ModelViewSet):
+    """
+    API endpoint that returns the objects related with a study
+    """
+    serializer_class = AssaySerializer
+    queryset = Assay.objects.all()
+    def get_queryset(self):
+        s_id = int(self.request.query_params['id'])
+        return Study.objects.get(id=s_id).assay_set.all()
+
+
+class VectorInAssay(viewsets.ModelViewSet):
+    """
+    API endpoint that returns the objects related with a study
+    """
+    serializer_class = VectorSerializer
+    queryset = Vector.objects.all()
+    def get_queryset(self):
+        a_id = int(self.request.query_params['id'])
+        samples = Assay.objects.get(id=a_id).sample_set.all()
+        return Vector.objects.filter(sample__in=samples).distinct()
+
+
+class StrainInAssay(viewsets.ModelViewSet):
+    """
+    API endpoint that returns the objects related with a study
+    """
+    serializer_class = StrainSerializer
+    queryset = Strain.objects.all()
+    def get_queryset(self):
+        s_id = int(self.request.query_params['id'])
+        samples = Assay.objects.get(id=s_id).sample_set.all()
+        return Strain.objects.filter(sample__in=samples).distinct()
+
+
+class MediaInAssay(viewsets.ModelViewSet):
+    """
+    API endpoint that returns the objects related with a study
+    """
+    serializer_class = MediaSerializer
+    queryset = Media.objects.all()
+    def get_queryset(self):
+        m_id = int(self.request.query_params['id'])
+        samples = Assay.objects.get(id=m_id).sample_set.all()
+        return Media.objects.filter(sample__in=samples).distinct()
+
+
+class SignalInAssay(viewsets.ModelViewSet):
+    """
+    API endpoint that returns the objects related with a study
+    """
+    serializer_class = SignalSerializer
+    queryset = Signal.objects.all()
+    def get_queryset(self):
+        s_id = int(self.request.query_params['id'])
+        samples = Assay.objects.get(id=s_id).sample_set.all()
+        meas = Measurement.objects.filter(sample__in=samples)
+        return Signal.objects.filter(measurement__in=meas).distinct()
