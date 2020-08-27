@@ -82,8 +82,7 @@ class VectorAllSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vector
-        fields = '__all__'#['id', 'name', 'dnas']
-
+        fields = '__all__'
         
 class VectorSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
@@ -116,6 +115,16 @@ class SignalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Signal
         fields = '__all__'
+
+    def to_internal_value(self, data):
+        validated = {
+                'id': data.get('id'),
+                'name': data.get('name'),
+                'description': data.get('description'),
+                'color': data.get('color').lower(),
+                'owner_id': self.context['request'].user.id,
+                }
+        return validated
         
 
 class MeasurementSerializer(serializers.ModelSerializer):
