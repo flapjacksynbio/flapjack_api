@@ -18,11 +18,12 @@ router.register(r'chemical', views.ChemicalViewSet)
 router.register(r'vector', views.VectorViewSet)
 router.register(r'vectorall', views.VectorAllViewSet)
 router.register(r'user', views.UserViewSet)
+router.register(r'assays_in_study', views.AssaysInStudy)
+router.register(r'vector_in assay', views.VectorInAssay)
+router.register(r'strain_in_assay', views.StrainInAssay)
+router.register(r'media_in_assay', views.MediaInAssay)
+router.register(r'signal_in_assay', views.SignalInAssay)
 
-#router.register(r'inducer', views.InducerViewSet)
-#router.register(r'user', views.UserViewSet)
-#router.register(r'group', views.GroupViewSet)
-#router.register(r'user_profile_info', views.UserProfileInfoViewSet)
 
 urlpatterns = [
     url(r'^api/', include(router.urls))
