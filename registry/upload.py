@@ -63,6 +63,8 @@ def synergy_clean_data(signal_names, df, rows):
 def synergy_fix_time(df):
     t = np.array([])
     for i, value in enumerate(df['Time']):
+        if value == datetime.datetime(1899, 12, 30):
+            value = datetime.time(0, 0, 0)
         try:
             t = np.append(t, value.day*24 + value.hour + value.minute/60 + value.second/3600)
         except:
