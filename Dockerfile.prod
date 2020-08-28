@@ -7,6 +7,9 @@ RUN apt install -y netcat
 RUN mkdir -p /var/app/flap
 WORKDIR /var/app/flap
 
+RUN pip install daphne
+RUN pip install -U Twisted[tls,http2]
+
 # Allows docker to cache installed dependencies between builds
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt

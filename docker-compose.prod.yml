@@ -38,6 +38,20 @@ services:
       - 1337:80
     depends_on:
       - flapjack_api
+      - daphne
+
+  daphne:
+    container_name: daphne
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    command: daphne -b 0.0.0.0 -p 7000 flapjack_api.asgi:application
+    expose:
+      - 7000
+    depends_on:
+      - redis
+    env_file:
+      - ./.env.prod
 
 volumes:
   redis:
