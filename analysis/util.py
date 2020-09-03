@@ -48,7 +48,7 @@ def normalize_temporal_mean(data, column):
 def normalize_data(df, norm_type, column):
     norm_funcs = {
         'Min/Max': normalize_min_max,
-        'Mean/Std': normalize_mean_std,
+        'Mean/std': normalize_mean_std,
         'Temporal Mean': normalize_temporal_mean
     }
     norm_func = norm_funcs.get(norm_type, None)
