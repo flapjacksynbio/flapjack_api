@@ -44,28 +44,27 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
         df = get_measurements(s, signals)
         if analysis_params:
             analysis = Analysis(analysis_params, signals)
-            df = await self.run_analysis(df, analysis)
-        # Send back analyzed data
+            await self.run_analysis(df, analysis)
+        # Send back finished message
         await self.send(text_data=json.dumps({
-            'type': 'analysis',
-            'data': df.to_json()
+            'type': 'finished'
         }))
-
 
     async def run_analysis(self, df, analysis):
         grouped = df.groupby('Sample')
-        result_dfs = []
+        #result_dfs = []
         n_samples = len(grouped)
         progress = 0
         for id,g in grouped:
             result_df = analysis.analyze_data(g)
-            result_dfs.append(result_df)
+            #result_dfs.append(result_df)
             progress += 1
             await self.send(text_data=json.dumps({
                 'type': 'progress_update',
-                'data': {'progress': int(100 * progress / n_samples)}
+                'progress': int(100 * progress / n_samples),
+                'data': result_df.to_json()
             }))
             await asyncio.sleep(0)
-        df = pd.concat(result_dfs, ignore_index=True)
-        return df
+        #df = pd.concat(result_dfs, ignore_index=True)
+        #return df
 

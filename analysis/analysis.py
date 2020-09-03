@@ -64,7 +64,6 @@ class Analysis:
         self.chemical_id = params.get('analyte', None)
         self.chemical_id1 = params.get('analyte1', None)
         self.chemical_id2 = params.get('analyte2', None)
-        self.ref_name = params.get('ref_signal')
         self.bounds = [[0,0,0,0], [1,1,1,24]]
         self.function = params.get('function')
 
@@ -86,6 +85,7 @@ class Analysis:
         meas_no_dna = get_measurements(samps_no_dna)
 
         if len(meas_no_cells) == 0 or len(meas_no_dna) == 0:
+            print('No background data to subtract', flush=True)
             return {}, {}
 
         # Compute media background
@@ -117,6 +117,7 @@ class Analysis:
     def get_background(self, assay, media, strain):
         key = (assay, media, strain)
         if key not in self.background:
+            print('Computing background for ', assay, media, strain, flush=True)
             self.background[key] = self.compute_background(assay, media, strain)
         return self.background[key]
 
