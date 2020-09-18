@@ -98,7 +98,7 @@ class SampleSerializerCreate(serializers.ModelSerializer):
 
     class Meta:
         model = Sample
-        fields = ['id', 'assay', 'row', 'col', 'vector']
+        fields = ['id', 'assay', 'media', 'strain', 'row', 'col', 'vector']
 
 class SampleSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
