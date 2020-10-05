@@ -157,10 +157,13 @@ def get_measurements(samples, signals=None):
 
 def get_biomass(df, biomass_signal):
     samp_ids = df.Sample.unique()
-    m = Measurement.objects.filter(sample__id__in=samp_ids)
-    m = m.filter(signal__id__exact=biomass_signal)
-    biomass_df = read_frame(m, fieldnames=field_names)
-    biomass_df.columns = [pretty_field_names[col] for col in biomass_df.columns]
+    s = Sample.objects.all()
+    s = s.filter(id__in=s)
+    #m = Measurement.objects.filter(sample__id__in=samp_ids)
+    #m = m.filter(signal__id__exact=biomass_signal)
+    #biomass_df = read_frame(m, fieldnames=field_names)
+    #biomass_df.columns = [pretty_field_names[col] for col in biomass_df.columns]
+    biomass_df = get_measurements(s, signals=[biomass_signal])
     return biomass_df
 
 def upload_measurements(df, sample, signal):
