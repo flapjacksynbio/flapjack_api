@@ -36,7 +36,7 @@ services:
       - 6379
     healthcheck:
       test: redis-cli ping
-      interval: 1s
+      interval: 5m
       timeout: 3s
       retries: 30
 
