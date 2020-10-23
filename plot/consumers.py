@@ -229,7 +229,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
             df = get_measurements(s, signals)
 
             # Default axis labels for raw measurements
-            xlabel, ylabel = 'Time', 'Measurement'
+            xlabel, ylabel = 'Time (h)', 'Measurement (AU)'
             xcolumn, ycolumn = 'Time', 'Measurement'
 
             # Default plot type for raw measurements
@@ -272,11 +272,14 @@ class PlotConsumer(AsyncWebsocketConsumer):
             if plot_type == 'heatmap':
                 chem1 = Chemical.objects.get(id=analysis.chemical_id1)
                 chem2 = Chemical.objects.get(id=analysis.chemical_id2)
-                xlabel = 'Concentration ' + chem1.name
-                ylabel = 'Concentration ' + chem2.name
+                xlabel = 'Concentration ' + chem1.name + ' (M)'
+                ylabel = 'Concentration ' + chem2.name + ' (M)'
             elif plot_type == 'kymograph':
                 chem = Chemical.objects.get(id=analysis.chemical_id)
-                xlabel = 'Concentration ' + chem.name
+                xlabel = 'Concentration ' + chem.name + ' (M)'
+            elif plot_type == 'induction':
+                chem = Chemical.objects.get(id=analysis.chemical_id)
+                xlabel = 'Concentration ' + chem.name + ' (M)'
 
             # Plot figure
             subplots = plot_options['subplots']

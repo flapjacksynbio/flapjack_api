@@ -11,50 +11,50 @@ import pandas as pd
 # Properties to use for each analysis/plot type
 plot_properties = { 
     'Velocity': dict(
-        axis_labels=('Time', 'Velocity'),
+        axis_labels=('Time (h)', 'Velocity (AU/h'),
         plot_type='timeseries',
         data_column='Velocity'
         ),
     'Expression Rate (direct)': dict(
-        axis_labels=('Time', 'Expression rate'),
+        axis_labels=('Time (h)', 'Expression rate (AU/h)'),
         plot_type='timeseries',
         data_column='Rate'
         ),
     'Expression Rate (indirect)': dict(
-        axis_labels=('Time', 'Expression rate'),
+        axis_labels=('Time (h)', 'Expression rate (AU/h)'),
         plot_type='timeseries',
         data_column='Rate'
         ),
     'Mean Expression': dict(
-        axis_labels=(None, 'Mean expression'),
+        axis_labels=(None, 'Mean expression (AU)'),
         plot_type='bar',
         data_column='Expression'
         ),
     'Max Expression': dict(
-        axis_labels=(None, 'Max. expression'),
+        axis_labels=(None, 'Max. expression (AU)'),
         plot_type='bar',
         data_column='Expression'
         ),
     'Mean Velocity': dict(
-        axis_labels=(None, 'Mean velocity'),
+        axis_labels=(None, 'Mean velocity (AU/h)'),
         plot_type='bar',
         data_column='Velocity'
         ),
     'Max Velocity': dict(
-        axis_labels=(None, 'Max. velocity'),
+        axis_labels=(None, 'Max. velocity (AU/h)'),
         plot_type='bar',
         data_column='Velocity'
         ),
     'Induction Curve': dict(
-        axis_labels=('Concentration', None),
+        axis_labels=('Concentration (M)', None),
         plot_type='induction'
         ),
     'Heatmap': dict(
-        axis_labels=('Concentration A', 'Concentration B'),
+        axis_labels=('Concentration A (M)', 'Concentration B (M)'),
         plot_type='heatmap'
         ),
     'Kymograph': dict(
-        axis_labels=('Concentration', 'Time'),
+        axis_labels=('Concentration (M)', 'Time (h)'),
         plot_type='kymograph'
         ),
     'Rho':  dict(
