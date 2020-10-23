@@ -80,7 +80,7 @@ class Analysis:
         s = Sample.objects.filter(assay__name__exact=assay) \
                             .filter(media__name__exact=media)
         samps_no_cells = s.filter(vector__isnull=True).filter(strain__isnull=True)
-        samps_no_dna = s.filter(vector__isnull=True).filter(strain__isnull=True)
+        samps_no_dna = s.filter(vector__isnull=True)
         meas_no_cells = get_measurements(samps_no_cells)
         meas_no_dna = get_measurements(samps_no_dna)
 
@@ -274,7 +274,8 @@ class Analysis:
         '''
         print(self.smoothing_param1, self.smoothing_param2, flush=True)
         density_df = get_biomass(df, self.density_name)
-        
+        density_df = self.bg_correct(density_df)
+
         result = pd.DataFrame()
         rows = []
 
@@ -374,6 +375,7 @@ class Analysis:
             return(df)
 
         density_df = get_biomass(df, self.density_name)
+        density_df = self.bg_correct(density_df)
         if len(density_df)==0:
             return density_df
         
@@ -562,7 +564,8 @@ class Analysis:
         #   density_df = dataframe containing biomass measurements
         #   ndt = number of doubling times to extend exponential phase
         density_df = get_biomass(df, self.density_name)
-
+        density_df = self.bg_correct(density_df)
+        
         result = pd.DataFrame()
         rows = []
 
