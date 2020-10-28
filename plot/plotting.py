@@ -11,7 +11,7 @@ import pandas as pd
 # Properties to use for each analysis/plot type
 plot_properties = { 
     'Velocity': dict(
-        axis_labels=('Time (h)', 'Velocity (AU/h'),
+        axis_labels=('Time (h)', 'Velocity (AU/h)'),
         plot_type='timeseries',
         data_column='Velocity'
         ),
