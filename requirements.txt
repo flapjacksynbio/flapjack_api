@@ -33,3 +33,4 @@ pytz==2018.5
 six==1.12.0
 statsmodels==0.10.2
 ipython==7.11.1
+gunicorn

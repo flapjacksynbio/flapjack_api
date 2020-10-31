@@ -13,6 +13,8 @@ services:
       - "8000:8000"
     depends_on:
       - db
+    #command: gunicorn --certfile=cert/fullchain.pem --keyfile=cert/privkey.pem flapjack_api.wsgi:application
+    #command: gunicorn flapjack_api.wsgi
     command: python manage.py runserver 0.0.0.0:8000
 
   db:
