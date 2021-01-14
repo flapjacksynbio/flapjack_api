@@ -25,6 +25,11 @@ plot_properties = {
         plot_type='timeseries',
         data_column='Rate'
         ),
+    'Expression Rate (inverse)': dict(
+        axis_labels=('Time (h)', 'Expression rate (AU/h)'),
+        plot_type='timeseries',
+        data_column='Rate'
+        ),
     'Mean Expression': dict(
         axis_labels=(None, 'Mean expression (AU)'),
         plot_type='bar',

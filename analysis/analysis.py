@@ -5,6 +5,7 @@ from django_pandas.io import read_frame
 from registry.models import *
 from registry.util import *
 from analysis.util import *
+from . import inverse
 from scipy.interpolate import interp1d, UnivariateSpline
 from scipy.signal import medfilt, savgol_filter
 import wellfare as wf
@@ -16,6 +17,7 @@ remove_background = {
         'Max Velocity': False,
         'Expression Rate (indirect)': True,
         'Expression Rate (direct)': True,
+        'Expression Rate (inverse)': True,
         'Mean Expression': True,
         'Max Expression': True,
         'Induction Curve': True,
@@ -26,6 +28,7 @@ remove_background = {
         'Background Correct': True
     }
 
+# Main analysis class
 class Analysis:
     def __init__(self, params, signals):
         self.set_params(params)
@@ -35,6 +38,7 @@ class Analysis:
             'Velocity': self.velocity,
             'Expression Rate (indirect)': self.expression_rate_indirect,
             'Expression Rate (direct)': self.expression_rate_direct,
+            'Expression Rate (inverse)': self.expression_rate_inverse,
             'Mean Velocity': self.mean_velocity,
             'Max Velocity': self.max_velocity,
             'Mean Expression': self.mean_expression,
@@ -61,6 +65,8 @@ class Analysis:
         self.smoothing_param2 = int(params.get('post_smoothing', 21))
         self.degr = float(params.get('degr', 0.))
         self.eps_L = float(params.get('eps_L', 1e-7))
+        self.n_gaussians = int(params.get('n_gaussians', 20))
+        self.eps = float(params.get('eps', 0.01))
         self.chemical_id = params.get('analyte', None)
         self.chemical_id1 = params.get('analyte1', None)
         self.chemical_id2 = params.get('analyte2', None)
@@ -426,6 +432,81 @@ class Analysis:
                         rows.append(data)
                     except:
                         print('Fitting direct expression rates failed!', flush=True)
+
+        if len(rows)>0:
+            result = result.append(rows)
+            result = result.dropna(subset=['Rate'])
+        else:
+            print('No rows to add to expression rate dataframe', flush=True)
+        return(result)
+
+    def expression_rate_inverse(self, df):
+        '''
+        Parameters:
+            df = data frame to analyse
+            density_df = dataframe containing density (biomass) measurements
+            degr = degradation rate of reporter protein
+            eps = Tikhoniv regularization parameter
+            n_gaussians = number of gaussians in basis
+        '''
+        if len(df)==0:
+            return(df)
+
+        density_df = get_biomass(df, self.density_name)
+        density_df = self.bg_correct(density_df)
+        if len(density_df)==0:
+            return density_df
+        
+        result = pd.DataFrame()
+        rows = []
+
+        grouped_sample = df.groupby('Sample')
+        n_samples = len(grouped_sample)
+        # Loop over samples
+        si = 1
+        for samp_id, samp_data in grouped_sample:
+            print('Computing inverse expression rate of sample %d of %d'%(si, n_samples), flush=True)
+            si += 1
+            for meas_name, data in samp_data.groupby('Signal_id'):
+                data = data.sort_values('Time')
+                time = data['Time']
+                val = data['Measurement']
+                density = density_df[density_df['Sample']==samp_id]
+                density = density.sort_values('Time')
+                density_val = density['Measurement']
+                density_time = density['Time']
+
+                if len(val)>1:
+                    # Construct curves
+                    fpt = time.values
+                    fpy = val.values
+                    cfp = wf.curves.Curve(x=fpt, y=fpy)
+                    odt = density_time.values
+                    ody = density_val.values
+                    cod = wf.curves.Curve(x=odt, y=ody)
+                    # Compute time range
+                    od_xmin, od_xmax = cod.xlim()
+                    cfp_xmin, cfp_xmax = cfp.xlim()
+                    xmin = max(od_xmin, cfp_xmin)
+                    xmax = min(od_xmax, cfp_xmax)
+                    ttu = np.linspace(od_xmin, od_xmax, 100, endpoint=False)
+                    # Fit model
+                    if meas_name==self.density_name:
+                        ksynth = inverse.characterize_growth(
+                            cod(ttu), 
+                            ttu, 
+                            n_gaussians=self.n_gaussians,
+                            epsilon=self.eps)
+                    else:
+                        ksynth = inverse.characterize(
+                            cfp(ttu), 
+                            cod(ttu), 
+                            ttu, 
+                            gamma=self.degr, 
+                            n_gaussians=self.n_gaussians,
+                            epsilon=self.eps)
+                    data = data.assign(Rate=ksynth(fpt))
+                    rows.append(data)
 
         if len(rows)>0:
             result = result.append(rows)
