@@ -14,8 +14,11 @@ services:
     depends_on:
       - db
     #command: gunicorn --certfile=cert/fullchain.pem --keyfile=cert/privkey.pem flapjack_api.wsgi:application
-    #command: gunicorn flapjack_api.wsgi
-    command: python manage.py runserver 0.0.0.0:8000
+    # command: gunicorn -w 4 -b 0.0.0.0:8000 flapjack_api.wsgi
+    command: gunicorn flapjack_api.asgi:application -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --timeout 3600
+    # command: daphne -b 0.0.0.0 -p 8000 flapjack_api.asgi:application
+    # command: uvicorn flapjack_api.asgi:application --port 8000 --reload
+    #command: python manage.py runserver 0.0.0.0:8000
 
   db:
     container_name: db
