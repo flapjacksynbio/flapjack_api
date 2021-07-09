@@ -1,7 +1,6 @@
 version: "3.3"
 
 services:
-
   flapjack_api:
     container_name: api
     restart: always
@@ -14,7 +13,12 @@ services:
       - "8000:8000"
     depends_on:
       - db
-    command: python manage.py runserver 0.0.0.0:8000
+    #command: gunicorn --certfile=cert/fullchain.pem --keyfile=cert/privkey.pem flapjack_api.wsgi:application
+    # command: gunicorn -w 4 -b 0.0.0.0:8000 flapjack_api.wsgi
+    command: gunicorn flapjack_api.asgi:application -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --timeout 3600
+    # command: daphne -b 0.0.0.0 -p 8000 flapjack_api.asgi:application
+    # command: uvicorn flapjack_api.asgi:application --port 8000 --reload
+    #command: python manage.py runserver 0.0.0.0:8000
 
   db:
     container_name: db
@@ -23,8 +27,24 @@ services:
     ports:
       - "5432:5432"
     environment:
+      POSTGRES_DB: registry
       POSTGRES_USER: guillermo
       POSTGRES_PASSWORD: 123456
-      PGDATA: /var/pg/data
     volumes:
-      - ../pgdata:/var/pg/data
+      - db:/var/pg/data
+
+  redis:
+    image: redis
+    volumes:
+      - redis:/data
+    ports:
+      - 6379
+    healthcheck:
+      test: redis-cli ping
+      interval: 5m
+      timeout: 30s
+      retries: 30
+
+volumes:
+  redis:
+  db:
