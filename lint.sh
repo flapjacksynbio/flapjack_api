@@ -1,0 +1,1 @@
+pylint analysis flapjack_api accounts plot registry --disable=C0111 --load-plugins=pylint_django

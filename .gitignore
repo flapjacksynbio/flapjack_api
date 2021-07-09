@@ -3,3 +3,7 @@
 *.pot
 *.pyc
 __pycache__/
+.vscode/
+.DS_Store
+cert/
+registry.sql
