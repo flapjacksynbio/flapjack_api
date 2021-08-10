@@ -4,6 +4,7 @@ import asyncio
 # Third Party imports.
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
 from analysis.analysis import Analysis 
 from analysis.util import *
 from registry.util import get_samples, get_measurements
@@ -50,13 +51,17 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
             'type': 'finished'
         }))
 
+    @database_sync_to_async
+    def analyze(self, g, analysis):
+        return analysis.analyze_data(g)
+
     async def run_analysis(self, df, analysis):
         grouped = df.groupby('Sample')
         #result_dfs = []
         n_samples = len(grouped)
         progress = 0
         for id,g in grouped:
-            result_df = analysis.analyze_data(g)
+            result_df = await self.analyze(g, analysis)
             #result_dfs.append(result_df)
             progress += 1
             await self.send(text_data=json.dumps({

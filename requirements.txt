@@ -7,7 +7,7 @@ djangorestframework-filters==1.0.0.dev0
 djangorestframework-simplejwt==4.6.0
 pylint>=2.5.2
 pylint-django>=2.0.15
-channels==2.4.0
+channels==3 #==2.4.0
 channels-redis
 numpy
 scipy

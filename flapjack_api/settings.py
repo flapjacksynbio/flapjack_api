@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -138,3 +139,8 @@ CHANNEL_LAYERS = {
 }
 
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}

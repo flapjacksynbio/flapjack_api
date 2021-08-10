@@ -8,11 +8,11 @@ websockets = ProtocolTypeRouter({
     "websocket": TokenAuthMiddleware(
         URLRouter([
             path(
-                "upload", UploadConsumer,
+                "upload", UploadConsumer.as_asgi(),
                 name="upload-ws",
             ),
             path(
-                "measurements", MeasurementsConsumer,
+                "measurements", MeasurementsConsumer.as_asgi(),
                 name="measurements-ws",
             ),
         ])

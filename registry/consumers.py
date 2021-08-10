@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
 # Scripts.
 from .upload import *
 from .models import *
@@ -24,15 +25,23 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
             "measurements",
             self.channel_name
         )
-        
+    @database_sync_to_async
+    def get_data(self, params, signals):
+        s = get_samples(params)
+        df = get_measurements(s, signals)
+        return df
+
+    @database_sync_to_async
+    def upload(self, df, sample, signal):
+        upload_measurements(df, sample, signal)
+
     async def receive(self, text_data):
         data = json.loads(text_data)
         if data['type'] == 'measurements':
             params = data['parameters']
             signals = params.get('signal')
             analysis_params = params.get('analysis')
-            s = get_samples(params)
-            df = get_measurements(s, signals)
+            df = await self.get_data(params, signals)
             await self.send(text_data=json.dumps({
                 'type': 'measurements',
                 'data': df.to_json()
@@ -43,7 +52,7 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
             signal = params['signal']
             json_data = data['data']
             df = pd.read_json(json_data)
-            upload_measurements(df, sample, signal)
+            await self.upload(df, sample, signal)
             await self.send(text_data=json.dumps({
                 'type': 'upload',
                 'data': 'success'
@@ -56,8 +65,10 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
         )
         
 class UploadConsumer(AsyncWebsocketConsumer): 
-    def __init__(self, scope, **kwargs):
-        super(UploadConsumer, self).__init__(scope, **kwargs)
+    #def __init__(self, scope, **kwargs):
+    def __init__(self, **kwargs):
+        #super(UploadConsumer, self).__init__(scope, **kwargs)
+        super(UploadConsumer, self).__init__(**kwargs)
         # for most attrs is not necessary to declared them, it is  
         # for having an idea of which parameters the instance has
         self.columns = [x+str(y) for x in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] for y in range(1,13)]
@@ -78,7 +89,8 @@ class UploadConsumer(AsyncWebsocketConsumer):
         )
 
     # TO DO: setup message receiving and disconnection
-    async def initialize_upload(self, data):
+    @database_sync_to_async
+    def _initialize_upload(self, data):
         print(f"initialize_upload DATA: {data}", flush=True)
         self.machine = data['machine']
         
@@ -91,14 +103,16 @@ class UploadConsumer(AsyncWebsocketConsumer):
         assay.save()
         self.assay_id = assay.id
 
+    async def initialize_upload(self, data):
+        await self._initialize_upload(data)
         # Send message for receiving file
         await self.send(text_data=json.dumps({
                 'type': 'ready_for_file',
                 'data': {'assay_id': self.assay_id}
             }))
 
-
-    async def read_binary(self, bin_data):
+    @database_sync_to_async
+    def _read_binary(self, bin_data):
         ## IF MACHINE SYNERGY
         if 'synergy' in self.machine.lower():
             # load workbook, sheet containing data and extract metadata information
@@ -115,7 +129,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
                     [dna for dna_list in dna_lists for dna in dna_list if dna not in empty_dna_names]
                     )
                 )
-            chem_names_file = [val for val in self.meta_dict.index if "chem" in val]
+            self.chem_names_file = [val for val in self.meta_dict.index if "chem" in val]
 
 
         ## IF MACHINE FLUOPI
@@ -134,14 +148,15 @@ class UploadConsumer(AsyncWebsocketConsumer):
 
         ## IF MACHINE BMG
 
-
+    async def read_binary(self, bin_data):
+        await self._read_binary(bin_data)
         ## SEND CORRECT DATA DEPENDING ON THE FILE
         # Ask for dna, chemicals and signals
         await self.send(text_data=json.dumps({
                 'type': 'input_requests',
                 'data': {
                     'dna': self.dna_names,
-                    'chemical': chem_names_file,
+                    'chemical': self.chem_names_file,
                     'signal': self.signal_names
                 }
             }))

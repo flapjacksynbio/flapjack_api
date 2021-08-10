@@ -8,7 +8,7 @@ websockets = ProtocolTypeRouter({
     "websocket": TokenAuthMiddleware(
         URLRouter([
             path(
-                "analysis", AnalysisConsumer,
+                "analysis", AnalysisConsumer.as_asgi(),
                 name="analysis-ws",
             ),
         ])

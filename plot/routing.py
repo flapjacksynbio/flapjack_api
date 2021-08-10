@@ -8,7 +8,7 @@ websockets = ProtocolTypeRouter({
     "websocket": TokenAuthMiddleware(
         URLRouter([
             path(
-                "plot", PlotConsumer,
+                "plot", PlotConsumer.as_asgi(),
                 name="plot-ws",
             ),
         ])

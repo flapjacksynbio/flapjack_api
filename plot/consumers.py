@@ -4,6 +4,7 @@ import asyncio
 # Third Party imports.
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
 from . import plotting
 from analysis.analysis import Analysis 
 from analysis.util import *
@@ -31,7 +32,7 @@ class PlotConsumer(AsyncWebsocketConsumer):
         print(self.user)
         await self.accept()
         await self.channel_layer.group_add(
-            "asd",
+            self.user.username,
             self.channel_name
         )
 
@@ -199,6 +200,10 @@ class PlotConsumer(AsyncWebsocketConsumer):
         plotting.layout_screen(fig, xaxis_type=xaxis_type, yaxis_type=yaxis_type, font_size=font_size)
         return fig
 
+    @database_sync_to_async
+    def analyze(self, g, analysis):
+        return analysis.analyze_data(g)
+
     async def run_analysis(self, df, analysis):
         if len(df)==0:
             return df
@@ -207,13 +212,22 @@ class PlotConsumer(AsyncWebsocketConsumer):
         n_samples = len(grouped)
         progress = 0
         for id,g in grouped:
-            result_df = analysis.analyze_data(g)
+            result_df = await self.analyze(g, analysis) # analysis.analyze_data(g)
             result_dfs.append(result_df)
             progress += 1
-            await self.send(text_data=json.dumps({
-                'type': 'progress_update',
-                'data': {'progress': int(50 * progress / n_samples)}
-            }))
+            try:
+                print('Sending group progress update', flush=True)
+                #await self.channel_layer.group_send(self.user.username, 
+                await self.send(
+                    text_data = json.dumps({
+                        'type': 'progress_update',
+                        'data': {'progress': int(50 * progress / n_samples)}
+                    })
+                )
+                #await self.channel_layer.flush()
+            except Exception as e:
+                print('Analysis send progress failed')
+                print(e)
             await asyncio.sleep(0)
         df = pd.concat(result_dfs)
         return df
@@ -304,21 +318,27 @@ class PlotConsumer(AsyncWebsocketConsumer):
             print('No samples found for query params', flush=True)
             fig_json = ''
         # Send back traces to plot
-        await self.send(text_data=json.dumps({
-            'type': 'plot_data',
-            'data': {
-                'figure': fig_json
-            }
-        }))
+        try:
+            await self.send(text_data=json.dumps({
+                'type': 'plot_data',
+                'data': {
+                    'figure': fig_json
+                }
+            }))
+        except Exception as e:
+            print(e)
         
     async def receive(self, text_data):
         print(f"Receive. text_data: {text_data}", flush=True)
         data = json.loads(text_data)
         if data['type'] == 'plot':
             await self.generate_data({'params': data['parameters']})
-
+    
     async def disconnect(self, message):
         await self.channel_layer.group_discard(
-            "asd",
+            self.user.username,
             self.channel_name
         )
+        await self.close()
+    
+    
