@@ -167,15 +167,17 @@ def upload_measurements(df, sample, signal):
     measurements = []
     sig = Signal.objects.get(id=signal[0])
     samp = Sample.objects.get(id=sample[0])
+    print('Creating Measurements from dataframe with %d rows'%len(df), flush=True)
     measurements = [
         Measurement(
             sample=samp, 
             signal=sig, 
             value=row.Measurement, 
             time=row.Time
-            ) for row in df
+            ) for id,row in df.iterrows()
         ]
     if len(measurements)==0:
         return False
+    print('Adding objects to DB', flush=True)
     Measurement.objects.bulk_create(measurements)
     return True
