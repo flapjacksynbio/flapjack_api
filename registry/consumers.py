@@ -25,6 +25,7 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
             "measurements",
             self.channel_name
         )
+
     @database_sync_to_async
     def get_data(self, params, signals):
         s = get_samples(params)
