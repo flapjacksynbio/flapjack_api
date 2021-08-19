@@ -1,0 +1,1218 @@
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>API Documentation</title>
+
+    <style media="screen">
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight .gh {
+  color: #999999;
+}
+.highlight .sr {
+  color: #f6aa11;
+}
+.highlight .go {
+  color: #888888;
+}
+.highlight .gp {
+  color: #555555;
+}
+.highlight .gs {
+}
+.highlight .gu {
+  color: #aaaaaa;
+}
+.highlight .nb {
+  color: #f6aa11;
+}
+.highlight .cm {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #75715e;
+}
+.highlight .c1 {
+  color: #75715e;
+}
+.highlight .cs {
+  color: #75715e;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cpf {
+  color: #75715e;
+}
+.highlight .err {
+  color: #960050;
+}
+.highlight .gr {
+  color: #960050;
+}
+.highlight .gt {
+  color: #960050;
+}
+.highlight .gd {
+  color: #49483e;
+}
+.highlight .gi {
+  color: #49483e;
+}
+.highlight .ge {
+  color: #49483e;
+}
+.highlight .kc {
+  color: #66d9ef;
+}
+.highlight .kd {
+  color: #66d9ef;
+}
+.highlight .kr {
+  color: #66d9ef;
+}
+.highlight .no {
+  color: #66d9ef;
+}
+.highlight .kt {
+  color: #66d9ef;
+}
+.highlight .mf {
+  color: #ae81ff;
+}
+.highlight .mh {
+  color: #ae81ff;
+}
+.highlight .il {
+  color: #ae81ff;
+}
+.highlight .mi {
+  color: #ae81ff;
+}
+.highlight .mo {
+  color: #ae81ff;
+}
+.highlight .m, .highlight .mb, .highlight .mx {
+  color: #ae81ff;
+}
+.highlight .sc {
+  color: #ae81ff;
+}
+.highlight .se {
+  color: #ae81ff;
+}
+.highlight .ss {
+  color: #ae81ff;
+}
+.highlight .sd {
+  color: #e6db74;
+}
+.highlight .s2 {
+  color: #e6db74;
+}
+.highlight .sb {
+  color: #e6db74;
+}
+.highlight .sh {
+  color: #e6db74;
+}
+.highlight .si {
+  color: #e6db74;
+}
+.highlight .sx {
+  color: #e6db74;
+}
+.highlight .s1 {
+  color: #e6db74;
+}
+.highlight .s, .highlight .sa, .highlight .dl {
+  color: #e6db74;
+}
+.highlight .na {
+  color: #a6e22e;
+}
+.highlight .nc {
+  color: #a6e22e;
+}
+.highlight .nd {
+  color: #a6e22e;
+}
+.highlight .ne {
+  color: #a6e22e;
+}
+.highlight .nf, .highlight .fm {
+  color: #a6e22e;
+}
+.highlight .vc {
+  color: #ffffff;
+}
+.highlight .nn {
+  color: #ffffff;
+}
+.highlight .ni {
+  color: #ffffff;
+}
+.highlight .bp {
+  color: #ffffff;
+}
+.highlight .vg {
+  color: #ffffff;
+}
+.highlight .vi {
+  color: #ffffff;
+}
+.highlight .nv, .highlight .vm {
+  color: #ffffff;
+}
+.highlight .w {
+  color: #ffffff;
+}
+.highlight {
+  color: #ffffff;
+}
+.highlight .n, .highlight .py, .highlight .nx {
+  color: #ffffff;
+}
+.highlight .nl {
+  color: #f92672;
+}
+.highlight .ow {
+  color: #f92672;
+}
+.highlight .nt {
+  color: #f92672;
+}
+.highlight .k, .highlight .kv {
+  color: #f92672;
+}
+.highlight .kn {
+  color: #f92672;
+}
+.highlight .kp {
+  color: #f92672;
+}
+.highlight .o {
+  color: #f92672;
+}
+    </style>
+    <style media="print">
+      * {
+        -webkit-transition:none!important;
+        transition:none!important;
+      }
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #586e75;
+}
+.highlight .err {
+  color: #002b36;
+  background-color: #dc322f;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #657b83;
+}
+.highlight .cp {
+  color: #b58900;
+}
+.highlight .nt {
+  color: #b58900;
+}
+.highlight .o, .highlight .ow {
+  color: #93a1a1;
+}
+.highlight .p, .highlight .pi {
+  color: #93a1a1;
+}
+.highlight .gi {
+  color: #859900;
+}
+.highlight .gd {
+  color: #dc322f;
+}
+.highlight .gh {
+  color: #268bd2;
+  background-color: #002b36;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #6c71c4;
+}
+.highlight .kc {
+  color: #cb4b16;
+}
+.highlight .kt {
+  color: #cb4b16;
+}
+.highlight .kd {
+  color: #cb4b16;
+}
+.highlight .s, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #859900;
+}
+.highlight .sa {
+  color: #6c71c4;
+}
+.highlight .sr {
+  color: #2aa198;
+}
+.highlight .si {
+  color: #d33682;
+}
+.highlight .se {
+  color: #d33682;
+}
+.highlight .nn {
+  color: #b58900;
+}
+.highlight .nc {
+  color: #b58900;
+}
+.highlight .no {
+  color: #b58900;
+}
+.highlight .na {
+  color: #268bd2;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #859900;
+}
+.highlight .ss {
+  color: #859900;
+}
+    </style>
+    <link href="stylesheets/screen-c9d8fa83.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print-953e3353.css" rel="stylesheet" media="print" />
+      <script src="javascripts/all_nosearch-8f5ea5a5.js"></script>
+
+  </head>
+
+  <body class="index" data-languages="[]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="images/navbar-cad8cdcb.png" alt="" />
+      </span>
+    </a>
+    <div class="toc-wrapper">
+      <img src="images/logo-1e815a84.png" class="logo" alt="" />
+      <ul id="toc" class="toc-list-h1">
+          <li>
+            <a href="#introduction" class="toc-h1 toc-link" data-title="Introduction">Introduction</a>
+          </li>
+          <li>
+            <a href="#authentication" class="toc-h1 toc-link" data-title="Authentication">Authentication</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#register" class="toc-h2 toc-link" data-title="Register">Register</a>
+                  </li>
+                  <li>
+                    <a href="#log-in" class="toc-h2 toc-link" data-title="Log In">Log In</a>
+                  </li>
+                  <li>
+                    <a href="#refresh" class="toc-h2 toc-link" data-title="Refresh">Refresh</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#registry" class="toc-h1 toc-link" data-title="Registry">Registry</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#study" class="toc-h2 toc-link" data-title="Study">Study</a>
+                  </li>
+                  <li>
+                    <a href="#assays" class="toc-h2 toc-link" data-title="Assays">Assays</a>
+                  </li>
+                  <li>
+                    <a href="#dna" class="toc-h2 toc-link" data-title="DNA">DNA</a>
+                  </li>
+                  <li>
+                    <a href="#media" class="toc-h2 toc-link" data-title="Media">Media</a>
+                  </li>
+                  <li>
+                    <a href="#strain" class="toc-h2 toc-link" data-title="Strain">Strain</a>
+                  </li>
+                  <li>
+                    <a href="#chemical" class="toc-h2 toc-link" data-title="Chemical">Chemical</a>
+                  </li>
+                  <li>
+                    <a href="#supplement" class="toc-h2 toc-link" data-title="Supplement">Supplement</a>
+                  </li>
+                  <li>
+                    <a href="#vector" class="toc-h2 toc-link" data-title="Vector">Vector</a>
+                  </li>
+                  <li>
+                    <a href="#sample" class="toc-h2 toc-link" data-title="Sample">Sample</a>
+                  </li>
+                  <li>
+                    <a href="#signal" class="toc-h2 toc-link" data-title="Signal">Signal</a>
+                  </li>
+                  <li>
+                    <a href="#measurement" class="toc-h2 toc-link" data-title="Measurement">Measurement</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#example-of-the-workflow-rest-api" class="toc-h1 toc-link" data-title="Example of the workflow (REST API)">Example of the workflow (REST API)</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#registry-2" class="toc-h2 toc-link" data-title="Registry">Registry</a>
+                  </li>
+                  <li>
+                    <a href="#log-in-2" class="toc-h2 toc-link" data-title="Log in">Log in</a>
+                  </li>
+                  <li>
+                    <a href="#upload-data" class="toc-h2 toc-link" data-title="Upload data">Upload data</a>
+                  </li>
+                  <li>
+                    <a href="#get-data" class="toc-h2 toc-link" data-title="Get Data">Get Data</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#analysis" class="toc-h1 toc-link" data-title="Analysis">Analysis</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#velocity" class="toc-h2 toc-link" data-title="Velocity">Velocity</a>
+                  </li>
+                  <li>
+                    <a href="#expression-rate-indirect" class="toc-h2 toc-link" data-title="Expression Rate (Indirect)">Expression Rate (Indirect)</a>
+                  </li>
+                  <li>
+                    <a href="#expression-rate-direct" class="toc-h2 toc-link" data-title="Expression Rate (Direct)">Expression Rate (Direct)</a>
+                  </li>
+                  <li>
+                    <a href="#expression-rate-inverse" class="toc-h2 toc-link" data-title="Expression Rate (Inverse)">Expression Rate (Inverse)</a>
+                  </li>
+                  <li>
+                    <a href="#mean-expression" class="toc-h2 toc-link" data-title="Mean Expression">Mean Expression</a>
+                  </li>
+                  <li>
+                    <a href="#max-expression" class="toc-h2 toc-link" data-title="Max expression">Max expression</a>
+                  </li>
+                  <li>
+                    <a href="#mean-velocity" class="toc-h2 toc-link" data-title="Mean Velocity">Mean Velocity</a>
+                  </li>
+                  <li>
+                    <a href="#max-velocity" class="toc-h2 toc-link" data-title="Max Velocity">Max Velocity</a>
+                  </li>
+                  <li>
+                    <a href="#induction-curve" class="toc-h2 toc-link" data-title="Induction Curve">Induction Curve</a>
+                  </li>
+                  <li>
+                    <a href="#kymograph" class="toc-h2 toc-link" data-title="Kymograph">Kymograph</a>
+                  </li>
+                  <li>
+                    <a href="#heatmap" class="toc-h2 toc-link" data-title="Heatmap">Heatmap</a>
+                  </li>
+                  <li>
+                    <a href="#ratiometric-alpha" class="toc-h2 toc-link" data-title="Ratiometric Alpha">Ratiometric Alpha</a>
+                  </li>
+                  <li>
+                    <a href="#ratiometric-rho" class="toc-h2 toc-link" data-title="Ratiometric Rho">Ratiometric Rho</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#plot" class="toc-h1 toc-link" data-title="Plot">Plot</a>
+          </li>
+      </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id='introduction'>Introduction</h1>
+<p>Flapjack is a data management and analysis tool for genetic circuit design. The system is implemented as a web app with a backend data registry and analysis engine accessible as a REST API</p>
+<h1 id='authentication'>Authentication</h1><h2 id='register'>Register</h2>
+<blockquote>
+<p>To register in Flapjack, use this code:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/auth/register/"</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="s">"{</span><span class="se">\n\t\"</span><span class="s">username</span><span class="se">\"</span><span class="s">: </span><span class="se">\"</span><span class="s">JohnDoe</span><span class="se">\"</span><span class="s">,</span><span class="se">\n\t\"</span><span class="s">password</span><span class="se">\"</span><span class="s">: </span><span class="se">\"</span><span class="s">asd123</span><span class="se">\"</span><span class="s">,</span><span class="se">\t\n\t\"</span><span class="s">password2</span><span class="se">\"</span><span class="s">: </span><span class="se">\"</span><span class="s">asd123</span><span class="se">\"</span><span class="s">,</span><span class="se">\n\t\"</span><span class="s">email</span><span class="se">\"</span><span class="s">: </span><span class="se">\"</span><span class="s">john@doe.com</span><span class="se">\"\n</span><span class="s">}</span><span class="se">\n</span><span class="s">"</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">request</span><span class="p">(</span><span class="s">"POST"</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="p">)</span>
+
+</code></pre></div><div class="highlight"><pre class="highlight shell tab-shell"><code><span class="c"># With shell, you can just pass the correct header with each request</span>
+curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/auth/register/'</span> <span class="se">\</span>
+<span class="nt">--data-raw</span> <span class="s1">'{
+        "username": "JohnDoe",
+        "password": "asd123",   
+        "password2": "asd123",
+        "email": "john@doe.com"
+</span></code></pre></div><div class="highlight"><pre class="highlight javascript tab-javascript"><code><span class="kd">var</span> <span class="nx">settings</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">url</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">http://localhost:8000/api/auth/register/</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">method</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">POST</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">timeout</span><span class="dl">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">data</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">{</span><span class="se">\n\t\"</span><span class="s2">username</span><span class="se">\"</span><span class="s2">: </span><span class="se">\"</span><span class="s2">JohnDoe</span><span class="se">\"</span><span class="s2">,</span><span class="se">\n\t\"</span><span class="s2">password</span><span class="se">\"</span><span class="s2">: </span><span class="se">\"</span><span class="s2">asd123</span><span class="se">\"</span><span class="s2">,</span><span class="se">\t\n\t\"</span><span class="s2">password2</span><span class="se">\"</span><span class="s2">: </span><span class="se">\"</span><span class="s2">asd123</span><span class="se">\"</span><span class="s2">,</span><span class="se">\n\t\"</span><span class="s2">email</span><span class="se">\"</span><span class="s2">: </span><span class="se">\"</span><span class="s2">john@doe.com</span><span class="se">\"\n</span><span class="s2">}</span><span class="se">\n</span><span class="dl">"</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">settings</span><span class="p">).</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">response</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>This API counts with the facility of a direct registry method.
+Required parameters:</p>
+
+<p><code>username: JohnDoe</code></p>
+
+<p><code>password: asd123</code></p>
+
+<p><code>password2: asd123</code></p>
+
+<p><code>email: john@doe.com</code></p>
+<h2 id='log-in'>Log In</h2><div class="highlight"><pre class="highlight python tab-python"><code>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/auth/log_in/"</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="s">"{</span><span class="se">\n\t\"</span><span class="s">username</span><span class="se">\"</span><span class="s">: </span><span class="se">\"</span><span class="s">JohnDoe</span><span class="se">\"</span><span class="s">,</span><span class="se">\n\t\"</span><span class="s">password</span><span class="se">\"</span><span class="s">: </span><span class="se">\"</span><span class="s">asd123</span><span class="se">\"\n</span><span class="s">}</span><span class="se">\n</span><span class="s">"</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">request</span><span class="p">(</span><span class="s">"POST"</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="p">)</span>
+
+</code></pre></div><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/auth/log_in/'</span> <span class="se">\</span>
+<span class="nt">--data-raw</span> <span class="s1">'{
+    "username": "JohnDoe",
+    "password": "asd123"
+}
+'</span>
+</code></pre></div><div class="highlight"><pre class="highlight javascript tab-javascript"><code>
+<span class="kd">var</span> <span class="nx">settings</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">url</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">http://localhost:8000/api/auth/log_in/</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">method</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">POST</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">timeout</span><span class="dl">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">data</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">{</span><span class="se">\n\t\"</span><span class="s2">username</span><span class="se">\"</span><span class="s2">: </span><span class="se">\"</span><span class="s2">JohnDoe</span><span class="se">\"</span><span class="s2">,</span><span class="se">\n\t\"</span><span class="s2">password</span><span class="se">\"</span><span class="s2">: </span><span class="se">\"</span><span class="s2">asd123</span><span class="se">\"\n</span><span class="s2">}</span><span class="se">\n</span><span class="dl">"</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">settings</span><span class="p">).</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">response</span><span class="p">);</span>
+<span class="p">});</span>
+
+</code></pre></div>
+<p>If you have already registerd as an user you can just log in using the API.</p>
+
+<p>Required parameters:</p>
+
+<p><code>username: JohnDoe</code></p>
+
+<p><code>password: asd123</code></p>
+<h2 id='refresh'>Refresh</h2><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/auth/refresh/"</span>
+<span class="n">refresh_token</span> <span class="o">=</span> <span class="c1">##obtained from the log_in request
+</span>
+<span class="n">refresh</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span> <span class="p">(</span>
+    <span class="n">url</span><span class="p">,</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">'refresh'</span> <span class="p">:</span> <span class="n">refresh_token</span><span class="p">}</span>
+<span class="p">)</span>
+<span class="c1">## and now the access token is:
+</span><span class="n">refresh</span><span class="p">.</span><span class="n">json</span><span class="p">[</span><span class="s">"access"</span><span class="p">]</span>
+</code></pre></div>
+<p>In order to refresh the database of the Flapjack API you need to get a refresh token from the log in request.</p>
+<h1 id='registry'>Registry</h1>
+<blockquote>
+<p>In order to register data you should have to be loged in using the API.</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="n">model</span> <span class="o">=</span> <span class="c1">## your desire model.
+</span><span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s">'http://localhost:8000/api/</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s">/'</span>
+<span class="n">access_token</span> <span class="o">=</span> <span class="c1">## given by the log in request.
+</span><span class="n">kwargs</span> <span class="o">=</span> <span class="c1">## parameters of the model.
+</span><span class="n">Id</span> <span class="o">=</span> <span class="c1">### The ID of the data that you want to delete or patch.
+</span>
+<span class="c1">### To post data
+</span><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">,</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s">'Authorization'</span> <span class="p">:</span> <span class="s">'Bearer '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">access_token</span><span class="p">)},</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">kwards</span>
+<span class="p">)</span>
+
+<span class="c1">### To get data
+</span><span class="n">info</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">get</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">,</span> 
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s">'Authorization'</span> <span class="p">:</span> <span class="s">'Bearer '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">acces_token</span><span class="p">)},</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">kwargs</span>
+<span class="p">)</span>
+<span class="c1">### To patch data
+</span><span class="n">patch</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">patch</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">+</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s">/'</span><span class="p">,</span>
+    <span class="n">headers</span><span class="o">=</span> <span class="p">{</span><span class="s">'Authorization'</span> <span class="p">:</span> <span class="s">'Bearer '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">access_token</span><span class="p">)},</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">kwargs</span>
+<span class="p">)</span>
+
+<span class="c1">### To delete data
+</span>
+<span class="n">delete</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">delete</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">+</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">Id</span><span class="si">}</span><span class="s">/'</span><span class="p">,</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s">'Authorization'</span> <span class="p">:</span> <span class="s">'Bearer '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">access_token</span><span class="p">)}</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>The regestry endpoint contains a way to upload and obtain data using the Flapjack REST API. As a way to further explain how this endpoint works firlty we are going to show the base code to contact the REST API, and in the next subsection we will explain the different models where you can upload and retrieve data.</p>
+
+<p>When you do a post request to the Flapjack API, you will upload your data into de database. On other hand, when you do a get request to the Flapjack API you will be filtering the actual data and returning those models that match the filter criteria. The delete request delete a certain data from the database by the id of the model that you post. And finally, patch is used to update the data of a certain model posted in Flapjack.</p>
+<h2 id='study'>Study</h2>
+<p>Study refers to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.</p>
+
+<p>Flapjack APi allows you to get the totallity of studies, search for an specific study and filter the studies by query parameters.</p>
+<h3 id='query-parameters'>Query parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>Refers to the name given to the study</td>
+</tr>
+<tr>
+<td>description</td>
+<td>The description of the Study</td>
+</tr>
+<tr>
+<td>doi</td>
+<td>The doi of the study</td>
+</tr>
+<tr>
+<td>owner</td>
+<td>The owner of the study</td>
+</tr>
+<tr>
+<td>public</td>
+<td>Boolean that indicates whether the study is public or private</td>
+</tr>
+</tbody></table>
+<h2 id='assays'>Assays</h2>
+<p>The flapjack API also gives you the possibility to analize the assays that are currienly on the server alowing you to filter them in order to obtain those that you desire.</p>
+<h3 id='query-parameters-2'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>study</td>
+<td>Name of the associated study</td>
+</tr>
+<tr>
+<td>id</td>
+<td>ID given to the assay</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>Temperature of development of the assay</td>
+</tr>
+<tr>
+<td>machine</td>
+<td>Machine used for the assay</td>
+</tr>
+<tr>
+<td>study</td>
+<td>Number of the assay in an specific study</td>
+</tr>
+</tbody></table>
+<h2 id='dna'>DNA</h2>
+<p>To look for a certain DNA.</p>
+<h3 id='query-parameters-3'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Owner of the DNA</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the DNA</td>
+</tr>
+<tr>
+<td>sboluri</td>
+<td>SBOLURI of the DNA</td>
+</tr>
+</tbody></table>
+<h2 id='media'>Media</h2>
+<p>The Flapjack API allows you to look for a certain media in the database. </p>
+<h3 id='query-parameters-4'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>owner of the media</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the media</td>
+</tr>
+<tr>
+<td>description</td>
+<td>Description of the media</td>
+</tr>
+</tbody></table>
+<h2 id='strain'>Strain</h2>
+<p>There is the possibility to look for an strain in the server in order to analize it.</p>
+<h3 id='query-parameters-5'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Name of the owner of the data of the strain</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the strain</td>
+</tr>
+<tr>
+<td>description</td>
+<td>Description of the strain</td>
+</tr>
+</tbody></table>
+<h2 id='chemical'>Chemical</h2><h3 id='query-parameters-6'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Name of the owner of the chemical data</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the chemical</td>
+</tr>
+<tr>
+<td>description</td>
+<td>Description of the chemical</td>
+</tr>
+<tr>
+<td>pubchemid</td>
+<td>Pubchem id of the chemical</td>
+</tr>
+</tbody></table>
+<h2 id='supplement'>Supplement</h2><h3 id='query-parameters-7'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Name of the owner of the data</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the certiain suplement</td>
+</tr>
+<tr>
+<td>chemical</td>
+<td>Chemicals used in the suplement</td>
+</tr>
+<tr>
+<td>concentration</td>
+<td>Concentration of the chemicals (Is the concentration of the chemicals or suplement???)</td>
+</tr>
+</tbody></table>
+<h2 id='vector'>Vector</h2><h3 id='query-parameters-8'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Name of the owner of the data of the query</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the vector</td>
+</tr>
+<tr>
+<td>dnas</td>
+<td>DNAs conteined in the vector</td>
+</tr>
+</tbody></table>
+<h2 id='sample'>Sample</h2><h3 id='query-parameters-9'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>assay</td>
+<td>Assays used in the sample</td>
+</tr>
+<tr>
+<td>media</td>
+<td>Media used in the sample</td>
+</tr>
+<tr>
+<td>strain</td>
+<td>Strain utilised in the sample</td>
+</tr>
+<tr>
+<td>vector</td>
+<td>Vector that was used in the sample</td>
+</tr>
+<tr>
+<td>supplements</td>
+<td>Supplement utilised in the sample</td>
+</tr>
+<tr>
+<td>row</td>
+<td>???</td>
+</tr>
+<tr>
+<td>col</td>
+<td>???</td>
+</tr>
+</tbody></table>
+<h2 id='signal'>Signal</h2><h3 id='query-parameters-10'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Owner of the signal data</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the signal data</td>
+</tr>
+<tr>
+<td>description</td>
+<td>Description of the signal data</td>
+</tr>
+<tr>
+<td>color</td>
+<td>Color of the signal utilized</td>
+</tr>
+</tbody></table>
+<h2 id='measurement'>Measurement</h2><h3 id='query-parameters-11'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>sample</td>
+<td>Sample that is associated with this measurement</td>
+</tr>
+<tr>
+<td>signal</td>
+<td>Signal associated with this measurement</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Value of the measurement</td>
+</tr>
+<tr>
+<td>time</td>
+<td>Time measurement</td>
+</tr>
+</tbody></table>
+<h1 id='example-of-the-workflow-rest-api'>Example of the workflow (REST API)</h1>
+<p>Now we are going to exemplify how the workflow of the Flapjack REST API works.</p>
+<h2 id='registry-2'>Registry</h2><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="n">url</span><span class="o">=</span> <span class="s">"http://localhost:8000/api/auth/register/"</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">"username"</span><span class="o">=</span><span class="s">"flapjack_test1"</span><span class="p">,</span>
+    <span class="s">"password"</span><span class="o">=</span><span class="s">"flapjack_test2"</span><span class="p">,</span>
+    <span class="s">"password2"</span><span class="o">=</span><span class="s">"flapjack_test2"</span><span class="p">,</span>
+    <span class="s">"email"</span><span class="o">=</span><span class="s">"flapjack_test@test.com"</span>
+<span class="p">}</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span> <span class="n">payload</span><span class="p">)</span>
+</code></pre></div>
+<p>Firstly we have to register to Flapjack. For this you have to create your credentials, especificaly the <code>username</code>, <code>password</code> (you have to repeat it in order to comfirme it), and <code>email</code>.</p>
+<h2 id='log-in-2'>Log in</h2><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/auth/log_in/"</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">"username"</span><span class="p">:</span><span class="s">"flapjack_test1"</span><span class="p">,</span>
+    <span class="s">"password"</span><span class="p">:</span><span class="s">"flapjack_test2"</span>
+<span class="p">}</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">,</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span><span class="p">,</span> 
+    <span class="n">data</span><span class="o">=</span> <span class="n">payload</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>If you are already registered in Flapjack you can log in to it using your <code>username</code> and <code>password</code>.</p>
+<h2 id='upload-data'>Upload data</h2><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">json</span> 
+
+<span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/"</span>
+<span class="c1">## Firstly we have to log in 
+</span><span class="n">login</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">"username"</span><span class="p">:</span> <span class="s">"flapjack_test1"</span><span class="p">,</span>
+    <span class="s">"password"</span><span class="p">:</span> <span class="s">"flapjack_test2"</span>
+<span class="p">}</span>
+
+<span class="n">headers</span><span class="o">=</span><span class="p">{}</span>
+
+<span class="n">log_in</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">+</span><span class="s">"auth/log_in/"</span><span class="p">,</span> 
+    <span class="n">headers</span><span class="o">=</span> <span class="n">headers</span><span class="p">,</span> 
+    <span class="n">data</span><span class="o">=</span><span class="n">login</span>
+<span class="p">).</span><span class="n">json</span><span class="p">()</span>
+<span class="c1">## After this you have to refresh
+</span>
+<span class="n">refresh_token</span> <span class="o">=</span> <span class="n">log_in</span><span class="p">[</span><span class="s">'refresh'</span><span class="p">]</span>
+
+<span class="n">refresh</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">url</span> <span class="o">+</span> <span class="s">"auth/refresh/"</span><span class="p">,</span> 
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">"refresh"</span> <span class="p">:</span> <span class="n">refresh_token</span><span class="p">}</span>
+<span class="p">).</span><span class="n">json</span><span class="p">()</span>
+<span class="c1">## Now we can upload our data to the server
+</span>
+<span class="n">access_token</span><span class="o">=</span><span class="n">log_in</span><span class="p">[</span><span class="s">"access"</span><span class="p">]</span>
+<span class="n">model</span> <span class="o">=</span> <span class="s">"study"</span>
+<span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+    <span class="s">"name"</span><span class="p">:</span><span class="s">"test-study1"</span><span class="p">,</span>
+    <span class="s">"description"</span><span class="p">:</span><span class="s">"This is an study to test the Flapjack REST API"</span><span class="p">,</span>
+    <span class="s">"owner"</span><span class="p">:</span><span class="s">"flapjack_test1"</span><span class="p">,</span>
+    <span class="s">"public"</span><span class="p">:</span><span class="bp">False</span>
+<span class="p">}</span>
+<span class="n">post</span><span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">+</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s">/'</span><span class="p">,</span>
+    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s">"Authorization"</span><span class="p">:</span> <span class="s">'Bearer '</span> <span class="o">+</span> <span class="n">access_token</span><span class="p">},</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">kwargs</span>
+<span class="p">)</span>
+</code></pre></div>
+<blockquote>
+<p>The repsonse to the post requests is the following
+<code>json
+[
+    {
+        &#39;id&#39;: 3, 
+        &#39;is_owner&#39;: True, 
+        &#39;shared_with&#39;: [], 
+        &#39;name&#39;: &#39;test-study&#39;, 
+        &#39;description&#39;: &#39;This is an study to test the Flapjack REST API&#39;, 
+        &#39;doi&#39;: &#39;&#39;, 
+        &#39;public&#39;: False
+    }
+]
+</code>
+Now imagine that you want to upload an study based with the following parameters:
+<code>Name: test-study1</code>
+<code>Description: This is a study to test the Flapjack REST API.</code>
+<code>owner: flapjack_test1</code>
+<code>Public: False</code></p>
+</blockquote>
+
+<p>To do this you need to post this data to the Flapjack REST API. The code to do this is in the right section.</p>
+<h2 id='get-data'>Get Data</h2>
+<p>Now as we upload data to Flapjack we can also get data from the database of Flapjack. In order to do this we need to </p>
+<h1 id='analysis'>Analysis</h1>
+<blockquote>
+<p>To connect to the websocket</p>
+</blockquote>
+<div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">websockets</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">params</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+<span class="n">uri</span> <span class="o">=</span> <span class="s">'ws://localhost:8000/ws/analysis/analysis?token='</span><span class="o">+</span><span class="n">access_token</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">"type"</span> <span class="p">:</span> <span class="s">"analysis"</span><span class="p">,</span>
+    <span class="s">"parameters"</span> <span class="p">:</span> <span class="n">params</span>
+<span class="p">}</span>
+
+<span class="k">with</span> <span class="n">websockets</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span> <span class="k">as</span> <span class="n">websocket</span><span class="p">:</span>
+    <span class="n">websocket</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
+    <span class="n">response_json</span> <span class="o">=</span> <span class="n">webscket</span><span class="p">.</span><span class="n">recv</span><span class="p">()</span>
+    <span class="n">response</span> <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response_json</span><span class="p">)</span>
+</code></pre></div>
+<p>This endpoint, unlike the past endopoints, corresponds to a websocket, the analysis is in charge of developing most of the calculations and the result is a .json file that can be interpreted as a pandas data frame. </p>
+
+<p>The <code>params</code> variable refers to the different kinds of analysis and data provided to the analysis websocket.</p>
+
+<p><strong>Types of analysis</strong></p>
+<h2 id='velocity'>Velocity</h2><h3 id='query-parameters-12'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+<tr>
+<td>pre_smoothing</td>
+<td>Savitsky-Golay filter parameter. Is the initial smoothing parameter.</td>
+</tr>
+<tr>
+<td>post_smoothing</td>
+<td>Savitsky-Golay filter parameter. Is the final smoothing parameter.</td>
+</tr>
+</tbody></table>
+<h2 id='expression-rate-indirect'>Expression Rate (Indirect)</h2><h3 id='query-parameters-13'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+<tr>
+<td>density_df</td>
+<td>DataFrame with density measurements.</td>
+</tr>
+<tr>
+<td>pre_smoothing</td>
+<td>Savitsky-Golay filter parameter. Is the initial smoothing parameter.</td>
+</tr>
+<tr>
+<td>post_smoothing</td>
+<td>Savitsky-Golay filter parameter. Is the final smoothing parameter.</td>
+</tr>
+</tbody></table>
+<h2 id='expression-rate-direct'>Expression Rate (Direct)</h2><h3 id='query-parameters-14'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+<tr>
+<td>density_df</td>
+<td>DataFrame with density (biomass) measurements.</td>
+</tr>
+<tr>
+<td>degr</td>
+<td>Degradation rate of the reporter protein.</td>
+</tr>
+<tr>
+<td>eps_L</td>
+<td>Insignificant value for model fitting.</td>
+</tr>
+</tbody></table>
+<h2 id='expression-rate-inverse'>Expression Rate (Inverse)</h2><h3 id='query-parameters-15'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+<tr>
+<td>density_df</td>
+<td>DataFrame with density (biomass) measurements.</td>
+</tr>
+<tr>
+<td>degr</td>
+<td>Degradation rate of the reporter protein.</td>
+</tr>
+<tr>
+<td>eps</td>
+<td>Tikhoniv regularization parameter.</td>
+</tr>
+<tr>
+<td>n_gaussians</td>
+<td>Number of gaussians in basis.</td>
+</tr>
+</tbody></table>
+<h2 id='mean-expression'>Mean Expression</h2>
+<p>This analysis returns a data frame containing the mean values for each sample.</p>
+<h3 id='query-parameters-16'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+</tbody></table>
+<h2 id='max-expression'>Max expression</h2>
+<p>This analysis returns a data frame containing the max values for each sample.</p>
+<h3 id='query-parameters-17'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+</tbody></table>
+<h2 id='mean-velocity'>Mean Velocity</h2>
+<p>This analysis returns a data frame containing the mean velocity for each sample.</p>
+<h3 id='query-parameters-18'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+</tbody></table>
+<h2 id='max-velocity'>Max Velocity</h2>
+<p>This analysis returns a data frame containing the max velocity for each sample.</p>
+<h3 id='query-parameters-19'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+</tbody></table>
+<h2 id='induction-curve'>Induction Curve</h2>
+<p><strong>Is this correct?</strong></p>
+<h3 id='query-parameters-20'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+</tbody></table>
+<h2 id='kymograph'>Kymograph</h2>
+<p><strong>This one is strange because it calls the past analysis.</strong></p>
+<h3 id='query-parameters-21'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+</tbody></table>
+<h2 id='heatmap'>Heatmap</h2><h3 id='query-parameters-22'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+</tbody></table>
+<h2 id='ratiometric-alpha'>Ratiometric Alpha</h2><h3 id='query-parameters-23'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+<tr>
+<td>bounds</td>
+<td>Tuple of list of min and max values for  Gompertz model parameters.</td>
+</tr>
+<tr>
+<td>density_df</td>
+<td>DataFrame containing biomass measurements.</td>
+</tr>
+<tr>
+<td>ndf</td>
+<td>Number of doubling times to extend exponential phase.</td>
+</tr>
+</tbody></table>
+<h2 id='ratiometric-rho'>Ratiometric Rho</h2><h3 id='query-parameters-24'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>df</td>
+<td>DataFrame containing the data to analyze.</td>
+</tr>
+<tr>
+<td>bounds</td>
+<td>Tuple of list of min and max values for  Gompertz model parameters.</td>
+</tr>
+<tr>
+<td>density_df</td>
+<td>DataFrame containing biomass measurements.</td>
+</tr>
+<tr>
+<td>ref_df</td>
+<td>DataFrame containing reference measurements.</td>
+</tr>
+<tr>
+<td>ndf</td>
+<td>Number of doubling times to extend exponential phase.***</td>
+</tr>
+</tbody></table>
+<h1 id='plot'>Plot</h1>
+<p>Plot is an websocket endopoint of the Flapjack API. This endpoint generates json objects oriented to generate diffent plots (hence its name), this json object can be interpreted by the python package matplotLib.</p>
+
+      </div>
+      <div class="dark-box">
+      </div>
+    </div>
+  </body>
+</html>
