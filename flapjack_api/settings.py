@@ -79,6 +79,7 @@ DATABASES = {
         'PASSWORD': '123456',
         'HOST': 'db',
         'PORT': '5432',
+        'CONN_MAX_AGE': None,
     }
 }
 
