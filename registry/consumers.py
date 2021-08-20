@@ -8,9 +8,9 @@ from django.db.models import Q
 import openpyxl as opxl
 import numpy as np
 import pandas as pd
+import sbol3
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.db import database_sync_to_async
 # Scripts.
 from .upload import *
 from .models import *
@@ -25,23 +25,15 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
             "measurements",
             self.channel_name
         )
-    @database_sync_to_async
-    def get_data(self, params, signals):
-        s = get_samples(params)
-        df = get_measurements(s, signals)
-        return df
-
-    @database_sync_to_async
-    def upload(self, df, sample, signal):
-        upload_measurements(df, sample, signal)
-
+        
     async def receive(self, text_data):
         data = json.loads(text_data)
         if data['type'] == 'measurements':
             params = data['parameters']
             signals = params.get('signal')
             analysis_params = params.get('analysis')
-            df = await self.get_data(params, signals)
+            s = get_samples(params)
+            df = get_measurements(s, signals)
             await self.send(text_data=json.dumps({
                 'type': 'measurements',
                 'data': df.to_json()
@@ -52,7 +44,7 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
             signal = params['signal']
             json_data = data['data']
             df = pd.read_json(json_data)
-            await self.upload(df, sample, signal)
+            upload_measurements(df, sample, signal)
             await self.send(text_data=json.dumps({
                 'type': 'upload',
                 'data': 'success'
@@ -65,10 +57,8 @@ class MeasurementsConsumer(AsyncWebsocketConsumer):
         )
         
 class UploadConsumer(AsyncWebsocketConsumer): 
-    #def __init__(self, scope, **kwargs):
-    def __init__(self, **kwargs):
-        #super(UploadConsumer, self).__init__(scope, **kwargs)
-        super(UploadConsumer, self).__init__(**kwargs)
+    def __init__(self, scope, **kwargs):
+        super(UploadConsumer, self).__init__(scope, **kwargs)
         # for most attrs is not necessary to declared them, it is  
         # for having an idea of which parameters the instance has
         self.columns = [x+str(y) for x in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] for y in range(1,13)]
@@ -89,8 +79,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
         )
 
     # TO DO: setup message receiving and disconnection
-    @database_sync_to_async
-    def _initialize_upload(self, data):
+    async def initialize_upload(self, data):
         print(f"initialize_upload DATA: {data}", flush=True)
         self.machine = data['machine']
         
@@ -103,16 +92,14 @@ class UploadConsumer(AsyncWebsocketConsumer):
         assay.save()
         self.assay_id = assay.id
 
-    async def initialize_upload(self, data):
-        await self._initialize_upload(data)
         # Send message for receiving file
         await self.send(text_data=json.dumps({
                 'type': 'ready_for_file',
                 'data': {'assay_id': self.assay_id}
             }))
 
-    @database_sync_to_async
-    def _read_binary(self, bin_data):
+
+    async def read_binary(self, bin_data):
         ## IF MACHINE SYNERGY
         if 'synergy' in self.machine.lower():
             # load workbook, sheet containing data and extract metadata information
@@ -129,7 +116,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
                     [dna for dna_list in dna_lists for dna in dna_list if dna not in empty_dna_names]
                     )
                 )
-            self.chem_names_file = [val for val in self.meta_dict.index if "chem" in val]
+            chem_names_file = [val for val in self.meta_dict.index if "chem" in val]
 
 
         ## IF MACHINE FLUOPI
@@ -148,15 +135,14 @@ class UploadConsumer(AsyncWebsocketConsumer):
 
         ## IF MACHINE BMG
 
-    async def read_binary(self, bin_data):
-        await self._read_binary(bin_data)
+
         ## SEND CORRECT DATA DEPENDING ON THE FILE
         # Ask for dna, chemicals and signals
         await self.send(text_data=json.dumps({
                 'type': 'input_requests',
                 'data': {
                     'dna': self.dna_names,
-                    'chemical': self.chem_names_file,
+                    'chemical': chem_names_file,
                     'signal': self.signal_names
                 }
             }))
@@ -519,3 +505,117 @@ class UploadConsumer(AsyncWebsocketConsumer):
             await self.progress_update(process_percent)
 
         Measurement.objects.bulk_create(measurements)
+
+class SBOLConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.accept()
+        await self.channel_layer.group_add(
+            "SBOL",
+            self.channel_name
+        )
+        
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        if data['type'] == 'download':
+            params = data['parameters']
+            signals = params.get('signal')
+            #analysis_params = params.get('analysis')
+            s = get_samples(params)
+            df = get_measurements(s, signals)
+            #build the example. See how roles and SBO works
+            #include all the controls
+
+           # params includes the query and I need to use it to obtain the name or id of the study, strain, etc
+           # 
+
+            sbol3.set_namespace('https://github.com/BuildACell/BioCRNPyler') #change
+
+            for media_id in params.get('media'):
+                media = sbol3.Component(Media.name(), sbol3.SBO_DNA)
+                media.roles = SO_Media #look for ontology role use tyto
+                medias = Media.objects().filter(media_id)
+                media.name = medias.name
+                media.description = medias.description
+                #review
+                if medias == None:
+                    print('No medias specified')
+
+            for strain_id in params.get('strain'):
+                strain = sbol3.Component(Strain.name(), sbol3.SBO_DNA)
+                strain.roles = SO_Strain #look for ontology role
+                strain.name = Strain.name
+                strain.description = Strain.description()
+
+            supplement = sbol3.Component(Supplement.name(), sbol3.SBO_DNA)
+            supplement.roles = SO_smallchemicals #look for ontology role
+            supplement.name = Supplement.name
+            supplement.description = Supplement.description()
+
+            dna= asd
+
+            vector = sbol3.Component(Vector.name(), sbol3.SBO_DNA)
+            vector.roles = SO_Plasmid #look for ontology role
+            vector.name = Vector.name
+            vector.description = Vector.description()
+
+            media_sc = sbol3.SubComponent(media)
+            strain_sc = sbol3.SubComponent(strain)
+            supplemet_sc = sbol3.SubComponent(supplement)
+            vector_sc = sbol3.SubComponent(vector)
+
+            measurements= qwe
+
+            sample = sbol3.Component(Sample.name(), sbol3.SBO_DNA)
+            sample.roles = SO_sample #look for ontology role
+            sample.name = Sample.name
+            sample.description = Sample.description
+            #add sc
+
+            assay = sbol3.ExperimentalData(Assay.name(), sbol3.SBO_DNA) # experimental data
+            assay.roles = SO_assay #look for ontology role
+            assay.name = Assay.name
+            assay.description = Assay.description
+            #add samples
+
+            study = sbol3.Experiment(Study.name(), sbol3.SBO_DNA)
+            study.roles = SO_Study #look for ontology role
+            study.name = Study.name
+            study.description =Study.description
+            #add assays
+            
+            doc = sbol3.Document()
+
+            # TODO: Enhancement: doc.addAll([ptet, op1, utr1, ...])
+            doc.add(media)
+            doc.add(strain)
+            doc.add(supplement)
+            doc.add(vector)
+            doc.add(sample)
+            doc.add(assay)
+            doc.add(study)
+            xml_string = doc.write_string('xml') 
+
+
+
+            await self.send(text_data=json.dumps({
+                'type': 'sbol',
+                'data': xml_string
+            }))
+            )
+        elif data['type'] == 'upload':
+            params = data['parameters']
+            sample = params['sample']
+            signal = params['signal']
+            json_data = data['data']
+            df = pd.read_json(json_data)
+            upload_measurements(df, sample, signal)
+            await self.send(text_data=json.dumps({
+                'type': 'upload',
+                'data': 'success'
+            }))
+
+    async def disconnect(self, message):
+        await self.channel_layer.group_discard(
+            "SBOL",
+            self.channel_name
+        )
