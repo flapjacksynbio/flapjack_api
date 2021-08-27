@@ -9,6 +9,7 @@ pylint>=2.5.2
 pylint-django>=2.0.15
 channels==3 #==2.4.0
 channels-redis
+asgiref==3.3.4
 numpy
 scipy
 pandas
