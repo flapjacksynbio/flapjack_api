@@ -495,6 +495,7 @@ Now as we upload data to Flapjack we can also get data from the database of Flap
 
 
 For more examples you can visit our [GitHub repository](https://github.com/SynBioUC/flapjack_api).
+
 # Analysis
 >To connect to the websocket
 
@@ -521,6 +522,8 @@ The `params` variable refers to the different kinds of analysis and data provide
 
 **Types of analysis**
 ## Velocity
+
+
 
 ### Query Parameters
 
