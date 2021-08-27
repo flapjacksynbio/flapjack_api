@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>API Documentation</title>
+    <title>API Reference</title>
 
     <style media="screen">
       .highlight table td { padding: 5px; }
@@ -284,11 +284,14 @@
     </style>
     <link href="stylesheets/screen-c9d8fa83.css" rel="stylesheet" media="screen" />
     <link href="stylesheets/print-953e3353.css" rel="stylesheet" media="print" />
-      <script src="javascripts/all_nosearch-8f5ea5a5.js"></script>
+      <script src="javascripts/all-a9fde460.js"></script>
 
+    <script>
+      $(function() { setupCodeCopy(); });
+    </script>
   </head>
 
-  <body class="index" data-languages="[]">
+  <body class="index" data-languages="[&quot;shell&quot;,&quot;python&quot;,&quot;javascript&quot;]">
     <a href="#" id="nav-button">
       <span>
         NAV
@@ -297,6 +300,15 @@
     </a>
     <div class="toc-wrapper">
       <img src="images/logo-01e575f2.png" class="logo" alt="" />
+        <div class="lang-selector">
+              <a href="#" data-language-name="shell">shell</a>
+              <a href="#" data-language-name="python">python</a>
+              <a href="#" data-language-name="javascript">javascript</a>
+        </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
       <ul id="toc" class="toc-list-h1">
           <li>
             <a href="#introduction" class="toc-h1 toc-link" data-title="Introduction">Introduction</a>
@@ -328,6 +340,9 @@
                     <a href="#dna" class="toc-h2 toc-link" data-title="DNA">DNA</a>
                   </li>
                   <li>
+                    <a href="#vector" class="toc-h2 toc-link" data-title="Vector">Vector</a>
+                  </li>
+                  <li>
                     <a href="#media" class="toc-h2 toc-link" data-title="Media">Media</a>
                   </li>
                   <li>
@@ -338,9 +353,6 @@
                   </li>
                   <li>
                     <a href="#supplement" class="toc-h2 toc-link" data-title="Supplement">Supplement</a>
-                  </li>
-                  <li>
-                    <a href="#vector" class="toc-h2 toc-link" data-title="Vector">Vector</a>
                   </li>
                   <li>
                     <a href="#sample" class="toc-h2 toc-link" data-title="Sample">Sample</a>
@@ -416,8 +428,26 @@
           </li>
           <li>
             <a href="#plot" class="toc-h1 toc-link" data-title="Plot">Plot</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#normalize" class="toc-h2 toc-link" data-title="Normalize">Normalize</a>
+                  </li>
+                  <li>
+                    <a href="#subplots" class="toc-h2 toc-link" data-title="Subplots">Subplots</a>
+                  </li>
+                  <li>
+                    <a href="#lines-markers" class="toc-h2 toc-link" data-title="Lines/Markers">Lines/Markers</a>
+                  </li>
+                  <li>
+                    <a href="#plot-2" class="toc-h2 toc-link" data-title="Plot">Plot</a>
+                  </li>
+              </ul>
           </li>
       </ul>
+        <ul class="toc-footer">
+            <li><a href='http://flapjack.rudge-lab.org/'>Sign Up to Flapjack</a></li>
+            <li><a href='https://github.com/slatedocs/slate'>Documentation Powered by Slate</a></li>
+        </ul>
     </div>
     <div class="page-wrapper">
       <div class="dark-box"></div>
@@ -561,9 +591,7 @@ Required parameters:</p>
 
 <p>When you do a post request to the Flapjack API, you will upload your data into de database. On other hand, when you do a get request to the Flapjack API you will be filtering the actual data and returning those models that match the filter criteria. The delete request delete a certain data from the database by the id of the model that you post. And finally, patch is used to update the data of a certain model posted in Flapjack.</p>
 <h2 id='study'>Study</h2>
-<p>Study refers to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.</p>
-
-<p>Flapjack APi allows you to get the totallity of studies, search for an specific study and filter the studies by query parameters.</p>
+<p>This corresponds to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.</p>
 <h3 id='query-parameters'>Query parameters</h3>
 <table><thead>
 <tr>
@@ -593,7 +621,7 @@ Required parameters:</p>
 </tr>
 </tbody></table>
 <h2 id='assays'>Assays</h2>
-<p>The flapjack API also gives you the possibility to analize the assays that are currienly on the server alowing you to filter them in order to obtain those that you desire.</p>
+<p>The assays refears to measurement of experiments, including replicates and varying experimental conditions, performed to explore different aspects of the study.</p>
 <h3 id='query-parameters-2'>Query Parameters</h3>
 <table><thead>
 <tr>
@@ -623,7 +651,7 @@ Required parameters:</p>
 </tr>
 </tbody></table>
 <h2 id='dna'>DNA</h2>
-<p>To look for a certain DNA.</p>
+<p>DNA corresponds to the DNA parts that, later on, will compose a vector that can be used in the assay.</p>
 <h3 id='query-parameters-3'>Query Parameters</h3>
 <table><thead>
 <tr>
@@ -644,9 +672,31 @@ Required parameters:</p>
 <td>SBOLURI of the DNA</td>
 </tr>
 </tbody></table>
-<h2 id='media'>Media</h2>
-<p>The Flapjack API allows you to look for a certain media in the database. </p>
+<h2 id='vector'>Vector</h2>
+<p>The vector describes the synthetic DNAs encoding a genetic circuit, including links to part composition and sequence via the corresponding SynBioHub URIs.</p>
 <h3 id='query-parameters-4'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Name of the owner of the data of the query</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the vector</td>
+</tr>
+<tr>
+<td>dnas</td>
+<td>DNAs conteined in the vector</td>
+</tr>
+</tbody></table>
+<h2 id='media'>Media</h2>
+<p>The media corresponds to the composition of the substrate that drives the genetic circuit, media in the case of live cell assays, or extract for cell-free experiments.</p>
+<h3 id='query-parameters-5'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -667,8 +717,8 @@ Required parameters:</p>
 </tr>
 </tbody></table>
 <h2 id='strain'>Strain</h2>
-<p>There is the possibility to look for an strain in the server in order to analize it.</p>
-<h3 id='query-parameters-5'>Query Parameters</h3>
+<p>The strains refers to the chassis organism, if any, hosting the genetic circuit.</p>
+<h3 id='query-parameters-6'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -688,7 +738,9 @@ Required parameters:</p>
 <td>Description of the strain</td>
 </tr>
 </tbody></table>
-<h2 id='chemical'>Chemical</h2><h3 id='query-parameters-6'>Query Parameters</h3>
+<h2 id='chemical'>Chemical</h2>
+<p>This registry refers to the chemical(s) that compose the supplement used during the experiments used to obtain data.</p>
+<h3 id='query-parameters-7'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -712,7 +764,9 @@ Required parameters:</p>
 <td>Pubchem id of the chemical</td>
 </tr>
 </tbody></table>
-<h2 id='supplement'>Supplement</h2><h3 id='query-parameters-7'>Query Parameters</h3>
+<h2 id='supplement'>Supplement</h2>
+<p>Supplemente is any supplementary chemicals that interact with components of the genetic circuit. It&#39;s compose of a serie of Chemical data objects.</p>
+<h3 id='query-parameters-8'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -736,27 +790,9 @@ Required parameters:</p>
 <td>Concentration of the chemicals (Is the concentration of the chemicals or suplement???)</td>
 </tr>
 </tbody></table>
-<h2 id='vector'>Vector</h2><h3 id='query-parameters-8'>Query Parameters</h3>
-<table><thead>
-<tr>
-<th>Key</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>owner</td>
-<td>Name of the owner of the data of the query</td>
-</tr>
-<tr>
-<td>name</td>
-<td>Name of the vector</td>
-</tr>
-<tr>
-<td>dnas</td>
-<td>DNAs conteined in the vector</td>
-</tr>
-</tbody></table>
-<h2 id='sample'>Sample</h2><h3 id='query-parameters-9'>Query Parameters</h3>
+<h2 id='sample'>Sample</h2>
+<p>Sample orresponds to the basic unit that is subject to measurement, for example a colony or a well in a microplate.</p>
+<h3 id='query-parameters-9'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -792,7 +828,9 @@ Required parameters:</p>
 <td>???</td>
 </tr>
 </tbody></table>
-<h2 id='signal'>Signal</h2><h3 id='query-parameters-10'>Query Parameters</h3>
+<h2 id='signal'>Signal</h2>
+<p>Signal is the subject of measurements, for example a fluorescence channel with given filter bandwidths.</p>
+<h3 id='query-parameters-10'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -816,7 +854,9 @@ Required parameters:</p>
 <td>Color of the signal utilized</td>
 </tr>
 </tbody></table>
-<h2 id='measurement'>Measurement</h2><h3 id='query-parameters-11'>Query Parameters</h3>
+<h2 id='measurement'>Measurement</h2>
+<p>The messurement is the value of the raw measurement recorded for a particular sample during an assay at a particular time.</p>
+<h3 id='query-parameters-11'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -936,8 +976,50 @@ Now imagine that you want to upload an study based with the following parameters
 </blockquote>
 
 <p>To do this you need to post this data to the Flapjack REST API. The code to do this is in the right section.</p>
-<h2 id='get-data'>Get Data</h2>
-<p>Now as we upload data to Flapjack we can also get data from the database of Flapjack. In order to do this we need to </p>
+<h2 id='get-data'>Get Data</h2><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/"</span>
+<span class="c1">## Firstly we have to log in 
+</span><span class="n">login</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">"username"</span><span class="p">:</span> <span class="s">"flapjack_test1"</span><span class="p">,</span>
+    <span class="s">"password"</span><span class="p">:</span> <span class="s">"flapjack_test2"</span>
+<span class="p">}</span>
+
+<span class="n">headers</span><span class="o">=</span><span class="p">{}</span>
+
+<span class="n">log_in</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">+</span><span class="s">"auth/log_in/"</span><span class="p">,</span> 
+    <span class="n">headers</span><span class="o">=</span> <span class="n">headers</span><span class="p">,</span> 
+    <span class="n">data</span><span class="o">=</span><span class="n">login</span>
+<span class="p">).</span><span class="n">json</span><span class="p">()</span>
+<span class="c1">## After this you have to refresh
+</span>
+<span class="n">refresh_token</span> <span class="o">=</span> <span class="n">log_in</span><span class="p">[</span><span class="s">'refresh'</span><span class="p">]</span>
+
+<span class="n">refresh</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">url</span> <span class="o">+</span> <span class="s">"auth/refresh/"</span><span class="p">,</span> 
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">"refresh"</span> <span class="p">:</span> <span class="n">refresh_token</span><span class="p">}</span>
+<span class="p">).</span><span class="n">json</span><span class="p">()</span>
+
+<span class="c1">## Assuming that you have uploaded a study previously
+</span>
+<span class="n">access_token</span><span class="o">=</span><span class="n">log_in</span><span class="p">[</span><span class="s">"access"</span><span class="p">]</span>
+<span class="n">model</span> <span class="o">=</span> <span class="s">"study"</span>
+<span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+    <span class="s">"name"</span><span class="p">:</span><span class="s">"test-study1"</span><span class="p">,</span>
+    <span class="s">"description"</span><span class="p">:</span><span class="s">"This is an study to test the Flapjack REST API"</span><span class="p">,</span>
+    <span class="s">"owner"</span><span class="p">:</span><span class="s">"flapjack_test1"</span><span class="p">,</span>
+    <span class="s">"public"</span><span class="p">:</span><span class="bp">False</span>
+<span class="p">}</span>
+<span class="n">get</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">+</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s">/'</span><span class="p">,</span>
+    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s">"Authorization"</span><span class="p">:</span> <span class="s">'Bearer '</span> <span class="o">+</span> <span class="n">access_token</span><span class="p">},</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">kwargs</span>
+<span class="p">)</span>
+
+</code></pre></div>
+<p>Now as we upload data to Flapjack we can also get data from the database of Flapjack. In order to do this we need to follow up the following workflow.</p>
 <h1 id='analysis'>Analysis</h1>
 <blockquote>
 <p>To connect to the websocket</p>
@@ -1209,9 +1291,102 @@ Now imagine that you want to upload an study based with the following parameters
 </tbody></table>
 <h1 id='plot'>Plot</h1>
 <p>Plot is an websocket endopoint of the Flapjack API. This endpoint generates json objects oriented to generate diffent plots (hence its name), this json object can be interpreted by the python package matplotLib.</p>
+<h2 id='normalize'>Normalize</h2>
+<p>In order to normalize the data and plot it we have provided many different options.</p>
+<h3 id='query-parameters-25'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Temporal Mean</td>
+<td>Normalize the data by the temporal mean of the data.</td>
+</tr>
+<tr>
+<td>Mean/std</td>
+<td>Normalize the data by the mean of the date divided by the standar deviation.</td>
+</tr>
+<tr>
+<td>Min/Max</td>
+<td>Normalize the data by the cocient of the minimum and maximum values.</td>
+</tr>
+<tr>
+<td>None</td>
+<td>The data is not normalized.</td>
+</tr>
+</tbody></table>
+<h2 id='subplots'>Subplots</h2>
+<p>When making a plot you can select different subplots according to what best suits your needs. You can plot the different registry parameters.</p>
+<h3 id='query-parameters-26'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Signal</td>
+<td>The subplots are plotted from signal data.</td>
+</tr>
+<tr>
+<td>Study</td>
+<td>The subplots are plotted from study data.</td>
+</tr>
+<tr>
+<td>Assay</td>
+<td>The subplots are plotted from assay data.</td>
+</tr>
+<tr>
+<td>Vector</td>
+<td>The subplots are plotted from vector data.</td>
+</tr>
+<tr>
+<td>Media</td>
+<td>The subplots are plotted from media data.</td>
+</tr>
+<tr>
+<td>Strain</td>
+<td>The subplots are plotted from strain data.</td>
+</tr>
+<tr>
+<td>Supplemente</td>
+<td>The subplots are plotted from supplement data.</td>
+</tr>
+</tbody></table>
+<h2 id='lines-markers'>Lines/Markers</h2>
+<p>This refers to the curves you want to be shown in each of the plots. The query parameters are the same as the previously mentioned.</p>
+<h2 id='plot-2'>Plot</h2>
+<p>It corresponds to the detail you want to have in each of the curves.</p>
+<h3 id='query-parameters-27'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Mean</td>
+<td>The datail is in the mean of the curves.</td>
+</tr>
+<tr>
+<td>Mean +/- std</td>
+<td>The detail is in the Mean, max, minimum, and standar deviation of the data.</td>
+</tr>
+<tr>
+<td>All data points</td>
+<td>You plot all the points, not givin more detail to anyone.</td>
+</tr>
+</tbody></table>
 
       </div>
       <div class="dark-box">
+          <div class="lang-selector">
+                <a href="#" data-language-name="shell">shell</a>
+                <a href="#" data-language-name="python">python</a>
+                <a href="#" data-language-name="javascript">javascript</a>
+          </div>
       </div>
     </div>
   </body>
