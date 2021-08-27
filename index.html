@@ -453,7 +453,7 @@
       <div class="dark-box"></div>
       <div class="content">
         <h1 id='introduction'>Introduction</h1>
-<p>Flapjack is a data management and analysis tool for genetic circuit design. The system is implemented as a web app with a backend data registry and analysis engine accessible as a REST API</p>
+<p>Flapjack is a data management and analysis tool for genetic circuit design. The system is implemented as a web app with a backend data registry and analysis engine accessible as a REST API. This API is fully documented in the following <a href="https://github.com/SynBioUC/flapjack_api">GitHub Repository</a>, and also we have developed a python package for easier access to the Flapjack API, this package is available in it&#39;s <a href="https://github.com/SynBioUC/flapjack">GitHub Repository</a> and you can see the documentation in the following <a href="https://synbiouc.github.io/flapjack/">web page</a>.</p>
 <h1 id='authentication'>Authentication</h1><h2 id='register'>Register</h2>
 <blockquote>
 <p>To register in Flapjack, use this code:</p>
@@ -1020,6 +1020,8 @@ Now imagine that you want to upload an study based with the following parameters
 
 </code></pre></div>
 <p>Now as we upload data to Flapjack we can also get data from the database of Flapjack. In order to do this we need to follow up the following workflow.</p>
+
+<p>For more examples you can visit our <a href="https://github.com/SynBioUC/flapjack_api">GitHub repository</a>.</p>
 <h1 id='analysis'>Analysis</h1>
 <blockquote>
 <p>To connect to the websocket</p>
@@ -1065,7 +1067,9 @@ Now imagine that you want to upload an study based with the following parameters
 <td>Savitsky-Golay filter parameter. Is the final smoothing parameter.</td>
 </tr>
 </tbody></table>
-<h2 id='expression-rate-indirect'>Expression Rate (Indirect)</h2><h3 id='query-parameters-13'>Query Parameters</h3>
+<h2 id='expression-rate-indirect'>Expression Rate (Indirect)</h2>
+<p>The expression rate analysis refers to analyze the expression of the genes in a certain study. In this case, the analysis is done using an indirect method.</p>
+<h3 id='query-parameters-13'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -1089,7 +1093,9 @@ Now imagine that you want to upload an study based with the following parameters
 <td>Savitsky-Golay filter parameter. Is the final smoothing parameter.</td>
 </tr>
 </tbody></table>
-<h2 id='expression-rate-direct'>Expression Rate (Direct)</h2><h3 id='query-parameters-14'>Query Parameters</h3>
+<h2 id='expression-rate-direct'>Expression Rate (Direct)</h2>
+<p>This analysis of the expression rate is based on a direct method.</p>
+<h3 id='query-parameters-14'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -1113,7 +1119,9 @@ Now imagine that you want to upload an study based with the following parameters
 <td>Insignificant value for model fitting.</td>
 </tr>
 </tbody></table>
-<h2 id='expression-rate-inverse'>Expression Rate (Inverse)</h2><h3 id='query-parameters-15'>Query Parameters</h3>
+<h2 id='expression-rate-inverse'>Expression Rate (Inverse)</h2>
+<p>This expression rate analysis is based on a inverse method.</p>
+<h3 id='query-parameters-15'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
