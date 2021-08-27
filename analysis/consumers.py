@@ -37,12 +37,17 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+    @database_sync_to_async
+    def get_data(self, params, signals):
+        s = get_samples(params)
+        df = get_measurements(s, signals)
+        return df
+
     async def generate_data(self, event):
         params = event['params']
         analysis_params = params['analysis']
         signals = params.get('signal')
-        s = get_samples(params)
-        df = get_measurements(s, signals)
+        df = await self.get_data(params, signals)
         if analysis_params:
             analysis = Analysis(analysis_params, signals)
             await self.run_analysis(df, analysis)
