@@ -20,7 +20,7 @@ code_clipboard: true
 
 # Introduction
 
-Flapjack is a data management and analysis tool for genetic circuit design. The system is implemented as a web app with a backend data registry and analysis engine accessible as a REST API
+Flapjack is a data management and analysis tool for genetic circuit design. The system is implemented as a web app with a backend data registry and analysis engine accessible as a REST API. This API is fully documented in the following [GitHub Repository](https://github.com/SynBioUC/flapjack_api), and also we have developed a python package for easier access to the Flapjack API, this package is available in it's [GitHub Repository](https://github.com/SynBioUC/flapjack) and you can see the documentation in the following [web page](https://synbiouc.github.io/flapjack/).
 
 # Authentication
 
@@ -494,7 +494,7 @@ get = requests.post(
 Now as we upload data to Flapjack we can also get data from the database of Flapjack. In order to do this we need to follow up the following workflow.
 
 
-
+For more examples you can visit our [GitHub repository](https://github.com/SynBioUC/flapjack_api).
 # Analysis
 >To connect to the websocket
 
@@ -532,6 +532,8 @@ post_smoothing | Savitsky-Golay filter parameter. Is the final smoothing paramet
 
 ## Expression Rate (Indirect)
 
+The expression rate analysis refers to analyze the expression of the genes in a certain study. In this case, the analysis is done using an indirect method.
+
 ### Query Parameters
 
 Key | Description
@@ -543,6 +545,8 @@ post_smoothing | Savitsky-Golay filter parameter. Is the final smoothing paramet
 
 ## Expression Rate (Direct)
 
+This analysis of the expression rate is based on a direct method.
+
 ### Query Parameters
 
 Key | Description
@@ -553,6 +557,8 @@ degr | Degradation rate of the reporter protein.
 eps_L | Insignificant value for model fitting. 
 
 ## Expression Rate (Inverse)
+
+This expression rate analysis is based on a inverse method.
 
 ### Query Parameters
 
