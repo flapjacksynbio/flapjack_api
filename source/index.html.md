@@ -447,6 +447,47 @@ To do this you need to post this data to the Flapjack REST API. The code to do t
 
 ## Get Data
 ```python
+import requests
+import json
+
+url = "http://localhost:8000/api/"
+## Firstly we have to log in 
+login = {
+	"username": "flapjack_test1",
+	"password": "flapjack_test2"
+}
+
+headers={}
+
+log_in = requests.post(
+	url+"auth/log_in/", 
+	headers= headers, 
+	data=login
+).json()
+## After this you have to refresh
+
+refresh_token = log_in['refresh']
+
+refresh = requests.post(
+	url + "auth/refresh/", 
+	data = {"refresh" : refresh_token}
+).json()
+
+## Assuming that you have uploaded a study previously
+
+access_token=log_in["access"]
+model = "study"
+kwargs={
+	"name":"test-study1",
+	"description":"This is an study to test the Flapjack REST API",
+	"owner":"flapjack_test1",
+	"public":False
+}
+get = requests.post(
+	url+f'{model}/',
+	headers={"Authorization": 'Bearer ' + access_token},
+	data = kwargs
+)
 
 ```
 
