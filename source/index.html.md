@@ -496,6 +496,10 @@ Now as we upload data to Flapjack we can also get data from the database of Flap
 
 For more examples you can visit our [GitHub repository](https://github.com/SynBioUC/flapjack_api).
 
+# Measurements
+
+
+
 # Analysis
 >To connect to the websocket
 
@@ -669,7 +673,7 @@ In order to normalize the data and plot it we have provided many different optio
 Key | Description
 ---|---
 Temporal Mean | Normalize the data by the temporal mean of the data. 
-Mean/std | Normalize the data by the mean of the date divided by the standar deviation.
+Mean/std | Normalize the data by the mean of the data divided by the standar deviation.
 Min/Max | Normalize the data by the cocient of the minimum and maximum values.
 None | The data is not normalized.
 
