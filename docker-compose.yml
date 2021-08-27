@@ -15,15 +15,16 @@ services:
       - db
     #command: gunicorn --certfile=cert/fullchain.pem --keyfile=cert/privkey.pem flapjack_api.wsgi:application
     # command: gunicorn -w 4 -b 0.0.0.0:8000 flapjack_api.wsgi
-    # command: gunicorn flapjack_api.asgi:application -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --timeout 360000
+    command: gunicorn flapjack_api.asgi:application -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --timeout 30
     # command: daphne -b 0.0.0.0 -p 8000 flapjack_api.asgi:application
     # command: uvicorn flapjack_api.asgi:application --port 8000 --reload
-    command: python manage.py runserver 0.0.0.0:8000
+    # command: python manage.py runserver 0.0.0.0:8000
 
   db:
     container_name: db
     restart: always
     image: postgres:12.1
+    command: postgres -c 'max_connections=400'
     ports:
       - "5432:5432"
     environment:
