@@ -2,16 +2,16 @@
 title: API Reference
 
 language_tabs: # must be one of https://git.io/vQNgJ
-	- shell
-	- python
-	- javascript
+  - shell
+  - python
+  - javascript
 
 toc_footers:
-	- <a href='#'>Sign Up for a Developer Key</a>
-	- <a href='https://github.com/slatedocs/slate'>Documentation Powered by Slate</a>
+  - <a href='http://flapjack.rudge-lab.org/'>Sign Up to Flapjack</a>
+  - <a href='https://github.com/slatedocs/slate'>Documentation Powered by Slate</a>
 
 includes:
-	- errors
+  #- errors
 
 search: true
 
@@ -190,10 +190,7 @@ When you do a post request to the Flapjack API, you will upload your data into d
 
 ## Study
 
-Study refers to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.
-
-Flapjack APi allows you to get the totallity of studies, search for an specific study and filter the studies by query parameters.
-
+This corresponds to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.
 ### Query parameters
 
 Key|Description
@@ -209,7 +206,7 @@ public | Boolean that indicates whether the study is public or private
 ## Assays 
 
 
-The flapjack API also gives you the possibility to analize the assays that are currienly on the server alowing you to filter them in order to obtain those that you desire.
+The assays refears to measurement of experiments, including replicates and varying experimental conditions, performed to explore different aspects of the study.
 
 
 ### Query Parameters
@@ -225,8 +222,7 @@ study| Number of the assay in an specific study
 
 ## DNA
 
-To look for a certain DNA.
-
+DNA corresponds to the DNA parts that, later on, will compose a vector that can be used in the assay.
 
 ### Query Parameters
 
@@ -236,11 +232,21 @@ owner| Owner of the DNA
 name| Name of the DNA 
 sboluri| SBOLURI of the DNA 
 
+## Vector
 
+The vector describes the synthetic DNAs encoding a genetic circuit, including links to part composition and sequence via the corresponding SynBioHub URIs.
+
+### Query Parameters
+
+Key|Description
+---|---
+owner | Name of the owner of the data of the query
+name | Name of the vector 
+dnas | DNAs conteined in the vector 
 
 ## Media
 
-The Flapjack API allows you to look for a certain media in the database. 
+The media corresponds to the composition of the substrate that drives the genetic circuit, media in the case of live cell assays, or extract for cell-free experiments.
 
 
 ### Query Parameters
@@ -254,8 +260,7 @@ description | Description of the media
 
 ## Strain
 
-There is the possibility to look for an strain in the server in order to analize it.
-
+The strains refers to the chassis organism, if any, hosting the genetic circuit.
 
 ### Query Parameters
 
@@ -267,6 +272,7 @@ description | Description of the strain
 
 ## Chemical
 
+This registry refers to the chemical(s) that compose the supplement used during the experiments used to obtain data.
 
 ### Query Parameters
 Key|Description
@@ -279,6 +285,8 @@ pubchemid | Pubchem id of the chemical
 
 ## Supplement
 
+Supplemente is any supplementary chemicals that interact with components of the genetic circuit. It's compose of a serie of Chemical data objects.
+
 ### Query Parameters
 Key | Description
 ---| ---
@@ -287,17 +295,9 @@ name | Name of the certiain suplement
 chemical | Chemicals used in the suplement
 concentration | Concentration of the chemicals (Is the concentration of the chemicals or suplement???)
 
-## Vector
-
-### Query Parameters
-
-Key|Description
----|---
-owner | Name of the owner of the data of the query
-name | Name of the vector 
-dnas | DNAs conteined in the vector 
-
 ## Sample
+
+Sample orresponds to the basic unit that is subject to measurement, for example a colony or a well in a microplate.
 
 ### Query Parameters
 
@@ -313,6 +313,8 @@ col | ???
 
 ## Signal
 
+Signal is the subject of measurements, for example a fluorescence channel with given filter bandwidths.
+
 ### Query Parameters
 
 Key | Description
@@ -323,6 +325,8 @@ description | Description of the signal data
 color | Color of the signal utilized
 
 ## Measurement
+
+The messurement is the value of the raw measurement recorded for a particular sample during an assay at a particular time.
 
 ### Query Parameters
 
@@ -442,8 +446,13 @@ Now imagine that you want to upload an study based with the following parameters
 To do this you need to post this data to the Flapjack REST API. The code to do this is in the right section.
 
 ## Get Data
+```python
 
-Now as we upload data to Flapjack we can also get data from the database of Flapjack. In order to do this we need to 
+```
+
+Now as we upload data to Flapjack we can also get data from the database of Flapjack. In order to do this we need to follow up the following workflow.
+
+
 
 # Analysis
 >To connect to the websocket
@@ -601,3 +610,47 @@ ndf | Number of doubling times to extend exponential phase.***
 
 Plot is an websocket endopoint of the Flapjack API. This endpoint generates json objects oriented to generate diffent plots (hence its name), this json object can be interpreted by the python package matplotLib.
 
+## Normalize
+
+In order to normalize the data and plot it we have provided many different options.
+
+### Query Parameters
+
+Key | Description
+---|---
+Temporal Mean | Normalize the data by the temporal mean of the data. 
+Mean/std | Normalize the data by the mean of the date divided by the standar deviation.
+Min/Max | Normalize the data by the cocient of the minimum and maximum values.
+None | The data is not normalized.
+
+## Subplots
+
+When making a plot you can select different subplots according to what best suits your needs. You can plot the different registry parameters.
+
+### Query Parameters
+
+Key | Description
+--- | ---
+Signal | The subplots are plotted from signal data.
+Study | The subplots are plotted from study data.
+Assay | The subplots are plotted from assay data.
+Vector | The subplots are plotted from vector data.
+Media | The subplots are plotted from media data.
+Strain | The subplots are plotted from strain data.
+Supplemente | The subplots are plotted from supplement data.
+
+## Lines/Markers
+
+This refers to the curves you want to be shown in each of the plots. The query parameters are the same as the previously mentioned.
+
+## Plot
+
+It corresponds to the detail you want to have in each of the curves.
+
+### Query Parameters
+
+Key | Description
+--- | ---
+Mean | The datail is in the mean of the curves.
+Mean +/- std | The detail is in the Mean, max, minimum, and standar deviation of the data.
+All data points | You plot all the points, not givin more detail to anyone.
