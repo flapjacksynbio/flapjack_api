@@ -342,7 +342,8 @@ class Analysis:
                     data = data[ (data.Time>=tmin) & (data.Time<tmax) ]
 
                     # Compute expression rate for time series
-                    dvaldt = savgol_filter(ival(time), int(self.smoothing_param1), 2, deriv=1, mode='interp')
+                    dt = np.mean(np.diff(time))
+                    dvaldt = savgol_filter(ival(time), int(self.smoothing_param1), 2, deriv=1, mode='interp') / dt
                     ksynth = dvaldt / sdensity(time)
                     #dvaldt = sval.derivative()(time)
                     #ksynth = dvaldt / (sdensity(time) + 0.)
