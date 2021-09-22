@@ -133,7 +133,7 @@ refresh.json["access"]
 ```
 In order to refresh the database of the Flapjack API you need to get a refresh token from the log in request.
 
-# RESTapi Endpoints
+# RESTapi Endpoints models
 
 > In order to register data you should have to be loged in using the API.
 
