@@ -4,7 +4,7 @@ title: API Reference
 language_tabs: # must be one of https://git.io/vQNgJ
   - shell
   - python
-  - javascript
+#  - javascript
 
 toc_footers:
   - <a href='http://flapjack.rudge-lab.org/'>Sign Up to Flapjack</a>
@@ -50,20 +50,9 @@ curl --location --request POST 'http://localhost:8000/api/auth/register/' \
 		"password": "asd123",   
 		"password2": "asd123",
 		"email": "john@doe.com"
+		}'
 ```
 
-```javascript
-var settings = {
-	"url": "http://localhost:8000/api/auth/register/",
-	"method": "POST",
-	"timeout": 0,
-	"data": "{\n\t\"username\": \"JohnDoe\",\n\t\"password\": \"asd123\",\t\n\t\"password2\": \"asd123\",\n\t\"email\": \"john@doe.com\"\n}\n",
-};
- 
-$.ajax(settings).done(function (response) {
-	console.log(response);
-});
-```
 
 
 
@@ -79,6 +68,15 @@ Required parameters:
 `email: john@doe.com`
 
 ## Log In
+```shell
+curl --location --request POST 'http://localhost:8000/api/auth/log_in/' \
+--data-raw '{
+    "username": "JohnDoe",
+    "password": "asd123"
+}
+'
+```
+
 ```python
 
 import requests
@@ -103,20 +101,6 @@ curl --location --request POST 'http://localhost:8000/api/auth/log_in/' \
 '
 ```
 
-```javascript
-
-var settings = {
-	"url": "http://localhost:8000/api/auth/log_in/",
-	"method": "POST",
-	"timeout": 0,
-	"data": "{\n\t\"username\": \"JohnDoe\",\n\t\"password\": \"asd123\"\n}\n",
-};
-
-$.ajax(settings).done(function (response) {
-	console.log(response);
-});
-
-```
 If you have already registerd as an user you can just log in using the API.
 
 Required parameters:
@@ -126,6 +110,14 @@ Required parameters:
 
 `password: asd123`
 ## Refresh
+
+```shell
+curl --location --request POST 'localhost:8989/api/refresh/' \
+--data-raw '{
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTU4ODc1NDM1MiwianRpIjoiOWYxOTcxYTBiNmFhNGJjMTgyZWE0M2E5YmVhMTEwYjIiLCJ1c2VyX2lkIjo0fQ.pm8kCyw6JL5m5BBZkTVFuTmwlEhRSkH8VSOgfP3lJYk"
+}'
+```
+
 ```python
 import requests
 import json
@@ -141,10 +133,36 @@ refresh.json["access"]
 ```
 In order to refresh the database of the Flapjack API you need to get a refresh token from the log in request.
 
-# Registry
+# RESTapi Endpoints
 
 > In order to register data you should have to be loged in using the API.
 
+```shell
+# GET the information of a certain model, 
+# where model are the endpoints of Registry
+
+### GET Request
+
+curl --location --request GET 'http://localhost:8000/api/model/' \
+--header 'Authorization: Bearer {{jwt_token}}'
+
+### POST request
+
+# params are the parameters that will be passed to filter data
+
+curl --location --request POST 'http://localhost:8000/api/model/' \
+--data-raw '{
+	"name": "API test", 
+	"description": "Testing API", 
+	"doi": "http://www.google.com"
+}'
+
+### PATCH request
+curl --location --request PATCH 'http://localhost:8000/api/model/'
+--data-raw '{
+	
+}'
+```
 
 ```python
 
@@ -308,8 +326,8 @@ media | Media used in the sample
 strain | Strain utilised in the sample
 vector | Vector that was used in the sample
 supplements | Supplement utilised in the sample
-row | ???
-col | ???
+row | Position in the assay layout (row)
+col | Position in the assay layout (column)
 
 ## Signal
 
@@ -354,7 +372,7 @@ payload = {
 	"email"="flapjack_test@test.com"
 }
 headers = {}
-response = requests.post(url, headers = headers, data= payload)
+response = requests.post(url, headers = headers, data = payload)
 ```
 
 Firstly we have to register to Flapjack. For this you have to create your credentials, especificaly the `username`, `password` (you have to repeat it in order to comfirme it), and `email`.
@@ -424,6 +442,7 @@ post= requests.post(
 )
 ```
 > The repsonse to the post requests is the following
+
 ```json
 [
 	{
@@ -495,12 +514,13 @@ Now as we upload data to Flapjack we can also get data from the database of Flap
 
 
 For more examples you can visit our [GitHub repository](https://github.com/SynBioUC/flapjack_api).
+# websocket API
 
-# Measurements
+## Measurements
 
 
 
-# Analysis
+## Analysis
 >To connect to the websocket
 
 ```python
@@ -525,7 +545,7 @@ This endpoint, unlike the past endopoints, corresponds to a websocket, the analy
 The `params` variable refers to the different kinds of analysis and data provided to the analysis websocket.
 
 **Types of analysis**
-## Velocity
+### Velocity
 
 
 
@@ -537,7 +557,7 @@ df | DataFrame containing the data to analyze.
 pre_smoothing |  Savitsky-Golay filter parameter. Is the initial smoothing parameter.
 post_smoothing | Savitsky-Golay filter parameter. Is the final smoothing parameter.
 
-## Expression Rate (Indirect)
+### Expression Rate (Indirect)
 
 The expression rate analysis refers to analyze the expression of the genes in a certain study. In this case, the analysis is done using an indirect method.
 
@@ -550,7 +570,7 @@ density_df | DataFrame with density measurements.
 pre_smoothing | Savitsky-Golay filter parameter. Is the initial smoothing parameter.
 post_smoothing | Savitsky-Golay filter parameter. Is the final smoothing parameter.
 
-## Expression Rate (Direct)
+### Expression Rate (Direct)
 
 This analysis of the expression rate is based on a direct method.
 
@@ -563,7 +583,7 @@ density_df | DataFrame with density (biomass) measurements.
 degr | Degradation rate of the reporter protein. 
 eps_L | Insignificant value for model fitting. 
 
-## Expression Rate (Inverse)
+### Expression Rate (Inverse)
 
 This expression rate analysis is based on a inverse method.
 
@@ -577,7 +597,7 @@ degr | Degradation rate of the reporter protein.
 eps | Tikhoniv regularization parameter.
 n_gaussians | Number of gaussians in basis. 
 
-## Mean Expression
+### Mean Expression
 
 This analysis returns a data frame containing the mean values for each sample.
 
@@ -586,7 +606,7 @@ Key | Description
 --- | ---
 df | DataFrame containing the data to analyze. 
 
-## Max expression 
+### Max expression 
 
 This analysis returns a data frame containing the max values for each sample.
 
@@ -596,7 +616,7 @@ Key| Description
 ---|---
 df | DataFrame containing the data to analyze.
 
-## Mean Velocity
+### Mean Velocity
 
 This analysis returns a data frame containing the mean velocity for each sample.
 
@@ -605,7 +625,7 @@ Key | Description
 ---|---
 df | DataFrame containing the data to analyze.
 
-## Max Velocity
+### Max Velocity
 
 This analysis returns a data frame containing the max velocity for each sample.
 
@@ -615,21 +635,21 @@ Key | Description
 ---|---
 df | DataFrame containing the data to analyze.
 
-## Induction Curve
+### Induction Curve
 **Is this correct?**
 ### Query Parameters
 Key | Description
 ---|---
 df | DataFrame containing the data to analyze.
 
-## Kymograph
+### Kymograph
 **This one is strange because it calls the past analysis.**
 ### Query Parameters
 Key | Description
 ---|---
 df | DataFrame containing the data to analyze.
 
-## Heatmap 
+### Heatmap 
 
 ### Query Parameters
 
@@ -637,7 +657,7 @@ Key | Description
 ---|---
 df | DataFrame containing the data to analyze.
 
-## Ratiometric Alpha
+### Ratiometric Alpha
 
 ### Query Parameters
 
@@ -648,7 +668,7 @@ bounds | Tuple of list of min and max values for  Gompertz model parameters.
 density_df | DataFrame containing biomass measurements.
 ndf | Number of doubling times to extend exponential phase.
 
-## Ratiometric Rho
+### Ratiometric Rho
 
 ### Query Parameters
 
@@ -660,11 +680,11 @@ density_df | DataFrame containing biomass measurements.
 ref_df | DataFrame containing reference measurements.
 ndf | Number of doubling times to extend exponential phase.***
 
-# Plot
+## Plot
 
 Plot is an websocket endopoint of the Flapjack API. This endpoint generates json objects oriented to generate diffent plots (hence its name), this json object can be interpreted by the python package matplotLib.
 
-## Normalize
+### Normalize
 
 In order to normalize the data and plot it we have provided many different options.
 
@@ -677,7 +697,7 @@ Mean/std | Normalize the data by the mean of the data divided by the standar dev
 Min/Max | Normalize the data by the cocient of the minimum and maximum values.
 None | The data is not normalized.
 
-## Subplots
+### Subplots
 
 When making a plot you can select different subplots according to what best suits your needs. You can plot the different registry parameters.
 
@@ -693,11 +713,11 @@ Media | The subplots are plotted from media data.
 Strain | The subplots are plotted from strain data.
 Supplemente | The subplots are plotted from supplement data.
 
-## Lines/Markers
+### Lines/Markers
 
 This refers to the curves you want to be shown in each of the plots. The query parameters are the same as the previously mentioned.
 
-## Plot
+### Plot
 
 It corresponds to the detail you want to have in each of the curves.
 
