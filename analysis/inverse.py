@@ -6,7 +6,7 @@ from scipy.interpolate import interp1d
 #
 def forward_model(
     Dt=0.25,
-    sim_steps=1,
+    sim_steps=10,
     odval=[1]*97,
     profile=[1]*97,
     gamma=0,
@@ -101,7 +101,7 @@ def characterize(expression, biomass, t, gamma, n_gaussians, epsilon):
 #
 def forward_model_growth(
     Dt=0.05,
-    sim_steps=1,
+    sim_steps=10,
     muval=[0]*100,
     od0=0,
     nt=100
