@@ -53,6 +53,7 @@ def get_samples(filter):
     vectors = filter.get('vector')
     meds = filter.get('media')
     strains = filter.get('strain')
+    samples = filter.get('sample')
 
     s = Sample.objects.all()
     filter_exist = False
@@ -72,6 +73,9 @@ def get_samples(filter):
     if strains:
         s = s.filter(strain__id__in=strains)
         filter_exist = True    
+    if samples:
+        s = s.filter(id__in=samples)
+        filter_exist = True
 
     if not filter_exist:
         s = Sample.objects.none()
