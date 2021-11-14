@@ -1,47 +1,19 @@
-# flapjack_api
-
 ## Rest API for Flapjack data management system
 
-First, you need to have docker>=18.09.5 and docker-compose>=1.23.2 installed
+### API
 
-### Clone flapjack_api's repo and start the Docker container
+For instructions on the API installation, you can go to our [API Wiki](https://github.com/SynBioUC/flapjack_api/wiki).
 
-* git clone git@github.com:SynBioUC/flapjack_api.git
+### Web interface
 
-* `cd /flapjack_api`
-* Install requirements:
-`docker-compose build`
-* (optional) Start app’s container:
-`docker-compose up`
+For instructions on installation and use of the web interface, you can go to our [UI Wiki](https://github.com/SynBioUC/flapjack_frontend/wiki).
 
-### Create database
+### Python package
 
-Enter to the docker container terminal:
+For instructions on package installation, you can go to our [Package Wiki](https://github.com/SynBioUC/flapjack/wiki/Installation).
 
-* `docker exec -it api bash`
-* Start postgresql app:
- `psql -U guillermo -h db`
-  * Password: 123456
-* Create database:
- `CREATE DATABASE registry;`
+For tutorials on how to use the Python package for accessing the API, you can go to our [Jupyter tutorials](https://github.com/SynBioUC/flapjack/tree/master/notebooks).
 
-### Make migrations
+### API's full documentation
 
-In a new terminal:
-  `docker exec -it api bash`
-
-You can skip the last step by quitting psql.
-
-* Run the migrations (execute the SQL commands):
- `python manage.py migrate`
-* Collect static files
- `python manage.py collectstatic`
-* Quit docker’s env
-
-### Run app
-
-* `cd /flapjack_api`
-* Start app’s container:
- `docker-compose up`
-* run on:
-localhost:8000
+For a comprehensive documentation of the API you can access the [Flapjack backend documentation](https://github.com/SynBioUC/flapjack_api/blob/gh-pages/Flapjack_doc_backend.pdf).
