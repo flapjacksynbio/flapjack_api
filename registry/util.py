@@ -173,7 +173,7 @@ def upload_measurements(df, sample, signal):
             signal=sig, 
             value=row.Measurement, 
             time=row.Time
-            ) for row in df
+            ) for idx,row in df.iterrows()
         ]
     if len(measurements)==0:
         return False
