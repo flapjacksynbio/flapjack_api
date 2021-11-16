@@ -447,31 +447,44 @@
 <span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="p">)</span>
 
 </code></pre></div><div class="highlight"><pre class="highlight shell tab-shell"><code><span class="c"># With shell, you can just pass the correct header with each request</span>
-curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/auth/register/'</span> <span class="se">\</span>
+curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/register/'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
-        "username": "flaptest",
-        "password": "flaptest1",   
-        "password2": "flaptest1",
-        "email": "flaptest@flap.com"
-        }'</span>
+    "username": "JohnDoe",
+    "password": "asd123",   
+    "password2": "asd123",
+    "email": "john@doe.com"
+}
+'</span>
 </code></pre></div>
 <p>This API counts with the facility of a direct registry method.
 Required parameters:</p>
 
-<p><code>username: flaptest</code></p>
+<p><code>username: JohnDoe</code></p>
 
-<p><code>password: flaptest1</code></p>
+<p><code>password: asd123</code></p>
 
-<p><code>password2: flaptest1</code></p>
+<p><code>password2: asd123</code></p>
 
-<p><code>email: flaptest@flap.com</code></p>
-<h2 id='log-in'>Log In</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/auth/log_in/'</span> <span class="se">\</span>
+<p><code>email: john@doe.com</code></p>
+<h2 id='log-in'>Log In</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/log_in/'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
-    "username": "flaptest",
-    "password": "flaptest1"
+    "username": "JohnDoe",
+    "password": "asd123"
 }
 '</span>
-</code></pre></div><div class="highlight"><pre class="highlight python tab-python"><code>
+</code></pre></div>
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"refresh"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzE2NzUwNCwianRpIjoiNzAxYTlmYWM3NmYyNDZmY2I0MDJkNzUwOTU5M2JlMjciLCJ1c2VyX2lkIjo0fQ.QalaWSeHxyf-7ugVoJhPQgfAma40DENTLXMkQWyxKmo"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"access"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3MDgxNDA0LCJqdGkiOiJjOTIyYmNjNjMzMTQ0ZWU1ODY0MzBjN2JmMjQ4MzkxYiIsInVzZXJfaWQiOjR9.YL6fKIx3dv-vH-Ho9OhwMloSLHT7Out8wi_gn7nldCA"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"JohnDoe"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"email"</span><span class="p">:</span><span class="w"> </span><span class="s2">"john@doe.com"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div><div class="highlight"><pre class="highlight python tab-python"><code>
 <span class="kn">import</span> <span class="nn">requests</span>
 
 <span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/auth/log_in/"</span>
@@ -483,25 +496,28 @@ Required parameters:</p>
 
 <span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="p">)</span>
 
-</code></pre></div><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/auth/log_in/'</span> <span class="se">\</span>
-<span class="nt">--data-raw</span> <span class="s1">'{
-    "username": "flaptest",
-    "password": "flaptest1"
-}
-'</span>
 </code></pre></div>
 <p>If you have already registerd as an user you can just log in using the API.</p>
 
 <p>Required parameters:</p>
 
-<p><code>username: flaptest</code></p>
+<p><code>username: JohnDoe</code></p>
 
-<p><code>password: flaptest1</code></p>
-<h2 id='refresh'>Refresh</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8989/api/refresh/'</span> <span class="se">\</span>
+<p><code>password: asd123</code></p>
+<h2 id='refresh'>Refresh</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/refresh/'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
-    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTU4ODc1NDM1MiwianRpIjoiOWYxOTcxYTBiNmFhNGJjMTgyZWE0M2E5YmVhMTEwYjIiLCJ1c2VyX2lkIjo0fQ.pm8kCyw6JL5m5BBZkTVFuTmwlEhRSkH8VSOgfP3lJYk"
-}'</span>
-</code></pre></div><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzE2NzUwNCwianRpIjoiNzAxYTlmYWM3NmYyNDZmY2I0MDJkNzUwOTU5M2JlMjciLCJ1c2VyX2lkIjo0fQ.QalaWSeHxyf-7ugVoJhPQgfAma40DENTLXMkQWyxKmo"
+}
+'</span>
+</code></pre></div>
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"access"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3MDgxNDUyLCJqdGkiOiI1NDMxNTU1OThhOTA0NWEwOTc5NWI0MzM1ZDc0ZWYwMiIsInVzZXJfaWQiOjR9.P0zMPr5sWazLHepsVj0gpthFQFTCuZv_zw8P6XZ4gxU"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/auth/refresh/"</span>
 <span class="n">refresh_token</span> <span class="o">=</span> <span class="c1">##obtained from the log_in request
