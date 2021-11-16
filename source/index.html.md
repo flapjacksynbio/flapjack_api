@@ -58,13 +58,15 @@ print(response.text)
 
 ```shell
 # With shell, you can just pass the correct header with each request
-curl --location --request POST 'http://localhost:8000/api/auth/register/' \
+curl --location --request POST 'localhost:8000/api/auth/register/' \
+--header 'Content-Type: application/json' \
 --data-raw '{
-		"username": "flaptest",
-		"password": "flaptest1",   
-		"password2": "flaptest1",
-		"email": "flaptest@flap.com"
-		}'
+    "username": "JohnDoe",
+    "password": "asd123",   
+    "password2": "asd123",
+    "email": "john@doe.com"
+}
+'
 ```
 
 
@@ -73,22 +75,33 @@ curl --location --request POST 'http://localhost:8000/api/auth/register/' \
 This API counts with the facility of a direct registry method.
 Required parameters:
 
-`username: flaptest`
+`username: JohnDoe`
 
-`password: flaptest1`
+`password: asd123`
 
-`password2: flaptest1`
+`password2: asd123`
 
-`email: flaptest@flap.com`
+`email: john@doe.com`
 
 ## Log In
 ```shell
-curl --location --request POST 'http://localhost:8000/api/auth/log_in/' \
+curl --location --request POST 'localhost:8000/api/auth/log_in/' \
+--header 'Content-Type: application/json' \
 --data-raw '{
-    "username": "flaptest",
-    "password": "flaptest1"
+    "username": "JohnDoe",
+    "password": "asd123"
 }
 '
+```
+> The above command returns JSON structured like this:
+
+```json
+{
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzE2NzUwNCwianRpIjoiNzAxYTlmYWM3NmYyNDZmY2I0MDJkNzUwOTU5M2JlMjciLCJ1c2VyX2lkIjo0fQ.QalaWSeHxyf-7ugVoJhPQgfAma40DENTLXMkQWyxKmo",
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3MDgxNDA0LCJqdGkiOiJjOTIyYmNjNjMzMTQ0ZWU1ODY0MzBjN2JmMjQ4MzkxYiIsInVzZXJfaWQiOjR9.YL6fKIx3dv-vH-Ho9OhwMloSLHT7Out8wi_gn7nldCA",
+    "username": "JohnDoe",
+    "email": "john@doe.com"
+}
 ```
 
 ```python
@@ -106,30 +119,31 @@ print(response.text)
 
 ```
 
-```shell
-curl --location --request POST 'http://localhost:8000/api/auth/log_in/' \
---data-raw '{
-	"username": "flaptest",
-	"password": "flaptest1"
-}
-'
-```
 
 If you have already registerd as an user you can just log in using the API.
 
 Required parameters:
 
-`username: flaptest`
+`username: JohnDoe`
 
 
-`password: flaptest1`
+`password: asd123`
 ## Refresh
 
 ```shell
-curl --location --request POST 'localhost:8989/api/refresh/' \
+curl --location --request POST 'localhost:8000/api/auth/refresh/' \
+--header 'Content-Type: application/json' \
 --data-raw '{
-    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTU4ODc1NDM1MiwianRpIjoiOWYxOTcxYTBiNmFhNGJjMTgyZWE0M2E5YmVhMTEwYjIiLCJ1c2VyX2lkIjo0fQ.pm8kCyw6JL5m5BBZkTVFuTmwlEhRSkH8VSOgfP3lJYk"
-}'
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzE2NzUwNCwianRpIjoiNzAxYTlmYWM3NmYyNDZmY2I0MDJkNzUwOTU5M2JlMjciLCJ1c2VyX2lkIjo0fQ.QalaWSeHxyf-7ugVoJhPQgfAma40DENTLXMkQWyxKmo"
+}
+'
+```
+> The above command returns JSON structured like this:
+
+```json
+{
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3MDgxNDUyLCJqdGkiOiI1NDMxNTU1OThhOTA0NWEwOTc5NWI0MzM1ZDc0ZWYwMiIsInVzZXJfaWQiOjR9.P0zMPr5sWazLHepsVj0gpthFQFTCuZv_zw8P6XZ4gxU"
+}
 ```
 
 ```python
