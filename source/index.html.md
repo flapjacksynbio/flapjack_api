@@ -22,8 +22,22 @@ code_clipboard: true
 
 Flapjack is a data management and analysis tool for genetic circuit design. The system is implemented as a web app with a backend data registry and analysis engine accessible as a REST API. This API is fully documented in the following [GitHub Repository](https://github.com/SynBioUC/flapjack_api), and also we have developed a python package for easier access to the Flapjack API, this package is available in it's [GitHub Repository](https://github.com/SynBioUC/flapjack) and you can see the documentation in the following [web page](https://synbiouc.github.io/flapjack/).
 
+The Flapjack API is devided in two types, a RESTful API and a websocket API.
+## What is a REST API?
+
+Firstly, an API, or application programming interface, is define set of rules that define how applications or diveces can connect and communicate with each other. A way to design this applications is the RESTful API architeture, in which using HTTP request you can access to the data. 
+
+This architecture uses a define set of data types to access to a database, these sets are ``GET``, ``PUT``, ``POST`` and ``DELETE``.
+
+``GET``: Is used to retrive data.
+``PUT``: Is utilized to change the state, or to update a resourse in the database.
+``POST``: Allows us to upload data.
+``DELETE``: To delete a certain information from the repository of data.
+
+
 # Authentication
 
+Authentication is one of the endpoints of the API, this endpoint is used to register, log in and refresh the token. 
 ## Register
 > To register in Flapjack, use this code:
 
@@ -46,10 +60,10 @@ print(response.text)
 # With shell, you can just pass the correct header with each request
 curl --location --request POST 'http://localhost:8000/api/auth/register/' \
 --data-raw '{
-		"username": "JohnDoe",
-		"password": "asd123",   
-		"password2": "asd123",
-		"email": "john@doe.com"
+		"username": "flaptest",
+		"password": "flaptest1",   
+		"password2": "flaptest1",
+		"email": "flaptest@flap.com"
 		}'
 ```
 
@@ -59,20 +73,20 @@ curl --location --request POST 'http://localhost:8000/api/auth/register/' \
 This API counts with the facility of a direct registry method.
 Required parameters:
 
-`username: JohnDoe`
+`username: flaptest`
 
-`password: asd123`
+`password: flaptest1`
 
-`password2: asd123`
+`password2: flaptest1`
 
-`email: john@doe.com`
+`email: flaptest@flap.com`
 
 ## Log In
 ```shell
 curl --location --request POST 'http://localhost:8000/api/auth/log_in/' \
 --data-raw '{
-    "username": "JohnDoe",
-    "password": "asd123"
+    "username": "flaptest",
+    "password": "flaptest1"
 }
 '
 ```
@@ -95,8 +109,8 @@ print(response.text)
 ```shell
 curl --location --request POST 'http://localhost:8000/api/auth/log_in/' \
 --data-raw '{
-	"username": "JohnDoe",
-	"password": "asd123"
+	"username": "flaptest",
+	"password": "flaptest1"
 }
 '
 ```
@@ -105,10 +119,10 @@ If you have already registerd as an user you can just log in using the API.
 
 Required parameters:
 
-`username: JohnDoe`
+`username: flaptest`
 
 
-`password: asd123`
+`password: flaptest1`
 ## Refresh
 
 ```shell
@@ -207,7 +221,9 @@ When you do a post request to the Flapjack API, you will upload your data into d
 
 
 ## Study
-
+```shell
+curl --location --request POST 'http://localhost:8000/api/study/' \
+```
 This corresponds to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.
 ### Query parameters
 
@@ -515,9 +531,16 @@ Now as we upload data to Flapjack we can also get data from the database of Flap
 
 For more examples you can visit our [GitHub repository](https://github.com/SynBioUC/flapjack_api).
 # websocket API
+## Introduction
 
+A websockat API is an advance technology that allows the communicate interactivily to the server. This is a very powerful tool because enables a longer conection to the server, in a full-duplex way. An important insight in this matter is that the websocket API enables an stable coneection to the server.
+
+These structure of API is used in Flapjack to communicate with the server with a more stable communication than that given by a REST API. We use this because the following endpoints are based on calculations that the require an stable conection with the client in order to bring the best service to the client.
 ## Measurements
 
+The meassurements endpoint *(note that it's different from the measurement endpoint)* is used to get the measurements of an specific data uploaded to the Flapjack server. This endpoint retrive a large quantity of data, because is used to get more than one mearsurement from the server.
+
+This endpoint gives as a result a .json file that contains the meassurements that were asked to the server.
 
 
 ## Analysis
@@ -540,7 +563,7 @@ with websockets.connect(uri) as websocket:
 	response_json = webscket.recv()
 	response data = json.loads(response_json)
 ```
-This endpoint, unlike the past endopoints, corresponds to a websocket, the analysis is in charge of developing most of the calculations and the result is a .json file that can be interpreted as a pandas data frame. 
+This endpoint is in charge of developing most of the calculations and the result is a .json file that can be interpreted as a pandas data frame. There are many analysis available in Flapjack at the moment, allowing you to analyze your data using many methods. This endpoint gives a .json file that can be interpreted as a pandas data frame.
 
 The `params` variable refers to the different kinds of analysis and data provided to the analysis websocket.
 
@@ -682,8 +705,7 @@ ndf | Number of doubling times to extend exponential phase.***
 
 ## Plot
 
-Plot is an websocket endopoint of the Flapjack API. This endpoint generates json objects oriented to generate diffent plots (hence its name), this json object can be interpreted by the python package matplotLib.
-
+This final endpoit is used to visualize the data that was retrive from the server after doing the analysis. The way that the endpoint works is that the analizis .json file given by the analizis endpoint is modified in order to be interpreted as a data frame interpretable for plotting tools, such as matplotlib.
 ### Normalize
 
 In order to normalize the data and plot it we have provided many different options.
