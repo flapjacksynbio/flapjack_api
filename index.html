@@ -312,6 +312,11 @@
       <ul id="toc" class="toc-list-h1">
           <li>
             <a href="#introduction" class="toc-h1 toc-link" data-title="Introduction">Introduction</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#what-is-a-rest-api" class="toc-h2 toc-link" data-title="What is a REST API?">What is a REST API?</a>
+                  </li>
+              </ul>
           </li>
           <li>
             <a href="#authentication" class="toc-h1 toc-link" data-title="Authentication">Authentication</a>
@@ -386,6 +391,12 @@
             <a href="#websocket-api" class="toc-h1 toc-link" data-title="websocket API">websocket API</a>
               <ul class="toc-list-h2">
                   <li>
+                    <a href="#introduction-2" class="toc-h2 toc-link" data-title="Introduction">Introduction</a>
+                  </li>
+                  <li>
+                    <a href="#upload_measurements" class="toc-h2 toc-link" data-title="Upload_measurements">Upload_measurements</a>
+                  </li>
+                  <li>
                     <a href="#measurements" class="toc-h2 toc-link" data-title="Measurements">Measurements</a>
                   </li>
                   <li>
@@ -407,7 +418,20 @@
       <div class="content">
         <h1 id='introduction'>Introduction</h1>
 <p>Flapjack is a data management and analysis tool for genetic circuit design. The system is implemented as a web app with a backend data registry and analysis engine accessible as a REST API. This API is fully documented in the following <a href="https://github.com/SynBioUC/flapjack_api">GitHub Repository</a>, and also we have developed a python package for easier access to the Flapjack API, this package is available in it&#39;s <a href="https://github.com/SynBioUC/flapjack">GitHub Repository</a> and you can see the documentation in the following <a href="https://synbiouc.github.io/flapjack/">web page</a>.</p>
-<h1 id='authentication'>Authentication</h1><h2 id='register'>Register</h2>
+
+<p>The Flapjack API is devided in two types, a RESTful API and a websocket API.</p>
+<h2 id='what-is-a-rest-api'>What is a REST API?</h2>
+<p>Firstly, an API, or application programming interface, is define set of rules that define how applications or diveces can connect and communicate with each other. A way to design this applications is the RESTful API architeture, in which using HTTP request you can access to the data. </p>
+
+<p>This architecture uses a define set of data types to access to a database, these sets are <code>GET</code>, <code>PUT</code>, <code>POST</code> and <code>DELETE</code>.</p>
+
+<p><code>GET</code>: Is used to retrive data.
+<code>PUT</code>: Is utilized to change the state, or to update a resourse in the database.
+<code>POST</code>: Allows us to upload data.
+<code>DELETE</code>: To delete a certain information from the repository of data.</p>
+<h1 id='authentication'>Authentication</h1>
+<p>Authentication is one of the endpoints of the API, this endpoint is used to register, log in and refresh the token. </p>
+<h2 id='register'>Register</h2>
 <blockquote>
 <p>To register in Flapjack, use this code:</p>
 </blockquote>
@@ -425,26 +449,26 @@
 </code></pre></div><div class="highlight"><pre class="highlight shell tab-shell"><code><span class="c"># With shell, you can just pass the correct header with each request</span>
 curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/auth/register/'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
-        "username": "JohnDoe",
-        "password": "asd123",   
-        "password2": "asd123",
-        "email": "john@doe.com"
+        "username": "flaptest",
+        "password": "flaptest1",   
+        "password2": "flaptest1",
+        "email": "flaptest@flap.com"
         }'</span>
 </code></pre></div>
 <p>This API counts with the facility of a direct registry method.
 Required parameters:</p>
 
-<p><code>username: JohnDoe</code></p>
+<p><code>username: flaptest</code></p>
 
-<p><code>password: asd123</code></p>
+<p><code>password: flaptest1</code></p>
 
-<p><code>password2: asd123</code></p>
+<p><code>password2: flaptest1</code></p>
 
-<p><code>email: john@doe.com</code></p>
+<p><code>email: flaptest@flap.com</code></p>
 <h2 id='log-in'>Log In</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/auth/log_in/'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
-    "username": "JohnDoe",
-    "password": "asd123"
+    "username": "flaptest",
+    "password": "flaptest1"
 }
 '</span>
 </code></pre></div><div class="highlight"><pre class="highlight python tab-python"><code>
@@ -461,8 +485,8 @@ Required parameters:</p>
 
 </code></pre></div><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/auth/log_in/'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
-    "username": "JohnDoe",
-    "password": "asd123"
+    "username": "flaptest",
+    "password": "flaptest1"
 }
 '</span>
 </code></pre></div>
@@ -470,9 +494,9 @@ Required parameters:</p>
 
 <p>Required parameters:</p>
 
-<p><code>username: JohnDoe</code></p>
+<p><code>username: flaptest</code></p>
 
-<p><code>password: asd123</code></p>
+<p><code>password: flaptest1</code></p>
 <h2 id='refresh'>Refresh</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8989/api/refresh/'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
     "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTU4ODc1NDM1MiwianRpIjoiOWYxOTcxYTBiNmFhNGJjMTgyZWE0M2E5YmVhMTEwYjIiLCJ1c2VyX2lkIjo0fQ.pm8kCyw6JL5m5BBZkTVFuTmwlEhRSkH8VSOgfP3lJYk"
@@ -556,7 +580,8 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> PATCH 
 <p>The regestry endpoint contains a way to upload and obtain data using the Flapjack REST API. As a way to further explain how this endpoint works firlty we are going to show the base code to contact the REST API, and in the next subsection we will explain the different models where you can upload and retrieve data.</p>
 
 <p>When you do a post request to the Flapjack API, you will upload your data into de database. On other hand, when you do a get request to the Flapjack API you will be filtering the actual data and returning those models that match the filter criteria. The delete request delete a certain data from the database by the id of the model that you post. And finally, patch is used to update the data of a certain model posted in Flapjack.</p>
-<h2 id='study'>Study</h2>
+<h2 id='study'>Study</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/study/'</span> <span class="se">\</span>
+</code></pre></div>
 <p>This corresponds to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.</p>
 <h3 id='query-parameters'>Query parameters</h3>
 <table><thead>
@@ -987,7 +1012,15 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> PATCH 
 <p>Now as we upload data to Flapjack we can also get data from the database of Flapjack. In order to do this we need to follow up the following workflow.</p>
 
 <p>For more examples you can visit our <a href="https://github.com/SynBioUC/flapjack_api">GitHub repository</a>.</p>
-<h1 id='websocket-api'>websocket API</h1><h2 id='measurements'>Measurements</h2><h2 id='analysis'>Analysis</h2>
+<h1 id='websocket-api'>websocket API</h1><h2 id='introduction-2'>Introduction</h2>
+<p>A websockat API is an advance technology that allows the communicate interactivily to the server. This is a very powerful tool because enables a longer conection to the server, in a full-duplex way. An important insight in this matter is that the websocket API enables an persistant conection to the server.</p>
+
+<p>These structure of API is used in Flapjack to communicate with the server with a more stable communication than that given by a REST API. We use this because the following endpoints are based on calculations that the require an stable conection with the client in order to bring the best service.</p>
+<h2 id='upload_measurements'>Upload_measurements</h2><h2 id='measurements'>Measurements</h2>
+<p>The meassurements endpoint <em>(note that it&#39;s different from the measurement endpoint)</em> is used to get the measurements of an specific data uploaded to the Flapjack server. This endpoint retrive a large quantity of data, because is used to get more than one mearsurement from the server.</p>
+
+<p>This endpoint gives as a result a .json file that contains the meassurements that were asked to the server.</p>
+<h2 id='analysis'>Analysis</h2>
 <blockquote>
 <p>To connect to the websocket</p>
 </blockquote>
@@ -1007,7 +1040,7 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> PATCH 
     <span class="n">response_json</span> <span class="o">=</span> <span class="n">webscket</span><span class="p">.</span><span class="n">recv</span><span class="p">()</span>
     <span class="n">response</span> <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response_json</span><span class="p">)</span>
 </code></pre></div>
-<p>This endpoint, unlike the past endopoints, corresponds to a websocket, the analysis is in charge of developing most of the calculations and the result is a .json file that can be interpreted as a pandas data frame. </p>
+<p>This endpoint is in charge of developing most of the calculations and the result is a .json file that can be interpreted as a pandas data frame. There are many analysis available in Flapjack at the moment, allowing you to analyze your data using many methods. This endpoint gives a .json file that can be interpreted as a pandas data frame.</p>
 
 <p>The <code>params</code> variable refers to the different kinds of analysis and data provided to the analysis websocket.</p>
 
@@ -1263,7 +1296,7 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> PATCH 
 </tr>
 </tbody></table>
 <h2 id='plot'>Plot</h2>
-<p>Plot is an websocket endopoint of the Flapjack API. This endpoint generates json objects oriented to generate diffent plots (hence its name), this json object can be interpreted by the python package matplotLib.</p>
+<p>This final endpoit is used to visualize the data that was retrive from the server after doing the analysis. The way that the endpoint works is that the analizis .json file given by the analizis endpoint is modified in order to be interpreted as a data frame interpretable for plotting tools, such as matplotlib.</p>
 <h3 id='normalize'>Normalize</h3>
 <p>In order to normalize the data and plot it we have provided many different options.</p>
 <h3 id='query-parameters-25'>Query Parameters</h3>
