@@ -533,9 +533,12 @@ For more examples you can visit our [GitHub repository](https://github.com/SynBi
 # websocket API
 ## Introduction
 
-A websockat API is an advance technology that allows the communicate interactivily to the server. This is a very powerful tool because enables a longer conection to the server, in a full-duplex way. An important insight in this matter is that the websocket API enables an stable coneection to the server.
 
-These structure of API is used in Flapjack to communicate with the server with a more stable communication than that given by a REST API. We use this because the following endpoints are based on calculations that the require an stable conection with the client in order to bring the best service to the client.
+A websockat API is an advance technology that allows the communicate interactivily to the server. This is a very powerful tool because enables a longer conection to the server, in a full-duplex way. An important insight in this matter is that the websocket API enables an persistant conection to the server.
+
+These structure of API is used in Flapjack to communicate with the server with a more stable communication than that given by a REST API. We use this because the following endpoints are based on calculations that the require an stable conection with the client in order to bring the best service.
+## Upload_measurements
+
 ## Measurements
 
 The meassurements endpoint *(note that it's different from the measurement endpoint)* is used to get the measurements of an specific data uploaded to the Flapjack server. This endpoint retrive a large quantity of data, because is used to get more than one mearsurement from the server.
