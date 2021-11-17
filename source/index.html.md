@@ -128,6 +128,9 @@ Required parameters:
 
 
 `password: asd123`
+
+When you do a log_in request you receive two tokens, a ``refresh`` token and an ``access token``. The ``refresh token``is used to keep the session alive, and you can give this token to the refresh endpoint to get a new ``access token``. The ``access token`` is used to access the different endpoints of the API, by giving it as a parameter in the header of the request, replazing the ``{{jwt_token}}`` in the header of the request.
+
 ## Refresh
 
 ```shell
@@ -159,7 +162,8 @@ refresh = requests.post (
 ## and now the access token is:
 refresh.json["access"]
 ```
-In order to refresh the database of the Flapjack API you need to get a refresh token from the log in request.
+
+This endpoint is used to keep alive the session. The uses a ``refresh token``as a parameter and it returns a ``access token``. In this way you get refreshed access token everytime you need it.
 
 # RESTapi Endpoints models
 
