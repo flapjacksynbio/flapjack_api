@@ -504,6 +504,8 @@ Required parameters:</p>
 <p><code>username: JohnDoe</code></p>
 
 <p><code>password: asd123</code></p>
+
+<p>When you do a log_in request you receive two tokens, a <code>refresh</code> token and an <code>access token</code>. The <code>refresh token</code>is used to keep the session alive, and you can give this token to the refresh endpoint to get a new <code>access token</code>. The <code>access token</code> is used to access the different endpoints of the API, by giving it as a parameter in the header of the request, replazing the <code>{{jwt_token}}</code> in the header of the request.</p>
 <h2 id='refresh'>Refresh</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/refresh/'</span> <span class="se">\</span>
 <span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
@@ -529,7 +531,7 @@ Required parameters:</p>
 <span class="c1">## and now the access token is:
 </span><span class="n">refresh</span><span class="p">.</span><span class="n">json</span><span class="p">[</span><span class="s">"access"</span><span class="p">]</span>
 </code></pre></div>
-<p>In order to refresh the database of the Flapjack API you need to get a refresh token from the log in request.</p>
+<p>This endpoint is used to keep alive the session. The uses a <code>refresh token</code>as a parameter and it returns a <code>access token</code>. In this way you get refreshed access token everytime you need it.</p>
 <h1 id='restapi-endpoints-models'>RESTapi Endpoints models</h1>
 <blockquote>
 <p>In order to register data you should have to be loged in using the API.</p>
