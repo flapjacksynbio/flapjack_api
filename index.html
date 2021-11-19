@@ -407,6 +407,9 @@
                   </li>
               </ul>
           </li>
+          <li>
+            <a href="#errors" class="toc-h1 toc-link" data-title="Errors">Errors</a>
+          </li>
       </ul>
         <ul class="toc-footer">
             <li><a href='http://flapjack.rudge-lab.org/'>Sign Up to Flapjack</a></li>
@@ -446,17 +449,20 @@
 
 <span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="p">)</span>
 
-</code></pre></div><div class="highlight"><pre class="highlight shell tab-shell"><code><span class="c"># With shell, you can just pass the correct header with each request</span>
-curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/register/'</span> <span class="se">\</span>
+</code></pre></div><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/auth/register/'</span> <span class="se">\</span>
 <span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
     "username": "JohnDoe",
-    "password": "asd123",   
+    "password": "asd123",
     "password2": "asd123",
     "email": "john@doe.com"
-}
-'</span>
+}'</span>
 </code></pre></div>
+<blockquote>
+<p>response </p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="err">rellenar</span><span class="w"> </span><span class="err">con</span><span class="w"> </span><span class="err">el</span><span class="w"> </span><span class="err">json</span><span class="w">
+</span></code></pre></div>
 <p>This API counts with the facility of a direct registry method.
 Required parameters:</p>
 
@@ -467,13 +473,15 @@ Required parameters:</p>
 <p><code>password2: asd123</code></p>
 
 <p><code>email: john@doe.com</code></p>
-<h2 id='log-in'>Log In</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/log_in/'</span> <span class="se">\</span>
+<h2 id='log-in'>Log In</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>
+curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/log_in/'</span> <span class="se">\</span>
 <span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
     "username": "JohnDoe",
     "password": "asd123"
 }
 '</span>
+
 </code></pre></div>
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
@@ -506,12 +514,14 @@ Required parameters:</p>
 <p><code>password: asd123</code></p>
 
 <p>When you do a log_in request you receive two tokens, a <code>refresh</code> token and an <code>access token</code>. The <code>refresh token</code>is used to keep the session alive, and you can give this token to the refresh endpoint to get a new <code>access token</code>. The <code>access token</code> is used to access the different endpoints of the API, by giving it as a parameter in the header of the request, replazing the <code>{{jwt_token}}</code> in the header of the request.</p>
-<h2 id='refresh'>Refresh</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/refresh/'</span> <span class="se">\</span>
+<h2 id='refresh'>Refresh</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>
+curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/refresh/'</span> <span class="se">\</span>
 <span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
     "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzE2NzUwNCwianRpIjoiNzAxYTlmYWM3NmYyNDZmY2I0MDJkNzUwOTU5M2JlMjciLCJ1c2VyX2lkIjo0fQ.QalaWSeHxyf-7ugVoJhPQgfAma40DENTLXMkQWyxKmo"
 }
 '</span>
+
 </code></pre></div>
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
@@ -532,35 +542,7 @@ Required parameters:</p>
 </span><span class="n">refresh</span><span class="p">.</span><span class="n">json</span><span class="p">[</span><span class="s">"access"</span><span class="p">]</span>
 </code></pre></div>
 <p>This endpoint is used to keep alive the session. The uses a <code>refresh token</code>as a parameter and it returns a <code>access token</code>. In this way you get refreshed access token everytime you need it.</p>
-<h1 id='restapi-endpoints-models'>RESTapi Endpoints models</h1>
-<blockquote>
-<p>In order to register data you should have to be loged in using the API.</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code><span class="c"># GET the information of a certain model, </span>
-<span class="c"># where model are the endpoints of Registry</span>
-
-<span class="c">### GET Request</span>
-
-curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'http://localhost:8000/api/model/'</span> <span class="se">\</span>
-<span class="nt">--header</span> <span class="s1">'Authorization: Bearer {{jwt_token}}'</span>
-
-<span class="c">### POST request</span>
-
-<span class="c"># params are the parameters that will be passed to filter data</span>
-
-curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/model/'</span> <span class="se">\</span>
-<span class="nt">--data-raw</span> <span class="s1">'{
-    "name": "API test", 
-    "description": "Testing API", 
-    "doi": "http://www.google.com"
-}'</span>
-
-<span class="c">### PATCH request</span>
-curl <span class="nt">--location</span> <span class="nt">--request</span> PATCH <span class="s1">'http://localhost:8000/api/model/'</span>
-<span class="nt">--data-raw</span> <span class="s1">'{
-
-}'</span>
-</code></pre></div><div class="highlight"><pre class="highlight python tab-python"><code>
+<h1 id='restapi-endpoints-models'>RESTapi Endpoints models</h1><div class="highlight"><pre class="highlight python tab-python"><code>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="n">model</span> <span class="o">=</span> <span class="c1">## your desire model.
 </span><span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s">'http://localhost:8000/api/</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s">/'</span>
@@ -595,9 +577,11 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> PATCH 
     <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s">'Authorization'</span> <span class="p">:</span> <span class="s">'Bearer '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">access_token</span><span class="p">)}</span>
 <span class="p">)</span>
 </code></pre></div>
-<p>The regestry endpoint contains a way to upload and obtain data using the Flapjack REST API. As a way to further explain how this endpoint works firlty we are going to show the base code to contact the REST API, and in the next subsection we will explain the different models where you can upload and retrieve data.</p>
+<p>The following endpoints are the ones that enable you to access to the data that you have stored in the database. You can use the <code>GET</code>, <code>POST</code>, <code>PATCH</code> and <code>DELETE</code> methods to access to the data. The way that you can access to this data is under the Flapjack system data structure. This structure is the following:</p>
 
-<p>When you do a post request to the Flapjack API, you will upload your data into de database. On other hand, when you do a get request to the Flapjack API you will be filtering the actual data and returning those models that match the filter criteria. The delete request delete a certain data from the database by the id of the model that you post. And finally, patch is used to update the data of a certain model posted in Flapjack.</p>
+<p><img src="https://pubs.acs.org/na101/home/literatum/publisher/achs/journals/content/asbcd6/2021/asbcd6.2021.10.issue-1/acssynbio.0c00554/20210108/images/large/sb0c00554_0002.jpeg" alt="image" /></p>
+
+<p>In the following endpoints you are able to access, post, patch and delete the data contained under the same model. </p>
 <h2 id='study'>Study</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/study/'</span> <span class="se">\</span>
 </code></pre></div>
 <p>This corresponds to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.</p>
@@ -1401,6 +1385,64 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> PATCH 
 <tr>
 <td>All data points</td>
 <td>You plot all the points, not givin more detail to anyone.</td>
+</tr>
+</tbody></table>
+<h1 id='errors'>Errors</h1>
+<aside class="notice">
+This error section is stored in a separate file in <code>includes/_errors.md</code>. Slate allows you to optionally separate out your docs into many files...just save them to the <code>includes</code> folder and add them to the top of your <code>index.md</code>'s frontmatter. Files are included in the order listed.
+</aside>
+
+<p>The Kittn API uses the following error codes:</p>
+
+<table><thead>
+<tr>
+<th>Error Code</th>
+<th>Meaning</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>400</td>
+<td>Bad Request -- Your request is invalid.</td>
+</tr>
+<tr>
+<td>401</td>
+<td>Unauthorized -- Your API key is wrong.</td>
+</tr>
+<tr>
+<td>403</td>
+<td>Forbidden -- The kitten requested is hidden for administrators only.</td>
+</tr>
+<tr>
+<td>404</td>
+<td>Not Found -- The specified kitten could not be found.</td>
+</tr>
+<tr>
+<td>405</td>
+<td>Method Not Allowed -- You tried to access a kitten with an invalid method.</td>
+</tr>
+<tr>
+<td>406</td>
+<td>Not Acceptable -- You requested a format that isn&#39;t json.</td>
+</tr>
+<tr>
+<td>410</td>
+<td>Gone -- The kitten requested has been removed from our servers.</td>
+</tr>
+<tr>
+<td>418</td>
+<td>I&#39;m a teapot.</td>
+</tr>
+<tr>
+<td>429</td>
+<td>Too Many Requests -- You&#39;re requesting too many kittens! Slow down!</td>
+</tr>
+<tr>
+<td>500</td>
+<td>Internal Server Error -- We had a problem with our server. Try again later.</td>
+</tr>
+<tr>
+<td>503</td>
+<td>Service Unavailable -- We&#39;re temporarily offline for maintenance. Please try again later.</td>
 </tr>
 </tbody></table>
 
