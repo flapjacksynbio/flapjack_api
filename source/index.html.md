@@ -214,12 +214,18 @@ The following endpoints are the ones that enable you to access to the data that 
 
 ![image](https://pubs.acs.org/na101/home/literatum/publisher/achs/journals/content/asbcd6/2021/asbcd6.2021.10.issue-1/acssynbio.0c00554/20210108/images/large/sb0c00554_0002.jpeg)
 
-In the following endpoints you are able to access, post, patch and delete the data contained under the same model. 
+As shown every endpoint is interconected with eachother in some sort of way. Using the RESTful API you are able to access to each one of the models in the database, so you can do whatever you want with it.
 ## Study
 ```shell
 curl --location --request POST 'http://localhost:8000/api/study/' \
 ```
 This corresponds to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.
+
+In general the things that you can do with each REST model is:
+``GET``: Get all the data of the model, get filtered data by a set of parameter and get an specific data by the ID.
+``POST``: Create a new data in the model.
+``PATCH``: Update a data in the model.
+``DELETE``: Delete a data in the model.
 ### Query parameters
 
 Key|Description
