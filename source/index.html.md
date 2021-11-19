@@ -11,7 +11,7 @@ toc_footers:
   - <a href='https://github.com/slatedocs/slate'>Documentation Powered by Slate</a>
 
 includes:
-  #- errors
+  - errors
 
 search: true
 
@@ -57,18 +57,20 @@ print(response.text)
 ```
 
 ```shell
-# With shell, you can just pass the correct header with each request
-curl --location --request POST 'localhost:8000/api/auth/register/' \
+curl --location --request POST 'http://localhost:8000/api/auth/register/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "username": "JohnDoe",
-    "password": "asd123",   
+	"username": "JohnDoe",
+	"password": "asd123",
     "password2": "asd123",
     "email": "john@doe.com"
-}
-'
+}'
 ```
+> response 
 
+```json
+rellenar con el json
+```
 
 
 
@@ -85,13 +87,15 @@ Required parameters:
 
 ## Log In
 ```shell
+
 curl --location --request POST 'localhost:8000/api/auth/log_in/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "username": "JohnDoe",
-    "password": "asd123"
+	"username": "JohnDoe",
+	"password": "asd123"
 }
 '
+
 ```
 > The above command returns JSON structured like this:
 
@@ -134,12 +138,14 @@ When you do a log_in request you receive two tokens, a ``refresh`` token and an 
 ## Refresh
 
 ```shell
+
 curl --location --request POST 'localhost:8000/api/auth/refresh/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzE2NzUwNCwianRpIjoiNzAxYTlmYWM3NmYyNDZmY2I0MDJkNzUwOTU5M2JlMjciLCJ1c2VyX2lkIjo0fQ.QalaWSeHxyf-7ugVoJhPQgfAma40DENTLXMkQWyxKmo"
+	"refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzE2NzUwNCwianRpIjoiNzAxYTlmYWM3NmYyNDZmY2I0MDJkNzUwOTU5M2JlMjciLCJ1c2VyX2lkIjo0fQ.QalaWSeHxyf-7ugVoJhPQgfAma40DENTLXMkQWyxKmo"
 }
 '
+
 ```
 > The above command returns JSON structured like this:
 
@@ -166,35 +172,6 @@ refresh.json["access"]
 This endpoint is used to keep alive the session. The uses a ``refresh token``as a parameter and it returns a ``access token``. In this way you get refreshed access token everytime you need it.
 
 # RESTapi Endpoints models
-
-> In order to register data you should have to be loged in using the API.
-
-```shell
-# GET the information of a certain model, 
-# where model are the endpoints of Registry
-
-### GET Request
-
-curl --location --request GET 'http://localhost:8000/api/model/' \
---header 'Authorization: Bearer {{jwt_token}}'
-
-### POST request
-
-# params are the parameters that will be passed to filter data
-
-curl --location --request POST 'http://localhost:8000/api/model/' \
---data-raw '{
-	"name": "API test", 
-	"description": "Testing API", 
-	"doi": "http://www.google.com"
-}'
-
-### PATCH request
-curl --location --request PATCH 'http://localhost:8000/api/model/'
---data-raw '{
-	
-}'
-```
 
 ```python
 
@@ -233,11 +210,11 @@ delete = requests.delete(
 )
 ```
 
-The regestry endpoint contains a way to upload and obtain data using the Flapjack REST API. As a way to further explain how this endpoint works firlty we are going to show the base code to contact the REST API, and in the next subsection we will explain the different models where you can upload and retrieve data.
+The following endpoints are the ones that enable you to access to the data that you have stored in the database. You can use the ``GET``, ``POST``, ``PATCH`` and ``DELETE`` methods to access to the data. The way that you can access to this data is under the Flapjack system data structure. This structure is the following:
 
-When you do a post request to the Flapjack API, you will upload your data into de database. On other hand, when you do a get request to the Flapjack API you will be filtering the actual data and returning those models that match the filter criteria. The delete request delete a certain data from the database by the id of the model that you post. And finally, patch is used to update the data of a certain model posted in Flapjack.
+![image](https://pubs.acs.org/na101/home/literatum/publisher/achs/journals/content/asbcd6/2021/asbcd6.2021.10.issue-1/acssynbio.0c00554/20210108/images/large/sb0c00554_0002.jpeg)
 
-
+In the following endpoints you are able to access, post, patch and delete the data contained under the same model. 
 ## Study
 ```shell
 curl --location --request POST 'http://localhost:8000/api/study/' \
