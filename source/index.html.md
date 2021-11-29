@@ -135,8 +135,11 @@ Required parameters:
 
 `password: asd123`
 
-When you do a log_in request you receive two tokens, a ``refresh`` token and an ``access token``. The ``refresh token``is used to keep the session alive, and you can give this token to the refresh endpoint to get a new ``access token``. The ``access token`` is used to access the different endpoints of the API, by giving it as a parameter in the header of the request, replazing the ``{{jwt_token}}`` in the header of the request.
+When you do a log_in request you receive two tokens, a ``refresh`` token and an ``access token``. The ``refresh token``is used to keep the session alive, and you can give this token to the refresh endpoint to get a new ``access token``. The ``access token`` is used to access the different endpoints of the API, by giving it as a parameter in the header of the request in the following format:
 
+``--header 'Authorization: Bearer {access token}'``
+
+In the next section of this documentation you can find examples to it.
 ## Refresh
 
 ```shell
@@ -215,6 +218,10 @@ The following endpoints are the ones that enable you to access to the data that 
 ![image](https://pubs.acs.org/na101/home/literatum/publisher/achs/journals/content/asbcd6/2021/asbcd6.2021.10.issue-1/acssynbio.0c00554/20210108/images/large/sb0c00554_0002.jpeg)
 
 As shown every endpoint is interconected with eachother in some sort of way. Using the RESTful API you are able to access to each one of the models in the database, so you can do whatever you want with it.
+
+In this case we have uploaded a file containing the data from an study about characterizing context effects on gene expression levels and dCas9 inverters, these studies can be found in the [flapjack paper](https://doi.org/10.1021/acssynbio.0c00554). 
+
+For each endpoint you will find a series of examples that will introduce you to the different ways that you can use the API. This examples are in the form of shell commands, and the response of them in json format.
 ## Study
 > To get the total list of studies:
 
@@ -222,17 +229,88 @@ As shown every endpoint is interconected with eachother in some sort of way. Usi
 curl --location --request POST 'http://localhost:8000/api/study/' \
 --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
 ```
+>Reponse
+
+```json
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 5,
+            "is_owner": true,
+            "shared_with": [],
+            "name": "cfps variants",
+            "description": "cfps variants for flapjack documentation",
+            "doi": "",
+            "public": false
+        },
+        {
+            "id": 6,
+            "is_owner": true,
+            "shared_with": [],
+            "name": "dcas9 inverters",
+            "description": "dcas9 inverters for flapjack documentation",
+            "doi": "",
+            "public": false
+        }
+    ]
+}
+```
+
 > To get the list of studies filtered by specific parameters:
 
 ```shell
-curl --location --request GET 'http://localhost:8000/api/study/?name=dCas9 Inverters&description=Inverters (NOT gates) based on repression by CRISPRi transcription regulation' \
+curl --location --request GET 'http://localhost:8000/api/study/?name=cfps variants' \
 --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
 ```
+> Response
+
+```json
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 5,
+            "is_owner": true,
+            "shared_with": [],
+            "name": "cfps variants",
+            "description": "cfps variants for flapjack documentation",
+            "doi": "",
+            "public": false
+        }
+    ]
+}
+```
+
 > To search for an specific study:
 
 ```shell
-curl --location --request GET 'http://localhost:8000/api/study/?search=dCas' \
+curl --location --request GET 'http://localhost:8000/api/study/?search=dCas9' \
 --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
+```
+> Response 
+
+```json
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 6,
+            "is_owner": true,
+            "shared_with": [],
+            "name": "dcas9 inverters",
+            "description": "dcas9 inverters for flapjack documentation",
+            "doi": "",
+            "public": false
+        }
+    ]
+}
 ```
 This corresponds to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.
 
@@ -261,20 +339,135 @@ curl --location --request GET 'http://localhost:8000/api/assay/'
 --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
 ```
 
+> Response
+
+```json
+
+{
+    "count": 5,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 10,
+            "name": "dcas9 inverters 1",
+            "machine": "HTX Synergy",
+            "description": "dcas9 inverters, assay 1",
+            "temperature": 37.0,
+            "study": 6
+        },
+        {
+            "id": 9,
+            "name": "cfps variants",
+            "machine": "HTX Synergy",
+            "description": "cfps variants for flapjack documentation assay 1",
+            "temperature": 24.0,
+            "study": 5
+        },
+        {
+            "id": 11,
+            "name": "dcas9 inverters 2",
+            "machine": "HTX Synergy",
+            "description": "dcas9 inverters assay 2",
+            "temperature": 37.0,
+            "study": 6
+        },
+        {
+            "id": 12,
+            "name": "dcas9 inverters 3",
+            "machine": "HTX Synergy",
+            "description": "dcas9 inverters assay 3",
+            "temperature": 37.0,
+            "study": 6
+        },
+        {
+            "id": 13,
+            "name": "dcas9 inverters 4",
+            "machine": "HTX Synergy",
+            "description": "dcas9 inverters assay 4",
+            "temperature": 37.0,
+            "study": 6
+        }
+    ]
+}
+```
+
 > To get the list of assays filtered by specific parameters:
 
 ```shell
-curl --location --request GET 'http://localhost:8000/api/assay/?name=K4'
+curl --location --request GET 'http://localhost:8000/api/assay/?temperature=37'
 --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
 ```
 
+>Response
+
+```json
+{
+    "count": 4,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 10,
+            "name": "dcas9 inverters 1",
+            "machine": "HTX Synergy",
+            "description": "dcas9 inverters, assay 1",
+            "temperature": 37.0,
+            "study": 6
+        },
+        {
+            "id": 11,
+            "name": "dcas9 inverters 2",
+            "machine": "HTX Synergy",
+            "description": "dcas9 inverters assay 2",
+            "temperature": 37.0,
+            "study": 6
+        },
+        {
+            "id": 12,
+            "name": "dcas9 inverters 3",
+            "machine": "HTX Synergy",
+            "description": "dcas9 inverters assay 3",
+            "temperature": 37.0,
+            "study": 6
+        },
+        {
+            "id": 13,
+            "name": "dcas9 inverters 4",
+            "machine": "HTX Synergy",
+            "description": "dcas9 inverters assay 4",
+            "temperature": 37.0,
+            "study": 6
+        }
+    ]
+}
+```
 > Search for an specific assay:
 
 ```shell
-curl --location --request GET 'http://localhost:8000/api/assay/?search=K4'
+curl --location --request GET 'http://localhost:8000/api/assay/?search=dcas9 inverters 3'
 --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
 ```
 
+> Response
+
+```json
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 12,
+            "name": "dcas9 inverters 3",
+            "machine": "HTX Synergy",
+            "description": "dcas9 inverters assay 3",
+            "temperature": 37.0,
+            "study": 6
+        }
+    ]
+}
+```
 
 The assays refears to measurement of experiments, including replicates and varying experimental conditions, performed to explore different aspects of the study.
 
@@ -298,13 +491,90 @@ curl --location --request GET 'localhost:8000/api/sample/' \
 --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
 ```
 
+>Response
+
+```json
+{
+    "count": 480,
+    "next": "http://localhost:8000/api/sample/?limit=100&offset=100",
+    "previous": null,
+    "results": [
+		{
+            "id": 665,
+            "row": 8,
+            "col": 5,
+            "assay": 12,
+            "media": 1,
+            "strain": null,
+            "vector": null,
+            "supplements": [
+                2,
+                11
+            ]
+        },
+        {
+            "id": 578,
+            "row": 1,
+            "col": 2,
+            "assay": 12,
+            "media": 1,
+            "strain": 1,
+            "vector": 13,
+            "supplements": [
+                2,
+                3
+            ]
+        },
+        {
+            "id": 730,
+            "row": 5,
+            "col": 10,
+            "assay": 13,
+            "media": 5,
+            "strain": 1,
+            "vector": 12,
+            "supplements": [
+                2,
+                11
+            ]
+        },
+		...
+	]
+}
+```
+>Due to the large number of samples, we are going to show the firts 3 samples.
+
 > To get the list of samples filtered by specific parameters:
 
 ```shell
-curl --location --request GET 'localhost:8000/api/sample/?id=11035&row=4' \
+curl --location --request GET 'localhost:8000/api/sample/?id=730' \
 --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
 ```
 
+>Response
+
+```json
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 730,
+            "row": 5,
+            "col": 10,
+            "assay": 13,
+            "media": 5,
+            "strain": 1,
+            "vector": 12,
+            "supplements": [
+                2,
+                11
+            ]
+        }
+    ]
+}
+```
 > Search for an specific sample:
 
 ```shell
@@ -326,40 +596,6 @@ supplements | Supplement utilised in the sample
 row | Position in the assay layout (row)
 col | Position in the assay layout (column)
 
-## DNA
-> To get the total list of dna:
-
-```shell
-curl --location --request GET 'http://localhost:8000/api/dna/' \
---header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
-```
-
-> To get the list of dna filtered by specific parameters:
-
-```shell
-curl --location --request GET 'http://localhost:8000/api/dna/?id=8&name=TMA3' \
---header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
-```
-
-> Search for an specific dna entry:
-
-```shell
-
-curl --location --request GET 'http://localhost:8000/api/dna/?search=TMA' \
---header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
-
-```
-
-DNA corresponds to the DNA parts that, later on, will compose a vector that can be used in the assay.
-
-### Query Parameters
-
-Key|Description
----|---
-owner| Owner of the DNA 
-name| Name of the DNA 
-sboluri| SBOLURI of the DNA 
-
 ## Vector
 
 The vector describes the synthetic DNAs encoding a genetic circuit, including links to part composition and sequence via the corresponding SynBioHub URIs.
@@ -371,6 +607,100 @@ Key|Description
 owner | Name of the owner of the data of the query
 name | Name of the vector 
 dnas | DNAs conteined in the vector 
+
+## DNA
+> To get the total list of dna:
+
+```shell
+curl --location --request GET 'http://localhost:8000/api/dna/' \
+--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
+```
+
+>Response
+
+```json
+{
+    "count": 11,
+    "next": null,
+    "previous": null,
+    "results": [
+		{
+            "id": 19,
+            "name": "tma 5",
+            "sboluri": ""
+        },
+        {
+            "id": 15,
+            "name": "L1-30A ft",
+            "sboluri": ""
+        },
+        {
+            "id": 16,
+            "name": "Ccat 1",
+            "sboluri": ""
+        },
+		...
+	]
+}
+```
+>Due to the large amount of DNA, we are going to show the first 3 dna.
+
+> To get the list of dna filtered by specific parameters:
+
+```shell
+curl --location --request GET 'http://localhost:8000/api/dna/?id=12' \
+--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
+```
+
+>Response
+```json
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 12,
+            "name": "L1-23A ft",
+            "sboluri": ""
+        }
+    ]
+}
+```
+
+> Search for an specific dna entry:
+
+```shell
+curl --location --request GET 'http://localhost:8000/api/dna/?search=tma 5' \
+--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'
+```
+
+>Response
+
+```json
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 19,
+            "name": "tma 5",
+            "sboluri": ""
+        }
+    ]
+}
+```
+
+DNA corresponds to the DNA parts that, later on, will compose a vector that can be used in the assay.
+
+### Query Parameters
+
+Key|Description
+---|---
+owner| Owner of the DNA 
+name| Name of the DNA 
+sboluri| SBOLURI of the DNA 
 
 ## Media
 
@@ -398,6 +728,18 @@ owner | Name of the owner of the data of the strain
 name | Name of the strain
 description | Description of the strain
 
+## Supplement
+
+Supplemente is any supplementary chemicals that interact with components of the genetic circuit. It's compose of a serie of Chemical data objects.
+
+### Query Parameters
+Key | Description
+---| ---
+owner | Name of the owner of the data 
+name | Name of the certiain suplement
+chemical | Chemicals used in the suplement
+concentration | Concentration of the chemicals (Is the concentration of the chemicals or suplement???)
+
 ## Chemical
 
 This registry refers to the chemical(s) that compose the supplement used during the experiments used to obtain data.
@@ -411,18 +753,18 @@ description | Description of the chemical
 pubchemid | Pubchem id of the chemical
 
 
-## Supplement
+## Measurement
 
-Supplemente is any supplementary chemicals that interact with components of the genetic circuit. It's compose of a serie of Chemical data objects.
+The messurement is the value of the raw measurement recorded for a particular sample during an assay at a particular time.
 
 ### Query Parameters
-Key | Description
----| ---
-owner | Name of the owner of the data 
-name | Name of the certiain suplement
-chemical | Chemicals used in the suplement
-concentration | Concentration of the chemicals (Is the concentration of the chemicals or suplement???)
 
+Key| Description
+---|---
+sample | Sample that is associated with this measurement
+signal | Signal associated with this measurement
+value | Value of the measurement
+time | Time measurement
 ## Signal
 
 Signal is the subject of measurements, for example a fluorescence channel with given filter bandwidths.
@@ -436,18 +778,6 @@ name | Name of the signal data
 description | Description of the signal data
 color | Color of the signal utilized
 
-## Measurement
-
-The messurement is the value of the raw measurement recorded for a particular sample during an assay at a particular time.
-
-### Query Parameters
-
-Key| Description
----|---
-sample | Sample that is associated with this measurement
-signal | Signal associated with this measurement
-value | Value of the measurement
-time | Time measurement
 
 # websocket API
 ## Introduction
