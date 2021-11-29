@@ -342,10 +342,13 @@
                     <a href="#assays" class="toc-h2 toc-link" data-title="Assays">Assays</a>
                   </li>
                   <li>
-                    <a href="#dna" class="toc-h2 toc-link" data-title="DNA">DNA</a>
+                    <a href="#sample" class="toc-h2 toc-link" data-title="Sample">Sample</a>
                   </li>
                   <li>
                     <a href="#vector" class="toc-h2 toc-link" data-title="Vector">Vector</a>
+                  </li>
+                  <li>
+                    <a href="#dna" class="toc-h2 toc-link" data-title="DNA">DNA</a>
                   </li>
                   <li>
                     <a href="#media" class="toc-h2 toc-link" data-title="Media">Media</a>
@@ -354,36 +357,16 @@
                     <a href="#strain" class="toc-h2 toc-link" data-title="Strain">Strain</a>
                   </li>
                   <li>
-                    <a href="#chemical" class="toc-h2 toc-link" data-title="Chemical">Chemical</a>
-                  </li>
-                  <li>
                     <a href="#supplement" class="toc-h2 toc-link" data-title="Supplement">Supplement</a>
                   </li>
                   <li>
-                    <a href="#sample" class="toc-h2 toc-link" data-title="Sample">Sample</a>
-                  </li>
-                  <li>
-                    <a href="#signal" class="toc-h2 toc-link" data-title="Signal">Signal</a>
+                    <a href="#chemical" class="toc-h2 toc-link" data-title="Chemical">Chemical</a>
                   </li>
                   <li>
                     <a href="#measurement" class="toc-h2 toc-link" data-title="Measurement">Measurement</a>
                   </li>
-              </ul>
-          </li>
-          <li>
-            <a href="#example-of-the-workflow-rest-api" class="toc-h1 toc-link" data-title="Example of the workflow (REST API)">Example of the workflow (REST API)</a>
-              <ul class="toc-list-h2">
                   <li>
-                    <a href="#registry" class="toc-h2 toc-link" data-title="Registry">Registry</a>
-                  </li>
-                  <li>
-                    <a href="#log-in-2" class="toc-h2 toc-link" data-title="Log in">Log in</a>
-                  </li>
-                  <li>
-                    <a href="#upload-data" class="toc-h2 toc-link" data-title="Upload data">Upload data</a>
-                  </li>
-                  <li>
-                    <a href="#get-data" class="toc-h2 toc-link" data-title="Get Data">Get Data</a>
+                    <a href="#signal" class="toc-h2 toc-link" data-title="Signal">Signal</a>
                   </li>
               </ul>
           </li>
@@ -461,7 +444,10 @@
 <blockquote>
 <p>response </p>
 </blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="err">rellenar</span><span class="w"> </span><span class="err">con</span><span class="w"> </span><span class="err">el</span><span class="w"> </span><span class="err">json</span><span class="w">
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"refresh"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzg5NTc4MSwianRpIjoiYjk3NzQwN2RmMjEwNDUzYTg0ZjA3YjEzMTlmOTY1OGIiLCJ1c2VyX2lkIjoyfQ.eb1fFQWatJiALTPEhPV4tPtPKIf7Nc1UUjLZUJVx-iU"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"access"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5NjgxLCJqdGkiOiJhZWMxYTAwNDE4NDE0ZjQwYWM3ZDMzYjk5YjY0ZmE0OSIsInVzZXJfaWQiOjJ9.aaa_P8F-DaLJh61gol9HoE9cpH-RAw1f4IGIs90FuWc"</span><span class="w">
+</span><span class="p">}</span><span class="w">
 </span></code></pre></div>
 <p>This API counts with the facility of a direct registry method.
 Required parameters:</p>
@@ -473,8 +459,7 @@ Required parameters:</p>
 <p><code>password2: asd123</code></p>
 
 <p><code>email: john@doe.com</code></p>
-<h2 id='log-in'>Log In</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>
-curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/log_in/'</span> <span class="se">\</span>
+<h2 id='log-in'>Log In</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/log_in/'</span> <span class="se">\</span>
 <span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
     "username": "JohnDoe",
@@ -487,8 +472,8 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> POST <
 <p>The above command returns JSON structured like this:</p>
 </blockquote>
 <div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"refresh"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzE2NzUwNCwianRpIjoiNzAxYTlmYWM3NmYyNDZmY2I0MDJkNzUwOTU5M2JlMjciLCJ1c2VyX2lkIjo0fQ.QalaWSeHxyf-7ugVoJhPQgfAma40DENTLXMkQWyxKmo"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"access"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3MDgxNDA0LCJqdGkiOiJjOTIyYmNjNjMzMTQ0ZWU1ODY0MzBjN2JmMjQ4MzkxYiIsInVzZXJfaWQiOjR9.YL6fKIx3dv-vH-Ho9OhwMloSLHT7Out8wi_gn7nldCA"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"refresh"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzg5NTk1MCwianRpIjoiZDVkMGU0MWY2MWE4NDk3ZjlmNTEyZWVmYTVkM2ZkYzYiLCJ1c2VyX2lkIjoyfQ.spzm6fvUty333NqrOdalQuq9dP4ze8-3JuKk-UbLcyQ"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"access"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5ODUwLCJqdGkiOiIwZGQ4Y2Q3N2VhZDk0NTQ5OWI0Mzg5MTU4ZjYzZTYzZCIsInVzZXJfaWQiOjJ9.Pu0807dYKqHFAXyvVAbe2E6K2dkrEgb7rhs_2T2-er8"</span><span class="p">,</span><span class="w">
     </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"JohnDoe"</span><span class="p">,</span><span class="w">
     </span><span class="nl">"email"</span><span class="p">:</span><span class="w"> </span><span class="s2">"john@doe.com"</span><span class="w">
 </span><span class="p">}</span><span class="w">
@@ -513,21 +498,23 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> POST <
 
 <p><code>password: asd123</code></p>
 
-<p>When you do a log_in request you receive two tokens, a <code>refresh</code> token and an <code>access token</code>. The <code>refresh token</code>is used to keep the session alive, and you can give this token to the refresh endpoint to get a new <code>access token</code>. The <code>access token</code> is used to access the different endpoints of the API, by giving it as a parameter in the header of the request, replazing the <code>{{jwt_token}}</code> in the header of the request.</p>
-<h2 id='refresh'>Refresh</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>
-curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/refresh/'</span> <span class="se">\</span>
+<p>When you do a log_in request you receive two tokens, a <code>refresh</code> token and an <code>access token</code>. The <code>refresh token</code>is used to keep the session alive, and you can give this token to the refresh endpoint to get a new <code>access token</code>. The <code>access token</code> is used to access the different endpoints of the API, by giving it as a parameter in the header of the request in the following format:</p>
+
+<p><code>--header &#39;Authorization: Bearer {access token}&#39;</code></p>
+
+<p>In the next section of this documentation you can find examples to it.</p>
+<h2 id='refresh'>Refresh</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'localhost:8000/api/auth/refresh/'</span> <span class="se">\</span>
 <span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
 <span class="nt">--data-raw</span> <span class="s1">'{
-    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzE2NzUwNCwianRpIjoiNzAxYTlmYWM3NmYyNDZmY2I0MDJkNzUwOTU5M2JlMjciLCJ1c2VyX2lkIjo0fQ.QalaWSeHxyf-7ugVoJhPQgfAma40DENTLXMkQWyxKmo"
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNzg5NTk1MCwianRpIjoiZDVkMGU0MWY2MWE4NDk3ZjlmNTEyZWVmYTVkM2ZkYzYiLCJ1c2VyX2lkIjoyfQ.spzm6fvUty333NqrOdalQuq9dP4ze8-3JuKk-UbLcyQ"
 }
 '</span>
-
 </code></pre></div>
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
 </blockquote>
 <div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"access"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3MDgxNDUyLCJqdGkiOiI1NDMxNTU1OThhOTA0NWEwOTc5NWI0MzM1ZDc0ZWYwMiIsInVzZXJfaWQiOjR9.P0zMPr5sWazLHepsVj0gpthFQFTCuZv_zw8P6XZ4gxU"</span><span class="w">
+    </span><span class="nl">"access"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik"</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre></div><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -581,10 +568,106 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> POST <
 
 <p><img src="https://pubs.acs.org/na101/home/literatum/publisher/achs/journals/content/asbcd6/2021/asbcd6.2021.10.issue-1/acssynbio.0c00554/20210108/images/large/sb0c00554_0002.jpeg" alt="image" /></p>
 
-<p>In the following endpoints you are able to access, post, patch and delete the data contained under the same model. </p>
-<h2 id='study'>Study</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/study/'</span> <span class="se">\</span>
+<p>As shown every endpoint is interconected with eachother in some sort of way. Using the RESTful API you are able to access to each one of the models in the database, so you can do whatever you want with it.</p>
+
+<p>In this case we have uploaded a file containing the data from an study about characterizing context effects on gene expression levels and dCas9 inverters, these studies can be found in the <a href="https://doi.org/10.1021/acssynbio.0c00554">flapjack paper</a>. </p>
+
+<p>For each endpoint you will find a series of examples that will introduce you to the different ways that you can use the API. This examples are in the form of shell commands, and the response of them in json format.</p>
+<h2 id='study'>Study</h2>
+<blockquote>
+<p>To get the total list of studies:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> POST <span class="s1">'http://localhost:8000/api/study/'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
 </code></pre></div>
+<blockquote>
+<p>Reponse</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"is_owner"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"shared_with"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cfps variants"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cfps variants for flapjack documentation"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"doi"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"public"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"is_owner"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"shared_with"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters for flapjack documentation"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"doi"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"public"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>To get the list of studies filtered by specific parameters:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'http://localhost:8000/api/study/?name=cfps variants'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
+<blockquote>
+<p>Response</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"is_owner"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"shared_with"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cfps variants"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cfps variants for flapjack documentation"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"doi"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"public"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>To search for an specific study:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'http://localhost:8000/api/study/?search=dCas9'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
+<blockquote>
+<p>Response </p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"is_owner"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"shared_with"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters for flapjack documentation"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"doi"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"public"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
 <p>This corresponds to a project, for example a paper or report, that corresponds to a certain question a researcher wants to address.</p>
+
+<p>In general the things that you can do with each REST model is:
+<code>GET</code>: Get all the data of the model, get filtered data by a set of parameter and get an specific data by the ID.
+<code>POST</code>: Create a new data in the model.
+<code>PATCH</code>: Update a data in the model.
+<code>DELETE</code>: Delete a data in the model.</p>
 <h3 id='query-parameters'>Query parameters</h3>
 <table><thead>
 <tr>
@@ -614,6 +697,138 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> POST <
 </tr>
 </tbody></table>
 <h2 id='assays'>Assays</h2>
+<blockquote>
+<p>To get the total list of assays:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'http://localhost:8000/api/assay/'</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
+<blockquote>
+<p>Response</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="w">
+</span><span class="p">{</span><span class="w">
+    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters 1"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"machine"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HTX Synergy"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters, assay 1"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">37.0</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"study"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cfps variants"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"machine"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HTX Synergy"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cfps variants for flapjack documentation assay 1"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">24.0</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"study"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters 2"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"machine"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HTX Synergy"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters assay 2"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">37.0</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"study"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters 3"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"machine"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HTX Synergy"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters assay 3"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">37.0</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"study"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters 4"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"machine"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HTX Synergy"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters assay 4"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">37.0</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"study"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>To get the list of assays filtered by specific parameters:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'http://localhost:8000/api/assay/?temperature=37'</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
+<blockquote>
+<p>Response</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters 1"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"machine"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HTX Synergy"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters, assay 1"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">37.0</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"study"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters 2"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"machine"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HTX Synergy"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters assay 2"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">37.0</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"study"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters 3"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"machine"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HTX Synergy"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters assay 3"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">37.0</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"study"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters 4"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"machine"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HTX Synergy"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters assay 4"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">37.0</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"study"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>Search for an specific assay:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'http://localhost:8000/api/assay/?search=dcas9 inverters 3'</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
+<blockquote>
+<p>Response</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters 3"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"machine"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HTX Synergy"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dcas9 inverters assay 3"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">37.0</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"study"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
 <p>The assays refears to measurement of experiments, including replicates and varying experimental conditions, performed to explore different aspects of the study.</p>
 <h3 id='query-parameters-2'>Query Parameters</h3>
 <table><thead>
@@ -643,149 +858,104 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> POST <
 <td>Number of the assay in an specific study</td>
 </tr>
 </tbody></table>
-<h2 id='dna'>DNA</h2>
-<p>DNA corresponds to the DNA parts that, later on, will compose a vector that can be used in the assay.</p>
-<h3 id='query-parameters-3'>Query Parameters</h3>
-<table><thead>
-<tr>
-<th>Key</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>owner</td>
-<td>Owner of the DNA</td>
-</tr>
-<tr>
-<td>name</td>
-<td>Name of the DNA</td>
-</tr>
-<tr>
-<td>sboluri</td>
-<td>SBOLURI of the DNA</td>
-</tr>
-</tbody></table>
-<h2 id='vector'>Vector</h2>
-<p>The vector describes the synthetic DNAs encoding a genetic circuit, including links to part composition and sequence via the corresponding SynBioHub URIs.</p>
-<h3 id='query-parameters-4'>Query Parameters</h3>
-<table><thead>
-<tr>
-<th>Key</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>owner</td>
-<td>Name of the owner of the data of the query</td>
-</tr>
-<tr>
-<td>name</td>
-<td>Name of the vector</td>
-</tr>
-<tr>
-<td>dnas</td>
-<td>DNAs conteined in the vector</td>
-</tr>
-</tbody></table>
-<h2 id='media'>Media</h2>
-<p>The media corresponds to the composition of the substrate that drives the genetic circuit, media in the case of live cell assays, or extract for cell-free experiments.</p>
-<h3 id='query-parameters-5'>Query Parameters</h3>
-<table><thead>
-<tr>
-<th>Key</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>owner</td>
-<td>owner of the media</td>
-</tr>
-<tr>
-<td>name</td>
-<td>Name of the media</td>
-</tr>
-<tr>
-<td>description</td>
-<td>Description of the media</td>
-</tr>
-</tbody></table>
-<h2 id='strain'>Strain</h2>
-<p>The strains refers to the chassis organism, if any, hosting the genetic circuit.</p>
-<h3 id='query-parameters-6'>Query Parameters</h3>
-<table><thead>
-<tr>
-<th>Key</th>
-<th>description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>owner</td>
-<td>Name of the owner of the data of the strain</td>
-</tr>
-<tr>
-<td>name</td>
-<td>Name of the strain</td>
-</tr>
-<tr>
-<td>description</td>
-<td>Description of the strain</td>
-</tr>
-</tbody></table>
-<h2 id='chemical'>Chemical</h2>
-<p>This registry refers to the chemical(s) that compose the supplement used during the experiments used to obtain data.</p>
-<h3 id='query-parameters-7'>Query Parameters</h3>
-<table><thead>
-<tr>
-<th>Key</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>owner</td>
-<td>Name of the owner of the chemical data</td>
-</tr>
-<tr>
-<td>name</td>
-<td>Name of the chemical</td>
-</tr>
-<tr>
-<td>description</td>
-<td>Description of the chemical</td>
-</tr>
-<tr>
-<td>pubchemid</td>
-<td>Pubchem id of the chemical</td>
-</tr>
-</tbody></table>
-<h2 id='supplement'>Supplement</h2>
-<p>Supplemente is any supplementary chemicals that interact with components of the genetic circuit. It&#39;s compose of a serie of Chemical data objects.</p>
-<h3 id='query-parameters-8'>Query Parameters</h3>
-<table><thead>
-<tr>
-<th>Key</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>owner</td>
-<td>Name of the owner of the data</td>
-</tr>
-<tr>
-<td>name</td>
-<td>Name of the certiain suplement</td>
-</tr>
-<tr>
-<td>chemical</td>
-<td>Chemicals used in the suplement</td>
-</tr>
-<tr>
-<td>concentration</td>
-<td>Concentration of the chemicals (Is the concentration of the chemicals or suplement???)</td>
-</tr>
-</tbody></table>
 <h2 id='sample'>Sample</h2>
+<blockquote>
+<p>To get the total list of samples:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'localhost:8000/api/sample/'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
+<blockquote>
+<p>Response</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">480</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:8000/api/sample/?limit=100&amp;offset=100"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">665</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"row"</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"col"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"assay"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"media"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"strain"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"vector"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"supplements"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="mi">2</span><span class="p">,</span><span class="w">
+                </span><span class="mi">11</span><span class="w">
+            </span><span class="p">]</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">578</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"row"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"col"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"assay"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"media"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"strain"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"vector"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"supplements"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="mi">2</span><span class="p">,</span><span class="w">
+                </span><span class="mi">3</span><span class="w">
+            </span><span class="p">]</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">730</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"row"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"col"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"assay"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"media"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"strain"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"vector"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"supplements"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="mi">2</span><span class="p">,</span><span class="w">
+                </span><span class="mi">11</span><span class="w">
+            </span><span class="p">]</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="err">...</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>Due to the large number of samples, we are going to show the firts 3 samples.</p>
+
+<p>To get the list of samples filtered by specific parameters:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'localhost:8000/api/sample/?id=730'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
+<blockquote>
+<p>Response</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">730</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"row"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"col"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"assay"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"media"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"strain"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"vector"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"supplements"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="mi">2</span><span class="p">,</span><span class="w">
+                </span><span class="mi">11</span><span class="w">
+            </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>Search for an specific sample:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'localhost:8000/api/sample/?search=TM'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
 <p>Sample orresponds to the basic unit that is subject to measurement, for example a colony or a well in a microplate.</p>
-<h3 id='query-parameters-9'>Query Parameters</h3>
+<h3 id='query-parameters-3'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -821,9 +991,9 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> POST <
 <td>Position in the assay layout (column)</td>
 </tr>
 </tbody></table>
-<h2 id='signal'>Signal</h2>
-<p>Signal is the subject of measurements, for example a fluorescence channel with given filter bandwidths.</p>
-<h3 id='query-parameters-10'>Query Parameters</h3>
+<h2 id='vector'>Vector</h2>
+<p>The vector describes the synthetic DNAs encoding a genetic circuit, including links to part composition and sequence via the corresponding SynBioHub URIs.</p>
+<h3 id='query-parameters-4'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -832,24 +1002,217 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> POST <
 </thead><tbody>
 <tr>
 <td>owner</td>
-<td>Owner of the signal data</td>
+<td>Name of the owner of the data of the query</td>
 </tr>
 <tr>
 <td>name</td>
-<td>Name of the signal data</td>
+<td>Name of the vector</td>
+</tr>
+<tr>
+<td>dnas</td>
+<td>DNAs conteined in the vector</td>
+</tr>
+</tbody></table>
+<h2 id='dna'>DNA</h2>
+<blockquote>
+<p>To get the total list of dna:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'http://localhost:8000/api/dna/'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
+<blockquote>
+<p>Response</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">19</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tma 5"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"sboluri"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"L1-30A ft"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"sboluri"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ccat 1"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"sboluri"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="err">...</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>Due to the large amount of DNA, we are going to show the first 3 dna.</p>
+
+<p>To get the list of dna filtered by specific parameters:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'http://localhost:8000/api/dna/?id=12'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
+<blockquote>
+<p>Response
+<code>json
+{
+    &quot;count&quot;: 1,
+    &quot;next&quot;: null,
+    &quot;previous&quot;: null,
+    &quot;results&quot;: [
+        {
+            &quot;id&quot;: 12,
+            &quot;name&quot;: &quot;L1-23A ft&quot;,
+            &quot;sboluri&quot;: &quot;&quot;
+        }
+    ]
+}
+</code></p>
+
+<p>Search for an specific dna entry:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">--location</span> <span class="nt">--request</span> GET <span class="s1">'http://localhost:8000/api/dna/?search=tma 5'</span> <span class="se">\</span>
+<span class="nt">--header</span> <span class="s1">'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3ODA5OTE3LCJqdGkiOiJmM2Q1MDZiMDBhYTc0MjQ1YWI4ZWVhZWExNmMyNGJiYSIsInVzZXJfaWQiOjJ9.w7zBOCM962a5GJ6zxZXigYNTUFIkNrI0qgxNAHU_Jik'</span>
+</code></pre></div>
+<blockquote>
+<p>Response</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">19</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tma 5"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"sboluri"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>DNA corresponds to the DNA parts that, later on, will compose a vector that can be used in the assay.</p>
+<h3 id='query-parameters-5'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Owner of the DNA</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the DNA</td>
+</tr>
+<tr>
+<td>sboluri</td>
+<td>SBOLURI of the DNA</td>
+</tr>
+</tbody></table>
+<h2 id='media'>Media</h2>
+<p>The media corresponds to the composition of the substrate that drives the genetic circuit, media in the case of live cell assays, or extract for cell-free experiments.</p>
+<h3 id='query-parameters-6'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>owner of the media</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the media</td>
 </tr>
 <tr>
 <td>description</td>
-<td>Description of the signal data</td>
+<td>Description of the media</td>
+</tr>
+</tbody></table>
+<h2 id='strain'>Strain</h2>
+<p>The strains refers to the chassis organism, if any, hosting the genetic circuit.</p>
+<h3 id='query-parameters-7'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Name of the owner of the data of the strain</td>
 </tr>
 <tr>
-<td>color</td>
-<td>Color of the signal utilized</td>
+<td>name</td>
+<td>Name of the strain</td>
+</tr>
+<tr>
+<td>description</td>
+<td>Description of the strain</td>
+</tr>
+</tbody></table>
+<h2 id='supplement'>Supplement</h2>
+<p>Supplemente is any supplementary chemicals that interact with components of the genetic circuit. It&#39;s compose of a serie of Chemical data objects.</p>
+<h3 id='query-parameters-8'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Name of the owner of the data</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the certiain suplement</td>
+</tr>
+<tr>
+<td>chemical</td>
+<td>Chemicals used in the suplement</td>
+</tr>
+<tr>
+<td>concentration</td>
+<td>Concentration of the chemicals (Is the concentration of the chemicals or suplement???)</td>
+</tr>
+</tbody></table>
+<h2 id='chemical'>Chemical</h2>
+<p>This registry refers to the chemical(s) that compose the supplement used during the experiments used to obtain data.</p>
+<h3 id='query-parameters-9'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Name of the owner of the chemical data</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the chemical</td>
+</tr>
+<tr>
+<td>description</td>
+<td>Description of the chemical</td>
+</tr>
+<tr>
+<td>pubchemid</td>
+<td>Pubchem id of the chemical</td>
 </tr>
 </tbody></table>
 <h2 id='measurement'>Measurement</h2>
 <p>The messurement is the value of the raw measurement recorded for a particular sample during an assay at a particular time.</p>
-<h3 id='query-parameters-11'>Query Parameters</h3>
+<h3 id='query-parameters-10'>Query Parameters</h3>
 <table><thead>
 <tr>
 <th>Key</th>
@@ -873,147 +1236,32 @@ curl <span class="nt">--location</span> <span class="nt">--request</span> POST <
 <td>Time measurement</td>
 </tr>
 </tbody></table>
-<h1 id='example-of-the-workflow-rest-api'>Example of the workflow (REST API)</h1>
-<p>Now we are going to exemplify how the workflow of the Flapjack REST API works.</p>
-<h2 id='registry'>Registry</h2><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
-
-<span class="n">url</span><span class="o">=</span> <span class="s">"http://localhost:8000/api/auth/register/"</span>
-
-<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">"username"</span><span class="o">=</span><span class="s">"flapjack_test1"</span><span class="p">,</span>
-    <span class="s">"password"</span><span class="o">=</span><span class="s">"flapjack_test2"</span><span class="p">,</span>
-    <span class="s">"password2"</span><span class="o">=</span><span class="s">"flapjack_test2"</span><span class="p">,</span>
-    <span class="s">"email"</span><span class="o">=</span><span class="s">"flapjack_test@test.com"</span>
-<span class="p">}</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">payload</span><span class="p">)</span>
-</code></pre></div>
-<p>Firstly we have to register to Flapjack. For this you have to create your credentials, especificaly the <code>username</code>, <code>password</code> (you have to repeat it in order to comfirme it), and <code>email</code>.</p>
-<h2 id='log-in-2'>Log in</h2><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
-
-<span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/auth/log_in/"</span>
-
-<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">"username"</span><span class="p">:</span><span class="s">"flapjack_test1"</span><span class="p">,</span>
-    <span class="s">"password"</span><span class="p">:</span><span class="s">"flapjack_test2"</span>
-<span class="p">}</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
-    <span class="n">url</span><span class="p">,</span>
-    <span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span><span class="p">,</span> 
-    <span class="n">data</span><span class="o">=</span> <span class="n">payload</span>
-<span class="p">)</span>
-</code></pre></div>
-<p>If you are already registered in Flapjack you can log in to it using your <code>username</code> and <code>password</code>.</p>
-<h2 id='upload-data'>Upload data</h2><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">json</span> 
-
-<span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/"</span>
-<span class="c1">## Firstly we have to log in 
-</span><span class="n">login</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">"username"</span><span class="p">:</span> <span class="s">"flapjack_test1"</span><span class="p">,</span>
-    <span class="s">"password"</span><span class="p">:</span> <span class="s">"flapjack_test2"</span>
-<span class="p">}</span>
-
-<span class="n">headers</span><span class="o">=</span><span class="p">{}</span>
-
-<span class="n">log_in</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
-    <span class="n">url</span><span class="o">+</span><span class="s">"auth/log_in/"</span><span class="p">,</span> 
-    <span class="n">headers</span><span class="o">=</span> <span class="n">headers</span><span class="p">,</span> 
-    <span class="n">data</span><span class="o">=</span><span class="n">login</span>
-<span class="p">).</span><span class="n">json</span><span class="p">()</span>
-<span class="c1">## After this you have to refresh
-</span>
-<span class="n">refresh_token</span> <span class="o">=</span> <span class="n">log_in</span><span class="p">[</span><span class="s">'refresh'</span><span class="p">]</span>
-
-<span class="n">refresh</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
-    <span class="n">url</span> <span class="o">+</span> <span class="s">"auth/refresh/"</span><span class="p">,</span> 
-    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">"refresh"</span> <span class="p">:</span> <span class="n">refresh_token</span><span class="p">}</span>
-<span class="p">).</span><span class="n">json</span><span class="p">()</span>
-<span class="c1">## Now we can upload our data to the server
-</span>
-<span class="n">access_token</span><span class="o">=</span><span class="n">log_in</span><span class="p">[</span><span class="s">"access"</span><span class="p">]</span>
-<span class="n">model</span> <span class="o">=</span> <span class="s">"study"</span>
-<span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-    <span class="s">"name"</span><span class="p">:</span><span class="s">"test-study1"</span><span class="p">,</span>
-    <span class="s">"description"</span><span class="p">:</span><span class="s">"This is an study to test the Flapjack REST API"</span><span class="p">,</span>
-    <span class="s">"owner"</span><span class="p">:</span><span class="s">"flapjack_test1"</span><span class="p">,</span>
-    <span class="s">"public"</span><span class="p">:</span><span class="bp">False</span>
-<span class="p">}</span>
-<span class="n">post</span><span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
-    <span class="n">url</span><span class="o">+</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s">/'</span><span class="p">,</span>
-    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s">"Authorization"</span><span class="p">:</span> <span class="s">'Bearer '</span> <span class="o">+</span> <span class="n">access_token</span><span class="p">},</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">kwargs</span>
-<span class="p">)</span>
-</code></pre></div>
-<blockquote>
-<p>The repsonse to the post requests is the following</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">[</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-        </span><span class="err">'id':</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> 
-        </span><span class="err">'is_owner':</span><span class="w"> </span><span class="err">True</span><span class="p">,</span><span class="w"> 
-        </span><span class="err">'shared_with':</span><span class="w"> </span><span class="p">[],</span><span class="w"> 
-        </span><span class="err">'name':</span><span class="w"> </span><span class="err">'test-study'</span><span class="p">,</span><span class="w"> 
-        </span><span class="err">'description':</span><span class="w"> </span><span class="err">'This</span><span class="w"> </span><span class="err">is</span><span class="w"> </span><span class="err">an</span><span class="w"> </span><span class="err">study</span><span class="w"> </span><span class="err">to</span><span class="w"> </span><span class="err">test</span><span class="w"> </span><span class="err">the</span><span class="w"> </span><span class="err">Flapjack</span><span class="w"> </span><span class="err">REST</span><span class="w"> </span><span class="err">API'</span><span class="p">,</span><span class="w"> 
-        </span><span class="err">'doi':</span><span class="w"> </span><span class="err">''</span><span class="p">,</span><span class="w"> 
-        </span><span class="err">'public':</span><span class="w"> </span><span class="err">False</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">]</span><span class="w">
-</span></code></pre></div>
-<p>Now imagine that you want to upload an study based with the following parameters:
-<code>Name: test-study1</code>
-<code>Description: This is a study to test the Flapjack REST API.</code>
-<code>owner: flapjack_test1</code>
-<code>Public: False</code></p>
-
-<p>To do this you need to post this data to the Flapjack REST API. The code to do this is in the right section.</p>
-<h2 id='get-data'>Get Data</h2><div class="highlight"><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">json</span>
-
-<span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:8000/api/"</span>
-<span class="c1">## Firstly we have to log in 
-</span><span class="n">login</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">"username"</span><span class="p">:</span> <span class="s">"flapjack_test1"</span><span class="p">,</span>
-    <span class="s">"password"</span><span class="p">:</span> <span class="s">"flapjack_test2"</span>
-<span class="p">}</span>
-
-<span class="n">headers</span><span class="o">=</span><span class="p">{}</span>
-
-<span class="n">log_in</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
-    <span class="n">url</span><span class="o">+</span><span class="s">"auth/log_in/"</span><span class="p">,</span> 
-    <span class="n">headers</span><span class="o">=</span> <span class="n">headers</span><span class="p">,</span> 
-    <span class="n">data</span><span class="o">=</span><span class="n">login</span>
-<span class="p">).</span><span class="n">json</span><span class="p">()</span>
-<span class="c1">## After this you have to refresh
-</span>
-<span class="n">refresh_token</span> <span class="o">=</span> <span class="n">log_in</span><span class="p">[</span><span class="s">'refresh'</span><span class="p">]</span>
-
-<span class="n">refresh</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
-    <span class="n">url</span> <span class="o">+</span> <span class="s">"auth/refresh/"</span><span class="p">,</span> 
-    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">"refresh"</span> <span class="p">:</span> <span class="n">refresh_token</span><span class="p">}</span>
-<span class="p">).</span><span class="n">json</span><span class="p">()</span>
-
-<span class="c1">## Assuming that you have uploaded a study previously
-</span>
-<span class="n">access_token</span><span class="o">=</span><span class="n">log_in</span><span class="p">[</span><span class="s">"access"</span><span class="p">]</span>
-<span class="n">model</span> <span class="o">=</span> <span class="s">"study"</span>
-<span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-    <span class="s">"name"</span><span class="p">:</span><span class="s">"test-study1"</span><span class="p">,</span>
-    <span class="s">"description"</span><span class="p">:</span><span class="s">"This is an study to test the Flapjack REST API"</span><span class="p">,</span>
-    <span class="s">"owner"</span><span class="p">:</span><span class="s">"flapjack_test1"</span><span class="p">,</span>
-    <span class="s">"public"</span><span class="p">:</span><span class="bp">False</span>
-<span class="p">}</span>
-<span class="n">get</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span>
-    <span class="n">url</span><span class="o">+</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s">/'</span><span class="p">,</span>
-    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s">"Authorization"</span><span class="p">:</span> <span class="s">'Bearer '</span> <span class="o">+</span> <span class="n">access_token</span><span class="p">},</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">kwargs</span>
-<span class="p">)</span>
-
-</code></pre></div>
-<p>Now as we upload data to Flapjack we can also get data from the database of Flapjack. In order to do this we need to follow up the following workflow.</p>
-
-<p>For more examples you can visit our <a href="https://github.com/SynBioUC/flapjack_api">GitHub repository</a>.</p>
+<h2 id='signal'>Signal</h2>
+<p>Signal is the subject of measurements, for example a fluorescence channel with given filter bandwidths.</p>
+<h3 id='query-parameters-11'>Query Parameters</h3>
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>owner</td>
+<td>Owner of the signal data</td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the signal data</td>
+</tr>
+<tr>
+<td>description</td>
+<td>Description of the signal data</td>
+</tr>
+<tr>
+<td>color</td>
+<td>Color of the signal utilized</td>
+</tr>
+</tbody></table>
 <h1 id='websocket-api'>websocket API</h1><h2 id='introduction-2'>Introduction</h2>
 <p>A websockat API is an advance technology that allows the communicate interactivily to the server. This is a very powerful tool because enables a longer conection to the server, in a full-duplex way. An important insight in this matter is that the websocket API enables an persistant conection to the server.</p>
 
