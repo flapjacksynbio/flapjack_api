@@ -1,19 +1,20 @@
-## Rest API for Flapjack data management system
+# API for Flapjack data management system
 
-### API
+The Flapjack data management systems allows synthetic biologist to analyze and visualize data from biological experiments. This system is provided in a serie of software that talk with each other in order to give the best expirience to every kind of user.
 
-For instructions on the API installation, you can go to our [API Wiki](https://github.com/SynBioUC/flapjack_api/wiki).
+In this document, we will describe the API of the Flapjack system. This API is simply explained as a powerful tool that allows programmers to interact with the system, allowing them to create, modify, delete and read data. And also we provide tools to analyze this data with different kind of algorithms and the faculty to visualize the results. All of this implemented with the help of both RESTful APIs and websockets.
 
-### Web interface
+In order to get your hand on the API, follow the instructions on the [installation page](https://github.com/RudgeLab/flapjack_api/wiki/Installation-and-deployment).
 
-For instructions on installation and use of the web interface, you can go to our [UI Wiki](https://github.com/SynBioUC/flapjack_frontend/wiki).
+## Other services
+The full documentation of this API is available at the following [link](https://rudgelab.github.io/flapjack_api/).
 
-### Python package
+If you want to know more about Flapjack, you can visit the other tools that we provide for this system, the [Flapjack front-end](https://github.com/RudgeLab/flapjack_frontend) github in order to get a local version, our [website](http://flapjack.rudge-lab.org/) where you can find an online version of the front-end of the system, and the Flapjack python package, [pyFlapjack](https://github.com/RudgeLab/flapjack), that allows you to interact with the system from python. 
 
-For instructions on package installation, you can go to our [Package Wiki](https://github.com/SynBioUC/flapjack/wiki/Installation).
+If you are interested in the Flapjack system, you can contact us at: [RudgeLab website](https://rudgelab.wordpress.com/).
 
-For tutorials on how to use the Python package for accessing the API, you can go to our [Jupyter tutorials](https://github.com/SynBioUC/flapjack/tree/master/notebooks).
+## Reference
 
-### API's full documentation
+Please reference our Flapjack's paper–available here, using the following reference:
 
-For a comprehensive documentation of the API you can access the [Flapjack backend documentation](https://github.com/SynBioUC/flapjack_api/blob/gh-pages/Flapjack_doc_backend.pdf).
+>Guillermo Yáñez Feliú, Benjamín Earle Gómez, Verner Codoceo Berrocal, Macarena Muñoz Silva, Isaac N. Nuñez, Tamara F. Matute, Anibal Arce Medina, Gonzalo Vidal, Carlos Vidal Céspedes, Jonathan Dahlin, Fernán Federici, and Timothy J. Rudge ACS Synthetic Biology 2021 10 (1), 183-191 DOI: 10.1021/acssynbio.0c00554
