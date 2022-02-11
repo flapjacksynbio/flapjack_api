@@ -38,4 +38,4 @@ uvloop
 uvicorn[standard]
 gunicorn
 daphne
-twisted==20.3.0
+twisted==22.1.0
