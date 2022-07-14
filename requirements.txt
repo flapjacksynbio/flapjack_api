@@ -14,8 +14,8 @@ scipy
 pandas
 plotly==4.8.0
 matplotlib
-git+https://github.com/ibis-inria/wellFARE.git
-cvxopt
+git+https://github.com/CarolusVitalis/wellFARE.git
+kvxopt
 django-pandas
 decorator
 cycler==0.10.0
