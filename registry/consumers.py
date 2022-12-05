@@ -105,7 +105,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
             wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
             self.ws = wb['Data']
             self.signal_names = synergy_get_signal_names(self.ws)[:-1]
-            self.meta_dict = synergy_load_meta(wb, self.columns)
+            self.meta_dict = (wb, self.columns)
             
             # get dnas and chemicals names to ask for metadata to the user
             dna_keys = [val for val in self.meta_dict.index if "DNA" in val]
