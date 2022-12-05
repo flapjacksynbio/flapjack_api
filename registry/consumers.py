@@ -66,6 +66,8 @@ class UploadConsumer(AsyncWebsocketConsumer):
         self.machine = ''
         self.signal_names = []
         self.ws = ''
+        self.ws_od = ''
+        self.ws_fluo = ''
         self.dna_names = []
         self.binary_file = b''
 
@@ -133,7 +135,22 @@ class UploadConsumer(AsyncWebsocketConsumer):
             self.signal_names = list(fluo.keys())
 
         ## IF MACHINE BMG
-
+        elif 'bmg' in self.machine.lower():
+            wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
+            self.ws_od = wb['OD']
+            self.ws_fluo = wb['Fluo']
+            self.signal_names = bmg_get_signal_names(self.ws_od, self.ws_fluo)
+            self.meta_dict = synergy_load_meta(wb, self.columns)
+            # DNAs and Chemicals names
+            # get dnas and chemicals names to ask for metadata to the user
+            dna_keys = [val for val in self.meta_dict.index if "DNA" in val]
+            dna_lists = [list(np.unique(self.meta_dict.loc[k])) for k in dna_keys]
+            self.dna_names = list(
+                np.unique(
+                    [dna for dna_list in dna_lists for dna in dna_list if dna not in empty_dna_names]
+                    )
+                )
+            chem_names_file = [val for val in self.meta_dict.index if "chem" in val]
 
         ## SEND CORRECT DATA DEPENDING ON THE FILE
         # Ask for dna, chemicals and signals

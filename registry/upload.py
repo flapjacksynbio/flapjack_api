@@ -24,6 +24,30 @@ def synergy_get_signal_names(ws):
     signal_names = [val for val in first_col_arr[start_index+1:] if val != None]
     return signal_names
 
+def bmg_get_signal_names(ws_od, ws_fluo):
+    """
+    Params
+    - ws_od: openpyxl worksheet object for od measurements
+    - ws_fluo: openpyxl worksheet object for fluo measurements
+    Returns
+    - signals: List with the signal names
+    """
+    # OD
+    #first column as Cell objects
+    first_col_od = ws_od['1']
+    # first column as values
+    first_col_arr_od = np.array([c.value for c in first_col_od])
+    sig_un_od = list(np.unique(first_col_arr_od[2:]))
+
+    # Fluo
+    first_col_fluo = ws_fluo['1']
+    first_col_arr_fluo = np.array([c.value for c in first_col_fluo])
+    sig_un_fluo = list(np.unique(first_col_arr_fluo[2:]))
+
+    # Joined signals
+    signal_names = sig_un_od + sig_un_fluo
+    return signal_names
+
 
 def synergy_rows_list(ws, signal_names):
     """
@@ -112,7 +136,7 @@ def synergy_load_data(ws, signal_names, signal_map):
     dfs = synergy_clean_data(names, df, rows)
     return dfs
 
-
+# Also works for BMG
 def synergy_load_meta(wb, columns):
     meta_dict = {}
     ws_names = ['Strains', 'Media', 'DNA', 'Chemicals']
