@@ -104,6 +104,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
         ## IF MACHINE SYNERGY
         if 'synergy' in self.machine.lower():
             # load workbook, sheet containing data and extract metadata information
+            self.binary_file = bin_data
             wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
             self.ws = wb['Data']
             self.signal_names = synergy_get_signal_names(self.ws)[:-1]
@@ -135,6 +136,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
 
         ## IF MACHINE BMG
         elif 'bmg' in self.machine.lower():
+            self.binary_file = bin_data
             wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
             self.ws_od = wb['OD']
             self.ws_fluo = wb['Fluo']
@@ -197,9 +199,11 @@ class UploadConsumer(AsyncWebsocketConsumer):
                             for idx, dna_id in enumerate(metadata['dna'])}
             # load data from "Data" sheet as a DataFrame
             signal_names_aux = self.signal_names.copy()
+            
+            dfs = bmg_load_data(self.wb, signal_map)
+            
 
-            print(f"signal_map: {signal_map}")
-            print(f"dna_map: {dna_map}")
+
 
         ## IF MACHINE FLUOPI
         elif 'fluopi' in self.machine.lower():
