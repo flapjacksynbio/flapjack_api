@@ -200,11 +200,16 @@ class UploadConsumer(AsyncWebsocketConsumer):
             # load data from "Data" sheet as a DataFrame
             signal_names_aux = self.signal_names.copy()
             
-            dfs = bmg_load_data(self.wb, signal_map)
+            dfs = bmg_load_data(self.wb, signal_map, self.columns)
+
+            signal_ids = {signal_map[name]: metadata['signal'][idx] 
+                            for idx, name in enumerate(self.signal_names)}
+            # upload data
+            start = time.time()
+            await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata, signal_ids, dna_map)
+            end = time.time()
+            print(f"UPLOAD BMG FINISHED. Took {end-start} secs")
             
-
-
-
         ## IF MACHINE FLUOPI
         elif 'fluopi' in self.machine.lower():
             data = json.loads(self.binary_file.decode())
