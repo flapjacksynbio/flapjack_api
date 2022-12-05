@@ -101,9 +101,9 @@ def bmg_fix_time(df):
     for t in df.index:
         time_string = t
         try:
-            datetime_obj = datetime.strptime(time_string, '%H h %M min')
+            datetime_obj = datetime.datetime.strptime(time_string, '%H h %M min')
         except:
-            datetime_obj = datetime.strptime(time_string, '%H h ')
+            datetime_obj = datetime.datetime.strptime(time_string, '%H h ')
         total_mins = (datetime_obj.hour * 60) + datetime_obj.minute
         time_in_hours = total_mins / 60
         time.append(time_in_hours)

@@ -65,6 +65,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
         self.assay_id = 0
         self.machine = ''
         self.signal_names = []
+        self.wb = ''
         self.ws = ''
         self.ws_od = ''
         self.ws_fluo = ''
@@ -106,6 +107,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
             # load workbook, sheet containing data and extract metadata information
             self.binary_file = bin_data
             wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
+            self.wb = wb
             self.ws = wb['Data']
             self.signal_names = synergy_get_signal_names(self.ws)[:-1]
             self.meta_dict = synergy_load_meta(wb, self.columns)
@@ -138,6 +140,7 @@ class UploadConsumer(AsyncWebsocketConsumer):
         elif 'bmg' in self.machine.lower():
             self.binary_file = bin_data
             wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
+            self.wb = wb
             self.ws_od = wb['OD']
             self.ws_fluo = wb['Fluo']
             self.signal_names = bmg_get_signal_names(self.ws_od, self.ws_fluo)
