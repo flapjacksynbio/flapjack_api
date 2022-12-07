@@ -65,7 +65,10 @@ class UploadConsumer(AsyncWebsocketConsumer):
         self.assay_id = 0
         self.machine = ''
         self.signal_names = []
+        self.wb = ''
         self.ws = ''
+        self.ws_od = ''
+        self.ws_fluo = ''
         self.dna_names = []
         self.binary_file = b''
 
@@ -102,11 +105,12 @@ class UploadConsumer(AsyncWebsocketConsumer):
         ## IF MACHINE SYNERGY
         if 'synergy' in self.machine.lower():
             # load workbook, sheet containing data and extract metadata information
+            self.binary_file = bin_data
             wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
+            self.wb = wb
             self.ws = wb['Data']
             self.signal_names = synergy_get_signal_names(self.ws)[:-1]
             self.meta_dict = synergy_load_meta(wb, self.columns)
-            
             # get dnas and chemicals names to ask for metadata to the user
             dna_keys = [val for val in self.meta_dict.index if "DNA" in val]
             dna_lists = [list(np.unique(self.meta_dict.loc[k])) for k in dna_keys]
@@ -133,7 +137,24 @@ class UploadConsumer(AsyncWebsocketConsumer):
             self.signal_names = list(fluo.keys())
 
         ## IF MACHINE BMG
-
+        elif 'bmg' in self.machine.lower():
+            self.binary_file = bin_data
+            wb = opxl.load_workbook(filename=io.BytesIO(bin_data), data_only=True)
+            self.wb = wb
+            self.ws_od = wb['OD']
+            self.ws_fluo = wb['Fluo']
+            self.signal_names = bmg_get_signal_names(self.ws_od, self.ws_fluo)
+            self.meta_dict = synergy_load_meta(wb, self.columns)
+            # DNAs and Chemicals names
+            # get dnas and chemicals names to ask for metadata to the user
+            dna_keys = [val for val in self.meta_dict.index if "DNA" in val]
+            dna_lists = [list(np.unique(self.meta_dict.loc[k])) for k in dna_keys]
+            self.dna_names = list(
+                np.unique(
+                    [dna for dna_list in dna_lists for dna in dna_list if dna not in empty_dna_names]
+                    )
+                )
+            chem_names_file = [val for val in self.meta_dict.index if "chem" in val]
 
         ## SEND CORRECT DATA DEPENDING ON THE FILE
         # Ask for dna, chemicals and signals
@@ -157,7 +178,6 @@ class UploadConsumer(AsyncWebsocketConsumer):
                             for i, s_id in enumerate(metadata['signal'])}
             dna_map = {self.dna_names[idx]: dna_id 
                             for idx, dna_id in enumerate(metadata['dna'])}
-            
 
             # load data from "Data" sheet as a DataFrame
             signal_names_aux = self.signal_names.copy()
@@ -171,8 +191,28 @@ class UploadConsumer(AsyncWebsocketConsumer):
             await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata, signal_ids, dna_map)
             end = time.time()
             print(f"UPLOAD SYNERGY FINISHED. Took {end-start} secs")
+        
+        ## IF MACHINE BMG
+        elif 'bmg' in self.machine.lower():
+            # get dnas and inducers
+            # construct signal_map ({signal_name: signal from machine})
+            signal_map = {self.signal_names[i]:Signal.objects.get(id=s_id).name 
+                            for i, s_id in enumerate(metadata['signal'])}
+            dna_map = {self.dna_names[idx]: dna_id 
+                            for idx, dna_id in enumerate(metadata['dna'])}
+            # load data from "Data" sheet as a DataFrame
+            signal_names_aux = self.signal_names.copy()
+            
+            dfs = bmg_load_data(self.wb, signal_map, self.columns)
 
-
+            signal_ids = {signal_map[name]: metadata['signal'][idx] 
+                            for idx, name in enumerate(self.signal_names)}
+            # upload data
+            start = time.time()
+            await self.upload_data(self.assay_id, self.meta_dict, dfs, metadata, signal_ids, dna_map)
+            end = time.time()
+            print(f"UPLOAD BMG FINISHED. Took {end-start} secs")
+            
         ## IF MACHINE FLUOPI
         elif 'fluopi' in self.machine.lower():
             data = json.loads(self.binary_file.decode())
@@ -216,7 +256,6 @@ class UploadConsumer(AsyncWebsocketConsumer):
             
             end = time.time()
             print(f"UPLOAD FLUOPI FINISHED. Took {end-start} secs")
-        ## IF MACHINE BMG
         
         await self.send(text_data=json.dumps({
                 'type': 'creation_done'
