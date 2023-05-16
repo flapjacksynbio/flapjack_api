@@ -8,6 +8,7 @@ class Study(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     doi = models.URLField(blank=True)
+    sboluri = models.URLField(blank=True)
     owner = models.ForeignKey(
         'auth.User', related_name='studies', on_delete=models.CASCADE)
     shared_with = models.ManyToManyField(
@@ -24,6 +25,7 @@ class Assay(models.Model):
     machine = models.CharField(max_length=100)
     description = models.TextField()
     temperature = models.FloatField()
+    sboluri = models.URLField(blank=True)
 
     def __str__(self):
         return self.name
@@ -34,6 +36,7 @@ class Media(models.Model):
         'auth.User', related_name='medias', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
+    sboluri = models.URLField(blank=True)
 
     def __str__(self):
         return self.name
@@ -44,6 +47,7 @@ class Strain(models.Model):
         'auth.User', related_name='strains', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
+    sboluri = models.URLField(blank=True)
 
     def __str__(self):
         return self.name
@@ -55,6 +59,7 @@ class Chemical(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     pubchemid = models.IntegerField(null=True)
+    sboluri = models.URLField(blank=True)
 
     def __str__(self):
         return self.name
@@ -66,6 +71,7 @@ class Supplement(models.Model):
     name = models.CharField(max_length=100)
     chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE)
     concentration = models.FloatField()
+    sboluri = models.URLField(blank=True)
 
     def __str__(self):
         return self.name
@@ -86,9 +92,11 @@ class Vector(models.Model):
         'auth.User', related_name='vectors', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     dnas = models.ManyToManyField(Dna, related_name='vectors')
+    sboluri = models.URLField(blank=True)
 
     def __str__(self):
         return self.name
+
 
 class Sample(models.Model):
     assay = models.ForeignKey(Assay, on_delete=models.CASCADE)
@@ -96,6 +104,7 @@ class Sample(models.Model):
     strain = models.ForeignKey(Strain, null=True, on_delete=models.CASCADE)
     vector = models.ForeignKey(Vector, null=True, on_delete=models.CASCADE)
     supplements = models.ManyToManyField(Supplement, related_name='samples')
+    sboluri = models.URLField(blank=True)
     row = models.IntegerField()
     col = models.IntegerField()
 
@@ -108,7 +117,9 @@ class Signal(models.Model):
         'auth.User', related_name='signals', on_delete=models.CASCADE)
     name = models.TextField()
     description = models.TextField()
-    color = models.CharField(max_length=100, default='')        
+    color = models.CharField(max_length=100, default='')
+    sboluri = models.URLField(blank=True)
+
     def __str__(self):
         return self.name
 

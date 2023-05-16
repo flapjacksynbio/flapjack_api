@@ -17,6 +17,7 @@ import django_filters
 class StudyFilter(FilterSet):
     name = CharFilter(lookup_expr='exact')
     doi = CharFilter(lookup_expr='exact')
+    sboluri = CharFilter(lookup_expr='icontains')
     is_owner = BooleanFilter(field_name='owner', method='filter_is_owner')
 
     class Meta:
@@ -32,6 +33,7 @@ class AssayFilter(FilterSet):
     name = CharFilter(lookup_expr='exact')
     machine = CharFilter(lookup_expr='icontains')
     description = CharFilter(lookup_expr='icontains')
+    sboluri = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Assay
@@ -41,6 +43,7 @@ class AssayFilter(FilterSet):
 class MediaFilter(FilterSet):
     name = CharFilter(lookup_expr='exact')
     description = CharFilter(lookup_expr='icontains')
+    sboluri = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Media
@@ -50,6 +53,7 @@ class MediaFilter(FilterSet):
 class StrainFilter(FilterSet):
     name = CharFilter(lookup_expr='exact')
     description = CharFilter(lookup_expr='icontains')
+    sboluri = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Strain
@@ -60,6 +64,7 @@ class ChemicalFilter(FilterSet):
     name = CharFilter(lookup_expr='exact')
     description = CharFilter(lookup_expr='icontains')
     pubchemid = NumberFilter(lookup_expr='exact')
+    sboluri = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Chemical
@@ -69,6 +74,7 @@ class ChemicalFilter(FilterSet):
 class SupplementFilter(FilterSet):
     name = CharFilter(lookup_expr='exact')
     concentration = NumberFilter(lookup_expr='exact')
+    sboluri = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Supplement
@@ -88,6 +94,7 @@ class VectorFilter(FilterSet):
     name = CharFilter(lookup_expr='exact')  
     dnas = RelatedFilter(DnaFilter, field_name='dnas',
                         queryset=Dna.objects.all())
+    sboluri = CharFilter(lookup_expr='icontains')
     
     class Meta:
         model = Vector
@@ -95,6 +102,8 @@ class VectorFilter(FilterSet):
 
 
 class SampleFilter(FilterSet):
+    sboluri = CharFilter(lookup_expr='icontains')
+    
     class Meta:
         model = Sample
         fields = (
@@ -105,7 +114,8 @@ class SampleFilter(FilterSet):
                 'vector', 
                 'supplements', 
                 'row', 
-                'col'
+                'col',
+                'sboluri'
         )
 
 
@@ -113,6 +123,7 @@ class SignalFilter(FilterSet):
     name = CharFilter(lookup_expr='exact')
     description = CharFilter(lookup_expr='icontains')
     color = CharFilter(lookup_expr='icontains')
+    sboluri = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Signal
@@ -144,7 +155,7 @@ class StudyViewSet(viewsets.ModelViewSet):
     serializer_class = StudySerializer
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     filterset_class = StudyFilter
-    search_fields = ['name',  'description', 'doi']
+    search_fields = ['name',  'description', 'doi', 'sboluri']
     
     def get_queryset(self):
         user = self.request.user
@@ -169,7 +180,8 @@ class AssayViewSet(viewsets.ModelViewSet):
         'machine',
         'description',
         'study__name',
-        'study__description'
+        'study__description',
+        'sboluri'
     ]
 
     def get_queryset(self):
@@ -190,7 +202,7 @@ class MediaViewSet(viewsets.ModelViewSet):
     serializer_class = MediaSerializer
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
     filter_class = MediaFilter
-    search_fields = ['name', 'description']
+    search_fields = ['name', 'description', 'sboluri']
 
 
 class StrainViewSet(viewsets.ModelViewSet):
@@ -202,7 +214,7 @@ class StrainViewSet(viewsets.ModelViewSet):
     serializer_class = StrainSerializer
     filter_class = StrainFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = ['name', 'description']
+    search_fields = ['name', 'description', 'sboluri']
 
 
 class ChemicalViewSet(viewsets.ModelViewSet):
@@ -214,7 +226,7 @@ class ChemicalViewSet(viewsets.ModelViewSet):
     serializer_class = ChemicalSerializer
     filter_class = ChemicalFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = ['name', 'description']
+    search_fields = ['name', 'description', 'sboluri']
 
 
 class SupplementViewSet(viewsets.ModelViewSet):
@@ -226,7 +238,7 @@ class SupplementViewSet(viewsets.ModelViewSet):
     serializer_class = SupplementSerializer
     filter_class = SupplementFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = ['name']
+    search_fields = ['name', 'sboluri']
 
 
 class DnaViewSet(viewsets.ModelViewSet):
@@ -262,7 +274,7 @@ class VectorAllViewSet(viewsets.ModelViewSet):
     serializer_class = VectorAllSerializer
     filter_class = VectorFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = ['name']
+    search_fields = ['name', 'sboluri']
 
     def get_queryset(self):
         user = self.request.user
@@ -283,7 +295,7 @@ class VectorViewSet(viewsets.ModelViewSet):
     serializer_class = VectorSerializer
     filter_class = VectorFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = ['name']
+    search_fields = ['name', 'sboluri']
 
     def get_queryset(self):
         user = self.request.user
@@ -311,6 +323,7 @@ class SampleViewSet(viewsets.ModelViewSet):
         'assay__study__name',
         'assay__study__description',
         'vector__name',
+        'sboluri'
     ]
 
     def get_serializer_class(self):
@@ -337,7 +350,7 @@ class SignalViewSet(viewsets.ModelViewSet):
     serializer_class = SignalSerializer
     filter_class = SignalFilter
     filter_backends = [SearchFilter, RestFrameworkFilterBackend]
-    search_fields = ['name', 'description', 'color']
+    search_fields = ['name', 'description', 'color', 'sboluri']
 
 
 class MeasurementViewSet(viewsets.ModelViewSet):
