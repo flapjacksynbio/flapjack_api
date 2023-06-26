@@ -172,7 +172,7 @@ def bmg_load_data(wb, signal_map, columns):
     columns_od = sheet_od.Well.dropna()
     sheet_od = sheet_od.drop(['Well'],axis=1)
     columns_od = list(columns_od.values)
-    columns_od = [x[0]+str(int(x[1])) for x in columns_od]
+    columns_od = [x[0]+str(int(x[1:])) for x in columns_od]
 
     sheet_od = sheet_od.T
     sheet_od = sheet_od.set_index(1)
@@ -187,7 +187,7 @@ def bmg_load_data(wb, signal_map, columns):
     columns_fluo = sheet_fluo.Well.dropna()
     sheet_fluo = sheet_fluo.drop(['Well'],axis=1)
     columns_fluo = list(columns_fluo.values)
-    columns_fluo = [x[0]+str(int(x[1])) for x in columns_fluo]
+    columns_fluo = [x[0]+str(int(x[1:])) for x in columns_fluo]
 
     sheet_fluo = sheet_fluo.T
     sigs = []
