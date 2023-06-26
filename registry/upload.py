@@ -96,6 +96,7 @@ def synergy_fix_time(df):
             t = np.append(t, value.hour + value.minute/60 + value.second/3600)
     df['Time'] = t
 
+"""
 def bmg_fix_time(df):
     time = []
     for t in df.index:
@@ -105,6 +106,18 @@ def bmg_fix_time(df):
         except:
             datetime_obj = datetime.datetime.strptime(time_string, '%H h ')
         total_mins = (datetime_obj.hour * 60) + datetime_obj.minute
+        time_in_hours = total_mins / 60
+        time.append(time_in_hours)
+    df = df.reset_index(drop=True)
+    df['Time'] = time
+    return df
+"""
+def bmg_fix_time(df):
+    time = []
+    for t in df.index:   
+        total_mins = int(t.split('h')[0])
+        if 'm' in t:
+            total_mins += int(t.split('h')[1].split('min')[0])
         time_in_hours = total_mins / 60
         time.append(time_in_hours)
     df = df.reset_index(drop=True)
@@ -154,19 +167,29 @@ def bmg_load_data(wb, signal_map, columns):
     sheet_od = pd.DataFrame(wb['OD'].values)
     sheet_od.columns = sheet_od.iloc[0]
     sheet_od = sheet_od[1:]
-    sheet_od = sheet_od.drop(['Well', 'Content'],axis=1)
+
+    sheet_od = sheet_od.drop(['Content'],axis=1)
+    columns_od = sheet_od.Well.dropna()
+    sheet_od = sheet_od.drop(['Well'],axis=1)
+    columns_od = list(columns_od.values)
+    columns_od = [x[0]+str(int(x[1])) for x in columns_od]
+
     sheet_od = sheet_od.T
     sheet_od = sheet_od.set_index(1)
-    sheet_od.columns = columns
+    sheet_od.columns = columns_od
     sheet_od = bmg_fix_time(sheet_od)
 
-    #sheet_fluo = pd.read_excel(filename, sheet_name='Fluo')
     sheet_fluo = pd.DataFrame(wb['Fluo'].values)
     sheet_fluo.columns = sheet_fluo.iloc[0]
     sheet_fluo = sheet_fluo[1:]
-    sheet_fluo = sheet_fluo.drop(['Well', 'Content'],axis=1)
-    sheet_fluo = sheet_fluo.T
 
+    sheet_fluo = sheet_fluo.drop(['Content'],axis=1)
+    columns_fluo = sheet_fluo.Well.dropna()
+    sheet_fluo = sheet_fluo.drop(['Well'],axis=1)
+    columns_fluo = list(columns_fluo.values)
+    columns_fluo = [x[0]+str(int(x[1])) for x in columns_fluo]
+
+    sheet_fluo = sheet_fluo.T
     sigs = []
     for i in sheet_fluo.index:
         for s in signal_map:
@@ -174,11 +197,12 @@ def bmg_load_data(wb, signal_map, columns):
                 sigs.append(signal_map[s])
 
     sheet_fluo = sheet_fluo.reset_index(drop=True)
+    sheet_fluo = sheet_fluo.dropna(axis=1)
     sheet_fluo = sheet_fluo.set_index(1)
-    sheet_fluo.columns = columns
+    sheet_fluo.columns = columns_fluo
     sheet_fluo = bmg_fix_time(sheet_fluo)
-
     sheet_fluo['Fluo'] = sigs
+
     dfs = {}
     dfs['OD'] = sheet_od
     for s in np.unique(sheet_fluo['Fluo']):
