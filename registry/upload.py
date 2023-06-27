@@ -96,29 +96,15 @@ def synergy_fix_time(df):
             t = np.append(t, value.hour + value.minute/60 + value.second/3600)
     df['Time'] = t
 
-"""
 def bmg_fix_time(df):
     time = []
     for t in df.index:
-        time_string = t
-        try:
-            datetime_obj = datetime.datetime.strptime(time_string, '%H h %M min')
-        except:
-            datetime_obj = datetime.datetime.strptime(time_string, '%H h ')
-        total_mins = (datetime_obj.hour * 60) + datetime_obj.minute
-        time_in_hours = total_mins / 60
-        time.append(time_in_hours)
-    df = df.reset_index(drop=True)
-    df['Time'] = time
-    return df
-"""
-def bmg_fix_time(df):
-    time = []
-    for t in df.index:   
-        total_mins = int(t.split('h')[0])
+        total_mins = 0
         if 'm' in t:
-            total_mins += int(t.split('h')[1].split('min')[0])
-        time_in_hours = total_mins / 60
+            total_mins += int(t.split('h')[0])*60 + int(t.split('h')[1].split('min')[0])
+        else:
+            total_mins += int(t.split('h')[0])        
+        time_in_hours = total_mins / 60    
         time.append(time_in_hours)
     df = df.reset_index(drop=True)
     df['Time'] = time
