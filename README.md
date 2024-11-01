@@ -7,7 +7,7 @@ In this document, we will describe the API of the Flapjack system. This API is s
 In order to get your hand on the API, follow the instructions on the [installation page](https://github.com/RudgeLab/flapjack_api/wiki/Installation-and-deployment).
 
 ## Other services
-The full documentation of this API is available at the following [link](https://rudgelab.github.io/flapjack_api/).
+The full documentation of this API is available at the following [link](https://flapjacksynbio.github.io/flapjack_api/#introduction).
 
 If you want to know more about Flapjack, you can visit the other tools that we provide for this system, the [Flapjack front-end](https://github.com/RudgeLab/flapjack_frontend) github in order to get a local version, our [website](http://flapjack.rudge-lab.org/) where you can find an online version of the front-end of the system, and the Flapjack python package, [pyFlapjack](https://github.com/RudgeLab/flapjack), that allows you to interact with the system from python. 
 
