@@ -25,7 +25,7 @@ services:
     restart: always
     image: postgres:12.1
     ports:
-      - "5432:5432"
+      - "5433:5433"
     environment:
       POSTGRES_DB: registry
       POSTGRES_USER: guillermo
